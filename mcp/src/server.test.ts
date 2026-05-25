@@ -39,4 +39,32 @@ describe('GoldenChart MCP server', () => {
     const structured = result.structuredContent as { meta: { kind: string } };
     expect(structured.meta.kind).toBe('bar');
   });
+
+  it('exposes the vibe-presets resource', async () => {
+    const client = await connectedClient();
+    const { resources } = await client.listResources();
+    expect(resources.map((r) => r.uri)).toContain('vibe://presets');
+    const read = await client.readResource({ uri: 'vibe://presets' });
+    expect((read.contents[0] as { text: string }).text).toContain('messy_sketch');
+  });
+
+  it('serves a JSON Schema for a chart type via the schema template', async () => {
+    const client = await connectedClient();
+    const read = await client.readResource({ uri: 'schema://chart/bar' });
+    const schema = JSON.parse((read.contents[0] as { text: string }).text);
+    expect(JSON.stringify(schema)).toContain('data');
+  });
+
+  it('exposes the make-me-a-chart prompt', async () => {
+    const client = await connectedClient();
+    const { prompts } = await client.listPrompts();
+    expect(prompts.map((p) => p.name)).toContain('make-me-a-chart');
+    const prompt = await client.getPrompt({
+      name: 'make-me-a-chart',
+      arguments: { dataDescription: 'monthly revenue', mood: 'playful' },
+    });
+    const text = (prompt.messages[0].content as { text: string }).text;
+    expect(text).toContain('monthly revenue');
+    expect(text).toContain('playful');
+  });
 });

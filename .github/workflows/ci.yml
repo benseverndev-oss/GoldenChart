@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  library:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  mcp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      # build the library first so the mcp package can resolve `goldenchart`
+      - run: npm run build
+      - name: Install mcp deps
+        working-directory: mcp
+        run: npm install
+      - name: Typecheck mcp
+        working-directory: mcp
+        run: npm run typecheck
+      - name: Test mcp
+        working-directory: mcp
+        run: npm test
+      - name: Build mcp
+        working-directory: mcp
+        run: npm run build

@@ -96,6 +96,12 @@ src/
 npm run playground        # interactive Vite demo of every chart + vibe
 ```
 
+## MCP server
+
+An MCP server in [`mcp/`](./mcp) exposes GoldenChart as tools at every level
+(vibe, calculation, primitives, charts, orchestration/export), so an agent can
+render charts and flowcharts as SVG. See [`mcp/README.md`](./mcp/README.md).
+
 ## Scripts
 
 ```bash
