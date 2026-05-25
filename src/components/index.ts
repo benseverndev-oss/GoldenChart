@@ -12,6 +12,8 @@ export { PieChart } from './PieChart';
 export type { PieChartProps } from './PieChart';
 export { Flowchart } from './Flowchart';
 export type { FlowchartProps } from './Flowchart';
+export { Diagram } from './Diagram';
+export type { DiagramProps } from './Diagram';
 export { SankeyChart } from './SankeyChart';
 export type { SankeyChartProps } from './SankeyChart';
 export { TreemapChart } from './TreemapChart';
