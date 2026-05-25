@@ -9,5 +9,11 @@ export default defineConfig({
   // Shebang so the published bin is directly executable.
   banner: { js: '#!/usr/bin/env node' },
   // Resolve these from node_modules at runtime, not bundled.
-  external: ['goldenchart', 'goldenchart/server', 'react', 'react-dom', '@resvg/resvg-js'],
+  external: [
+    '@benseverndev-oss/goldenchart',
+    '@benseverndev-oss/goldenchart/server',
+    'react',
+    'react-dom',
+    '@resvg/resvg-js',
+  ],
 });

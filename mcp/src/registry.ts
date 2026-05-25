@@ -1,7 +1,7 @@
 import { createElement } from 'react';
 import type { ComponentType } from 'react';
 import type { z } from 'zod';
-import { renderToSVGString } from 'goldenchart/server';
+import { renderToSVGString } from '@benseverndev-oss/goldenchart/server';
 import { renderOutputShape } from './schemas';
 
 export interface ToolResult {

@@ -3,11 +3,11 @@
   "packages": {
     ".": {
       "release-type": "node",
-      "package-name": "goldenchart"
+      "package-name": "@benseverndev-oss/goldenchart"
     },
     "mcp": {
       "release-type": "node",
-      "package-name": "goldenchart-mcp"
+      "package-name": "@benseverndev-oss/goldenchart-mcp"
     }
   }
 }

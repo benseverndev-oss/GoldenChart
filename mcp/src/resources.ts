@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { VIBE_PRESETS } from 'goldenchart';
+import { VIBE_PRESETS } from '@benseverndev-oss/goldenchart';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { chartTools } from './tools';
 

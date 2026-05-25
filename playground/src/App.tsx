@@ -11,8 +11,15 @@ import {
   RoughCircle,
   linePath,
   VIBE_PRESETS,
-} from 'goldenchart';
-import type { ChartDatum, FlowNode, Series, ScatterDatum, VibeConfig, VibePreset } from 'goldenchart';
+} from '@benseverndev-oss/goldenchart';
+import type {
+  ChartDatum,
+  FlowNode,
+  Series,
+  ScatterDatum,
+  VibeConfig,
+  VibePreset,
+} from '@benseverndev-oss/goldenchart';
 
 const PRESETS = Object.keys(VIBE_PRESETS) as VibePreset[];
 

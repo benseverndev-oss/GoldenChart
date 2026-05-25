@@ -8,8 +8,8 @@ import {
   areaPath,
   computePie,
   layoutTree,
-} from 'goldenchart';
-import type { ChartDatum, FlowDirection, FlowEdge, FlowNode } from 'goldenchart';
+} from '@benseverndev-oss/goldenchart';
+import type { ChartDatum, FlowDirection, FlowEdge, FlowNode } from '@benseverndev-oss/goldenchart';
 import type { ToolDef } from './registry';
 import {
   ChartDatumSchema,

@@ -9,9 +9,9 @@ import {
   RoughLine,
   RoughCircle,
   RoughText,
-} from 'goldenchart';
-import type { VibeConfig } from 'goldenchart';
-import { renderToSVGString } from 'goldenchart/server';
+} from '@benseverndev-oss/goldenchart';
+import type { VibeConfig } from '@benseverndev-oss/goldenchart';
+import { renderToSVGString } from '@benseverndev-oss/goldenchart/server';
 import type { ToolDef } from './registry';
 import { VibeConfigSchema, renderOutputShape } from './schemas';
 

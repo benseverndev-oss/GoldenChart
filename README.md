@@ -15,7 +15,7 @@ GoldenChart cleanly separates _where_ things go from _how_ they look:
 ## Install
 
 ```bash
-npm install goldenchart roughjs d3-scale d3-shape d3-hierarchy
+npm install @benseverndev-oss/goldenchart roughjs d3-scale d3-shape d3-hierarchy
 ```
 
 `react` / `react-dom` (v18+) are peer dependencies.
@@ -23,7 +23,7 @@ npm install goldenchart roughjs d3-scale d3-shape d3-hierarchy
 ## Quick start
 
 ```tsx
-import { BarChart } from 'goldenchart';
+import { BarChart } from '@benseverndev-oss/goldenchart';
 
 export function Sales() {
   return (
@@ -48,8 +48,8 @@ Every chart is built from reusable primitives, so you can draw arbitrary diagram
 Hand any D3-computed path string to `<RoughPath>`:
 
 ```tsx
-import { Surface, RoughPath, RoughRectangle } from 'goldenchart';
-import { linePath } from 'goldenchart';
+import { Surface, RoughPath, RoughRectangle } from '@benseverndev-oss/goldenchart';
+import { linePath } from '@benseverndev-oss/goldenchart';
 
 <Surface width={400} height={200} vibe={{ preset: 'clean_blueprint', roughness: 1.2 }}>
   <RoughRectangle x={20} y={20} width={120} height={60} fill="#fde68a" />

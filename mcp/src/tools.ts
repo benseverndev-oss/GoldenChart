@@ -1,5 +1,12 @@
 import { z } from 'zod';
-import { AreaChart, BarChart, Flowchart, LineChart, PieChart, ScatterPlot } from 'goldenchart';
+import {
+  AreaChart,
+  BarChart,
+  Flowchart,
+  LineChart,
+  PieChart,
+  ScatterPlot,
+} from '@benseverndev-oss/goldenchart';
 import { makeRenderTool } from './registry';
 import type { ToolDef } from './registry';
 import { vibeTools } from './vibeTools';

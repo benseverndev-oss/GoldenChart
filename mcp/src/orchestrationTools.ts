@@ -1,9 +1,17 @@
 import { createElement } from 'react';
 import type { ComponentType, ReactElement } from 'react';
 import { z } from 'zod';
-import { Surface, BarChart, LineChart, AreaChart, ScatterPlot, PieChart, Flowchart } from 'goldenchart';
-import type { FlowEdge, FlowNode, FlowNodeShape, VibeConfig } from 'goldenchart';
-import { renderToSVGString } from 'goldenchart/server';
+import {
+  Surface,
+  BarChart,
+  LineChart,
+  AreaChart,
+  ScatterPlot,
+  PieChart,
+  Flowchart,
+} from '@benseverndev-oss/goldenchart';
+import type { FlowEdge, FlowNode, FlowNodeShape, VibeConfig } from '@benseverndev-oss/goldenchart';
+import { renderToSVGString } from '@benseverndev-oss/goldenchart/server';
 import type { ToolDef } from './registry';
 import { primitiveToElement } from './primitives';
 import type { PrimitiveSpec, SceneNode } from './schemas';

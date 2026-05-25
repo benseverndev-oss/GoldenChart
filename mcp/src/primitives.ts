@@ -1,6 +1,6 @@
 import { createElement } from 'react';
 import type { ReactElement } from 'react';
-import { RoughPath, RoughRectangle, RoughCircle, RoughLine, RoughText } from 'goldenchart';
+import { RoughPath, RoughRectangle, RoughCircle, RoughLine, RoughText } from '@benseverndev-oss/goldenchart';
 import type { PrimitiveSpec } from './schemas';
 
 /**

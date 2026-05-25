@@ -5,7 +5,7 @@ import type { Config } from 'tailwindcss';
  * utility classes GoldenChart emits get included in their build.
  */
 const config: Config = {
-  content: ['./node_modules/goldenchart/dist/**/*.{js,cjs}', './src/**/*.{ts,tsx}'],
+  content: ['./node_modules/@benseverndev-oss/goldenchart/dist/**/*.{js,cjs}', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {},
   },

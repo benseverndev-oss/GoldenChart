@@ -11,7 +11,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      goldenchart: resolve(dir, '../src/index.ts'),
+      '@benseverndev-oss/goldenchart': resolve(dir, '../src/index.ts'),
     },
   },
 });

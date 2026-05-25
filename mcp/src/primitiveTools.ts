@@ -1,8 +1,8 @@
 import { createElement } from 'react';
 import { z } from 'zod';
-import { Surface } from 'goldenchart';
-import type { VibeConfig } from 'goldenchart';
-import { renderToSVGString } from 'goldenchart/server';
+import { Surface } from '@benseverndev-oss/goldenchart';
+import type { VibeConfig } from '@benseverndev-oss/goldenchart';
+import { renderToSVGString } from '@benseverndev-oss/goldenchart/server';
 import type { ToolDef, ToolResult } from './registry';
 import { primitiveToElement } from './primitives';
 import type { PrimitiveSpec } from './schemas';

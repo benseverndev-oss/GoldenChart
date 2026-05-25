@@ -3,7 +3,7 @@
   "compilerOptions": {
     "noEmit": true,
     "paths": {
-      "goldenchart": ["../src/index.ts"]
+      "@benseverndev-oss/goldenchart": ["../src/index.ts"]
     }
   },
   "include": ["src", "vite.config.ts"]

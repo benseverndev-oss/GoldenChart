@@ -1,4 +1,4 @@
-# goldenchart-mcp
+# @benseverndev-oss/goldenchart-mcp
 
 An [MCP](https://modelcontextprotocol.io) server that renders **GoldenChart**
 hand-drawn charts and flowcharts as SVG. It surfaces a tool at every level of the
