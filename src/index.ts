@@ -38,6 +38,8 @@ export {
   Grid,
   Legend,
   Annotations,
+  AutoChart,
+  visualize,
 } from './components';
 export type {
   SurfaceProps,
@@ -62,4 +64,6 @@ export type {
   LegendItem,
   AnnotationsProps,
   Annotation,
+  AutoChartProps,
+  VisualizeOptions,
 } from './components';

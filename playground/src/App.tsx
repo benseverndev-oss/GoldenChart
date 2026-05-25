@@ -10,6 +10,7 @@ import {
   TreemapChart,
   HeatmapChart,
   RadarChart,
+  AutoChart,
   Surface,
   RoughPath,
   RoughCircle,
@@ -88,6 +89,14 @@ const RADAR_SERIES = [
 const ANNOTATIONS = [
   { kind: 'y-line' as const, value: 6, label: 'target' },
   { kind: 'point-callout' as const, x: 7, y: 9, text: 'peak' },
+];
+
+// Raw records handed to AutoChart — it profiles, recommends and renders.
+const AUTO_RECORDS = [
+  { region: 'NA', revenue: 12 },
+  { region: 'EU', revenue: 19 },
+  { region: 'APAC', revenue: 7 },
+  { region: 'LATAM', revenue: 14 },
 ];
 
 const FLOW_NODES: FlowNode[] = [
@@ -262,6 +271,10 @@ export function App() {
 
         <Panel title="Line chart with annotations">
           <LineChart width={460} height={260} vibe={vibe} series={[SERIES[0]]} annotations={ANNOTATIONS} />
+        </Panel>
+
+        <Panel title="AutoChart (visualize — picks the chart from the data)">
+          <AutoChart width={460} height={280} vibe={vibe} data={AUTO_RECORDS} />
         </Panel>
 
         <Panel title="Composed primitives (RoughPath + RoughCircle)">

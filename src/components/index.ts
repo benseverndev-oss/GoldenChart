@@ -28,3 +28,5 @@ export { Legend } from './Legend';
 export type { LegendProps, LegendItem } from './Legend';
 export { Annotations } from './Annotations';
 export type { AnnotationsProps, Annotation } from './Annotations';
+export { AutoChart, visualize } from './AutoChart';
+export type { AutoChartProps, VisualizeOptions } from './AutoChart';

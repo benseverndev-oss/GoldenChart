@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { chartTools } from './tools';
 import { calcTools } from './calcTools';
+import { visualizeTools } from './visualizeTool';
 
-const tool = (name: string) => [...chartTools, ...calcTools].find((t) => t.name === name)!;
+const tool = (name: string) => [...chartTools, ...calcTools, ...visualizeTools].find((t) => t.name === name)!;
 
 describe('multi-series bar modes', () => {
   const multi = [
@@ -70,6 +71,39 @@ describe('compute_color_scale', () => {
     const res = await tool('compute_color_scale').handler({ scale: 'viridis', domain: [0, 10], steps: 5, value: 5 });
     expect(res.structuredContent!.ramp).toHaveLength(5);
     expect(res.structuredContent!.valueColor).toMatch(/^#[0-9a-f]{6}$/);
+  });
+});
+
+describe('visualize_data', () => {
+  it('auto-picks a chart and returns SVG + rationale + alternatives', async () => {
+    const res = await tool('visualize_data').handler({
+      width: 300,
+      height: 200,
+      data: [
+        { region: 'NA', sales: 3 },
+        { region: 'EU', sales: 7 },
+        { region: 'APAC', sales: 5 },
+      ],
+    });
+    const svg = res.content[0].text;
+    expect(svg.startsWith('<svg')).toBe(true);
+    const sc = res.structuredContent as { chosen: { chartType: string; rationale: string }; alternatives: unknown[] };
+    expect(sc.chosen.chartType).toBe('bar');
+    expect(sc.chosen.rationale).toBeTruthy();
+    expect(Array.isArray(sc.alternatives)).toBe(true);
+  });
+
+  it('honors intent (trend ⇒ line over time)', async () => {
+    const res = await tool('visualize_data').handler({
+      width: 300,
+      height: 200,
+      intent: 'trend',
+      data: [
+        { date: '2024-01-01', revenue: 10 },
+        { date: '2024-02-01', revenue: 20 },
+      ],
+    });
+    expect((res.structuredContent as { chosen: { chartType: string } }).chosen.chartType).toBe('line');
   });
 });
 

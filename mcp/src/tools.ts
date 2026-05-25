@@ -18,6 +18,7 @@ import { calcTools } from './calcTools';
 import { primitiveTools } from './primitiveTools';
 import { orchestrationTools } from './orchestrationTools';
 import { exportTools } from './exportTools';
+import { visualizeTools } from './visualizeTool';
 import {
   AnnotationSchema,
   baseChartShape,
@@ -224,4 +225,5 @@ export const tools: ToolDef[] = [
   ...primitiveTools,
   ...orchestrationTools,
   ...exportTools,
+  ...visualizeTools,
 ];
