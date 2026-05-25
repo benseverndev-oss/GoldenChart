@@ -24,3 +24,4 @@ export * from './dataTable';
 export * from './profile';
 export * from './recommend';
 export * from './compile';
+export * from './critique';

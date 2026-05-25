@@ -14,6 +14,10 @@ import {
   Timeline,
   renderDiagram,
   parseMermaid,
+  profileData,
+  recommendChart,
+  compileChart,
+  critiqueChart,
   SankeyChart,
   TreemapChart,
   HeatmapChart,
@@ -250,6 +254,16 @@ const MERMAID_SRC = `flowchart LR
   C -->|yes| D((Done))
   C -->|no| B`;
 
+// A deliberately flawed chart: many long-labelled, clustered categories — the
+// critique engine flags the crowding and label collisions.
+const CRITIQUE_DATA = Array.from({ length: 16 }, (_, i) => ({
+  category: `Department ${i + 1}`,
+  value: 80 + (i % 4),
+}));
+const CRITIQUE_PROFILE = profileData(CRITIQUE_DATA);
+const CRITIQUE_REC = recommendChart(CRITIQUE_PROFILE)[0];
+const CRITIQUES = critiqueChart(compileChart(CRITIQUE_DATA, CRITIQUE_REC), CRITIQUE_PROFILE, { width: 460 });
+
 const SPARK_POINTS = [3, 7, 4, 9, 6, 11, 8, 14].map((v, i) => ({ x: i * 50, y: 120 - v * 7 }));
 
 export function App() {
@@ -382,6 +396,24 @@ export function App() {
 
         <Panel title="Timeline (events along an axis)">
           <Timeline width={460} height={240} vibe={vibe} events={TIMELINE_EVENTS} />
+        </Panel>
+
+        <Panel title="Chart critique (suggest_improvements)">
+          <AutoChart width={460} height={200} vibe={vibe} data={CRITIQUE_DATA} />
+          <ul className="mt-3 space-y-1 text-xs text-gray-700">
+            {CRITIQUES.map((c) => (
+              <li key={c.rule}>
+                <span
+                  className={`mr-1 rounded px-1 font-semibold uppercase ${
+                    c.severity === 'warn' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
+                  }`}
+                >
+                  {c.severity}
+                </span>
+                {c.message}
+              </li>
+            ))}
+          </ul>
         </Panel>
 
         <Panel title="Mermaid → diagram (renderDiagram + parseMermaid)">
