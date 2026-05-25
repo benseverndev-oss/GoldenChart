@@ -64,6 +64,14 @@ export const SeriesSchema = z.object({
 
 export const CurveSchema = z.enum(['linear', 'basis', 'catmullRom', 'monotoneX']);
 
+export const ScatterDatumSchema = z.object({
+  x: z.number(),
+  y: z.number(),
+  r: z.number().optional(),
+  color: z.string().optional(),
+  label: z.string().optional(),
+});
+
 export const FlowNodeSchema = z.object({
   id: z.string(),
   label: z.string(),
