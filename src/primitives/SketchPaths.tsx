@@ -25,6 +25,7 @@ export function SketchPaths({ paths, className, style, onClick, children }: Sket
           fill={p.fill}
           strokeLinecap="round"
           strokeLinejoin="round"
+          pathLength={1}
         />
       ))}
       {children}

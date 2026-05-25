@@ -3,6 +3,7 @@ import type { BaseChartProps, ChartDatum } from '../types/charts';
 import { getPlotArea } from '../core/geometry';
 import { computePie } from '../core/arc';
 import { colorAt } from '../core/palette';
+import { datumTable } from '../core/dataTable';
 import { Surface } from './Surface';
 import { RoughPath } from '../primitives/RoughPath';
 import { RoughText } from '../primitives/RoughText';
@@ -26,6 +27,9 @@ export function PieChart({
   margin,
   vibe,
   title,
+  description,
+  ariaLabel,
+  dataTable,
   className,
   style,
   bare,
@@ -44,7 +48,18 @@ export function PieChart({
   );
 
   return (
-    <Surface width={width} height={height} vibe={vibe} title={title} className={className} style={style} bare={bare}>
+    <Surface
+      width={width}
+      height={height}
+      vibe={vibe}
+      title={title}
+      description={description}
+      ariaLabel={ariaLabel}
+      dataTable={dataTable ? datumTable(data, title) : undefined}
+      className={className}
+      style={style}
+      bare={bare}
+    >
       <g transform={`translate(${cx}, ${cy})`}>
         {slices.map((slice) => (
           <g key={slice.datum.label}>

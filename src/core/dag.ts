@@ -48,6 +48,28 @@ function isTreeLike(nodes: FlowNode[], edges: FlowEdge[]): boolean {
 }
 
 /**
+ * Longest-path layer assignment via bounded relaxation: every node sits one
+ * layer below its deepest parent; roots stay at 0. The iteration cap guarantees
+ * termination even with cycles. Shared by the DAG layout and the Sankey chart.
+ */
+export function assignLayers(nodeIds: string[], links: { from: string; to: string }[]): Map<string, number> {
+  const layer = new Map<string, number>(nodeIds.map((id) => [id, 0]));
+  for (let iter = 0; iter < nodeIds.length; iter++) {
+    let changed = false;
+    for (const e of links) {
+      if (!layer.has(e.from) || !layer.has(e.to)) continue;
+      const want = layer.get(e.from)! + 1;
+      if (want > layer.get(e.to)!) {
+        layer.set(e.to, want);
+        changed = true;
+      }
+    }
+    if (!changed) break;
+  }
+  return layer;
+}
+
+/**
  * Lay out a general directed graph using a layered (Sugiyama-style) approach:
  * longest-path layering, a median heuristic to reduce edge crossings, then even
  * spacing within each layer. Handles merges (multiple parents), multiple roots
@@ -74,22 +96,7 @@ export function layoutDag(
     parents.get(e.to)!.push(e.from);
   }
 
-  // Longest-path layering via bounded relaxation: roots stay at layer 0, every
-  // other node sits one below its deepest parent. The iteration cap guarantees
-  // termination even if the input contains a cycle.
-  const layer = new Map<string, number>(nodes.map((n) => [n.id, 0]));
-  for (let iter = 0; iter < nodes.length; iter++) {
-    let changed = false;
-    for (const e of links) {
-      const want = layer.get(e.from)! + 1;
-      if (want > layer.get(e.to)!) {
-        layer.set(e.to, want);
-        changed = true;
-      }
-    }
-    if (!changed) break;
-  }
-
+  const layer = assignLayers(nodes.map((n) => n.id), links);
   const maxLayer = Math.max(...nodes.map((n) => layer.get(n.id)!));
   const byLayer: string[][] = Array.from({ length: maxLayer + 1 }, () => []);
   for (const n of nodes) byLayer[layer.get(n.id)!].push(n.id);

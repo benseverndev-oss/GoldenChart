@@ -22,6 +22,12 @@ export interface Series {
   color?: string;
 }
 
+/** A category with one value per series — for grouped/stacked bar charts. */
+export interface MultiSeriesDatum {
+  label: string;
+  values: Record<string, number>;
+}
+
 /**
  * Props shared by every high-level chart component. Charts own the outer SVG
  * surface, the margins, and the vibe; the calculation layer turns this into
@@ -36,11 +42,24 @@ export interface BaseChartProps {
   vibe?: VibeConfig;
   /** Accessible label rendered as `<title>` / aria-label on the surface. */
   title?: string;
+  /** Longer accessible description, rendered as `<desc>`. */
+  description?: string;
+  /** Explicit aria-label; falls back to `title`. */
+  ariaLabel?: string;
+  /** Emit a visually-hidden data table mirroring the chart, for screen readers. */
+  dataTable?: boolean;
   className?: string;
   style?: CSSProperties;
   children?: ReactNode;
   /** Render only the bare `<svg>` (no wrapper div) for headless/SVG-string use. */
   bare?: boolean;
+}
+
+/** A tabular mirror of a chart's data, rendered visually-hidden for screen readers. */
+export interface DataTableModel {
+  caption?: string;
+  columns: string[];
+  rows: (string | number)[][];
 }
 
 export type FlowNodeShape = 'rect' | 'ellipse' | 'diamond';

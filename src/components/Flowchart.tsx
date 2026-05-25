@@ -33,6 +33,8 @@ export function Flowchart({
   margin,
   vibe,
   title,
+  description,
+  ariaLabel,
   className,
   style,
   bare,
@@ -49,7 +51,17 @@ export function Flowchart({
   );
 
   return (
-    <Surface width={width} height={height} vibe={vibe} title={title} className={className} style={style} bare={bare}>
+    <Surface
+      width={width}
+      height={height}
+      vibe={vibe}
+      title={title}
+      description={description}
+      ariaLabel={ariaLabel}
+      className={className}
+      style={style}
+      bare={bare}
+    >
       <g transform={`translate(${plot.x}, ${plot.y})`}>
         {layout.edges.map((e) => (
           <FlowchartEdge
