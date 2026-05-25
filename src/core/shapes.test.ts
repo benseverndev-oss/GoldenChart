@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { arrowHeadPath, diamondPath, ellipsePath, linePath, linkPath } from './shapes';
+import {
+  arrowHeadPath,
+  diamondPath,
+  ellipsePath,
+  linePath,
+  linkPath,
+  orthogonalPath,
+  orthogonalPoints,
+} from './shapes';
 
 describe('shape path generators', () => {
   it('linePath builds a path through points', () => {
@@ -16,6 +24,31 @@ describe('shape path generators', () => {
     const h = linkPath({ x: 0, y: 0 }, { x: 100, y: 0 }, 'horizontal');
     expect(v).not.toBe(h);
     expect(v.includes('C')).toBe(true);
+  });
+
+  it('orthogonalPath uses straight elbow segments (no curves)', () => {
+    const d = orthogonalPath({ x: 0, y: 0 }, { x: 40, y: 100 }, 'vertical');
+    expect(d.startsWith('M0,0')).toBe(true);
+    expect(d.includes('C')).toBe(false);
+    expect(d.split('L')).toHaveLength(4); // three line segments after the move
+  });
+
+  it('orthogonalPoints jogs across the midpoint along the flow axis', () => {
+    const v = orthogonalPoints({ x: 0, y: 0 }, { x: 40, y: 100 }, 'vertical');
+    // leaves the source vertically, crosses at mid-y, arrives vertically
+    expect(v).toEqual([
+      { x: 0, y: 0 },
+      { x: 0, y: 50 },
+      { x: 40, y: 50 },
+      { x: 40, y: 100 },
+    ]);
+    const h = orthogonalPoints({ x: 0, y: 0 }, { x: 100, y: 40 }, 'horizontal');
+    expect(h).toEqual([
+      { x: 0, y: 0 },
+      { x: 50, y: 0 },
+      { x: 50, y: 40 },
+      { x: 100, y: 40 },
+    ]);
   });
 
   it('diamondPath and ellipsePath are closed paths', () => {

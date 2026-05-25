@@ -65,3 +65,6 @@ export interface FlowEdge {
 
 /** Tree layout direction: Top-Bottom, Bottom-Top, Left-Right, Right-Left. */
 export type FlowDirection = 'TB' | 'BT' | 'LR' | 'RL';
+
+/** Edge connector style: smooth cubic `curved` links or `orthogonal` elbows. */
+export type EdgeRouting = 'curved' | 'orthogonal';

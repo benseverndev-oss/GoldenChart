@@ -143,6 +143,18 @@ export function App() {
           />
         </Panel>
 
+        <Panel title="Flowchart (orthogonal elbow routing, TB)">
+          <Flowchart
+            width={460}
+            height={300}
+            vibe={vibe}
+            nodes={FLOW_NODES}
+            edges={FLOW_EDGES}
+            direction="TB"
+            routing="orthogonal"
+          />
+        </Panel>
+
         <Panel title="Composed primitives (RoughPath + RoughCircle)">
           <Surface width={460} height={160} vibe={vibe} title="Sparkline">
             <RoughPath d={linePath(SPARK_POINTS, 'catmullRom')} fill={null} />

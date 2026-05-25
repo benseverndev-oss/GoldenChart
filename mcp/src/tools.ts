@@ -11,6 +11,7 @@ import {
   baseChartShape,
   ChartDatumSchema,
   CurveSchema,
+  EdgeRoutingSchema,
   FlowDirectionSchema,
   FlowEdgeSchema,
   FlowNodeSchema,
@@ -102,7 +103,7 @@ export const chartTools: ToolDef[] = [
     name: 'render_flowchart',
     title: 'Render Flowchart',
     description:
-      'Render a hand-drawn flowchart (tree layout, four directions, rect/ellipse/diamond nodes) as a standalone SVG.',
+      'Render a hand-drawn flowchart (tree layout, four directions, rect/ellipse/diamond nodes, curved or orthogonal edges) as a standalone SVG.',
     kind: 'flow',
     component: Flowchart,
     inputShape: {
@@ -110,6 +111,7 @@ export const chartTools: ToolDef[] = [
       nodes: z.array(FlowNodeSchema).min(1),
       edges: z.array(FlowEdgeSchema).optional(),
       direction: FlowDirectionSchema.optional(),
+      routing: EdgeRoutingSchema.optional(),
       showArrowheads: z.boolean().optional(),
     },
   }),

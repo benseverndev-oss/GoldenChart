@@ -90,6 +90,8 @@ export const FlowEdgeSchema = z.object({
 
 export const FlowDirectionSchema = z.enum(['TB', 'BT', 'LR', 'RL']);
 
+export const EdgeRoutingSchema = z.enum(['curved', 'orthogonal']);
+
 /** Common chart dimension/vibe fields shared by every render tool. */
 export const baseChartShape = {
   width: z.number().positive(),

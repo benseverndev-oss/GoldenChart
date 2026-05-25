@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
-import type { BaseChartProps, FlowDirection, FlowEdge, FlowNode } from '../types/charts';
+import type { BaseChartProps, EdgeRouting, FlowDirection, FlowEdge, FlowNode } from '../types/charts';
 import { getPlotArea } from '../core/geometry';
 import { layoutTree } from '../core/hierarchy';
 import type { LaidOutEdge, LaidOutNode } from '../core/hierarchy';
-import { arrowHeadPath, diamondPath, ellipsePath, linkPath } from '../core/shapes';
+import { arrowHeadPath, diamondPath, ellipsePath, linkPath, orthogonalPath, orthogonalPoints } from '../core/shapes';
 import { Surface } from './Surface';
 import { RoughRectangle } from '../primitives/RoughRectangle';
 import { RoughPath } from '../primitives/RoughPath';
@@ -14,6 +14,8 @@ export interface FlowchartProps extends BaseChartProps {
   edges?: FlowEdge[];
   direction?: FlowDirection;
   showArrowheads?: boolean;
+  /** Edge connector style. `curved` (default) or `orthogonal` elbow links. */
+  routing?: EdgeRouting;
 }
 
 /**
@@ -35,6 +37,7 @@ export function Flowchart({
   bare,
   direction = 'TB',
   showArrowheads = true,
+  routing = 'curved',
 }: FlowchartProps) {
   const plot = getPlotArea(width, height, margin);
   const orientation = direction === 'LR' || direction === 'RL' ? 'horizontal' : 'vertical';
@@ -48,7 +51,13 @@ export function Flowchart({
     <Surface width={width} height={height} vibe={vibe} title={title} className={className} style={style} bare={bare}>
       <g transform={`translate(${plot.x}, ${plot.y})`}>
         {layout.edges.map((e) => (
-          <FlowchartEdge key={`${e.from}->${e.to}`} edge={e} orientation={orientation} showArrowhead={showArrowheads} />
+          <FlowchartEdge
+            key={`${e.from}->${e.to}`}
+            edge={e}
+            orientation={orientation}
+            routing={routing}
+            showArrowhead={showArrowheads}
+          />
         ))}
         {layout.nodes.map((n, i) => (
           <FlowchartNode key={n.id} node={n} index={i} />
@@ -61,18 +70,31 @@ export function Flowchart({
 function FlowchartEdge({
   edge,
   orientation,
+  routing,
   showArrowhead,
 }: {
   edge: LaidOutEdge;
   orientation: 'vertical' | 'horizontal';
+  routing: EdgeRouting;
   showArrowhead: boolean;
 }) {
   const from = { x: edge.sx, y: edge.sy };
   const to = { x: edge.tx, y: edge.ty };
+  // For elbow links the head must align with the final (axis-aligned) segment,
+  // not the straight source->target line, so it reads as a clean right angle.
+  let d: string;
+  let arrowTail = from;
+  if (routing === 'orthogonal') {
+    const pts = orthogonalPoints(from, to, orientation);
+    d = orthogonalPath(from, to, orientation);
+    arrowTail = pts[pts.length - 2];
+  } else {
+    d = linkPath(from, to, orientation);
+  }
   return (
     <g>
-      <RoughPath d={linkPath(from, to, orientation)} fill={null} />
-      {showArrowhead && <RoughPath d={arrowHeadPath(from, to)} fill={null} />}
+      <RoughPath d={d} fill={null} />
+      {showArrowhead && <RoughPath d={arrowHeadPath(arrowTail, to)} fill={null} />}
       {edge.label && (
         <RoughText x={(edge.sx + edge.tx) / 2} y={(edge.sy + edge.ty) / 2} anchor="middle" baseline="middle">
           {edge.label}

@@ -10,12 +10,13 @@ import {
   PieChart,
   Flowchart,
 } from 'goldenchart';
-import type { FlowEdge, FlowNode, FlowNodeShape, VibeConfig } from 'goldenchart';
+import type { EdgeRouting, FlowEdge, FlowNode, FlowNodeShape, VibeConfig } from 'goldenchart';
 import { renderToSVGString } from 'goldenchart/server';
 import type { ToolDef } from './registry';
 import { primitiveToElement } from './primitives';
 import type { PrimitiveSpec, SceneNode } from './schemas';
 import {
+  EdgeRoutingSchema,
   FlowDirectionSchema,
   FlowEdgeSchema,
   FlowNodeSchema,
@@ -95,6 +96,7 @@ export const orchestrationTools: ToolDef[] = [
         nodes: z.array(FlowNodeSchema).min(1),
         edges: z.array(FlowEdgeSchema).optional(),
         direction: FlowDirectionSchema.optional(),
+        routing: EdgeRoutingSchema.optional(),
         autoShape: z.boolean().optional(),
         width: z.number().positive(),
         height: z.number().positive(),
@@ -125,6 +127,7 @@ export const orchestrationTools: ToolDef[] = [
           nodes: shaped,
           edges: args.edges as FlowEdge[] | undefined,
           direction: (args.direction as 'TB' | 'BT' | 'LR' | 'RL' | undefined) ?? 'TB',
+          routing: (args.routing as EdgeRouting | undefined) ?? 'curved',
           bare: true,
         }),
       );
