@@ -34,4 +34,37 @@ export function registerPrompts(server: McpServer): void {
       ],
     }),
   );
+
+  server.registerPrompt(
+    'make-me-a-diagram',
+    {
+      title: 'Make me a diagram',
+      description: 'Guided flow: pick a vibe, describe the diagram, then render it from a spec or Mermaid.',
+      argsSchema: { diagramDescription: z.string(), mood: z.string().optional() },
+    },
+    ({ diagramDescription, mood }) => ({
+      messages: [
+        {
+          role: 'user' as const,
+          content: {
+            type: 'text' as const,
+            text: [
+              'You are creating a hand-drawn diagram with the GoldenChart MCP tools. Follow these steps:',
+              '',
+              `1. The diagram to create: ${diagramDescription}`,
+              mood
+                ? `2. Desired mood: "${mood}". Call list_vibe_presets, pick the closest preset, optionally fine-tune with resolve_vibe.`
+                : '2. Call list_vibe_presets and pick a preset (default: messy_sketch).',
+              '3. Read docs://diagram-spec to see the diagram kinds (flowchart, sequence, mindmap, arch, er, timeline, org) and their fields, plus the supported Mermaid subset.',
+              '4. Already have Mermaid? Call build_diagram_from_mermaid with the source and chosen vibe.',
+              '5. Otherwise call render_diagram with a spec `{ kind, ... }` for the chosen diagram type and the vibe.',
+              '6. If a raster image is needed, pass the returned SVG to export_png.',
+              '',
+              'Return the final SVG (or PNG) and mention which diagram kind you used.',
+            ].join('\n'),
+          },
+        },
+      ],
+    }),
+  );
 }

@@ -67,4 +67,25 @@ describe('GoldenChart MCP server', () => {
     expect(text).toContain('monthly revenue');
     expect(text).toContain('playful');
   });
+
+  it('builds a diagram from a Mermaid snippet over the protocol', async () => {
+    const client = await connectedClient();
+    const { tools } = await client.listTools();
+    expect(tools.map((t) => t.name)).toContain('build_diagram_from_mermaid');
+    const result = await client.callTool({
+      name: 'build_diagram_from_mermaid',
+      arguments: { source: 'flowchart TD\n  A[Start] --> B((Done))', width: 320, height: 240 },
+    });
+    const content = result.content as { type: string; text: string }[];
+    expect(content[0].text).toContain('<svg');
+    expect(content[0].text).toContain('Start');
+  });
+
+  it('exposes the diagram-spec doc and make-me-a-diagram prompt', async () => {
+    const client = await connectedClient();
+    const read = await client.readResource({ uri: 'docs://diagram-spec' });
+    expect((read.contents[0] as { text: string }).text).toContain('render_diagram');
+    const { prompts } = await client.listPrompts();
+    expect(prompts.map((p) => p.name)).toContain('make-me-a-diagram');
+  });
 });

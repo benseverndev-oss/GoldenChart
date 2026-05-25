@@ -12,6 +12,8 @@ import {
   SequenceDiagram,
   ERDiagram,
   Timeline,
+  renderDiagram,
+  parseMermaid,
   SankeyChart,
   TreemapChart,
   HeatmapChart,
@@ -242,6 +244,12 @@ const TIMELINE_EVENTS: TimelineEventInput[] = [
   { date: '2025', label: 'Profitable' },
 ];
 
+const MERMAID_SRC = `flowchart LR
+  A([Start]) --> B[Build]
+  B --> C{Ship?}
+  C -->|yes| D((Done))
+  C -->|no| B`;
+
 const SPARK_POINTS = [3, 7, 4, 9, 6, 11, 8, 14].map((v, i) => ({ x: i * 50, y: 120 - v * 7 }));
 
 export function App() {
@@ -374,6 +382,10 @@ export function App() {
 
         <Panel title="Timeline (events along an axis)">
           <Timeline width={460} height={240} vibe={vibe} events={TIMELINE_EVENTS} />
+        </Panel>
+
+        <Panel title="Mermaid → diagram (renderDiagram + parseMermaid)">
+          {renderDiagram(parseMermaid(MERMAID_SRC), { width: 460, height: 300, vibe })}
         </Panel>
 
         <Panel title="Sankey (weighted flow)">
