@@ -13,6 +13,12 @@ export interface SurfaceProps {
   svgClassName?: string;
   style?: CSSProperties;
   children?: ReactNode;
+  /**
+   * Render only the `<svg>` (no Tailwind wrapper `<div>`) with an explicit
+   * `xmlns`, producing a standalone, serializable SVG. Used by the headless
+   * `renderToSVGString` path and the MCP server.
+   */
+  bare?: boolean;
 }
 
 /**
@@ -29,22 +35,30 @@ export function Surface({
   svgClassName = 'block h-auto w-full',
   style,
   children,
+  bare = false,
 }: SurfaceProps) {
+  const svg = (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox={`0 0 ${width} ${height}`}
+      width={width}
+      height={height}
+      className={bare ? undefined : svgClassName}
+      role="img"
+      aria-label={title}
+    >
+      {title ? <title>{title}</title> : null}
+      {children}
+    </svg>
+  );
+
   return (
     <VibeProvider vibe={vibe}>
-      <div className={className} style={style}>
-        <svg
-          viewBox={`0 0 ${width} ${height}`}
-          width={width}
-          height={height}
-          className={svgClassName}
-          role="img"
-          aria-label={title}
-        >
-          {title ? <title>{title}</title> : null}
-          {children}
-        </svg>
-      </div>
+      {bare ? svg : (
+        <div className={className} style={style}>
+          {svg}
+        </div>
+      )}
     </VibeProvider>
   );
 }

@@ -33,6 +33,7 @@ export function AreaChart({
   title,
   className,
   style,
+  bare,
   curve = 'linear',
   baseline = 0,
   showLine = true,
@@ -64,7 +65,7 @@ export function AreaChart({
   }, [series, curve, baseline, plot.x, plot.y, plot.width, plot.height]);
 
   return (
-    <Surface width={width} height={height} vibe={vibe} title={title} className={className} style={style}>
+    <Surface width={width} height={height} vibe={vibe} title={title} className={className} style={style} bare={bare}>
       {showGrid && <Grid plot={plot} xScale={x} yScale={y} />}
       {areas.map((a, i) => (
         <g key={a.id}>

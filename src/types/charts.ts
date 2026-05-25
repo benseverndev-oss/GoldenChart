@@ -39,6 +39,8 @@ export interface BaseChartProps {
   className?: string;
   style?: CSSProperties;
   children?: ReactNode;
+  /** Render only the bare `<svg>` (no wrapper div) for headless/SVG-string use. */
+  bare?: boolean;
 }
 
 export type FlowNodeShape = 'rect' | 'ellipse' | 'diamond';

@@ -32,6 +32,7 @@ export function Flowchart({
   title,
   className,
   style,
+  bare,
   direction = 'TB',
   showArrowheads = true,
 }: FlowchartProps) {
@@ -44,7 +45,7 @@ export function Flowchart({
   );
 
   return (
-    <Surface width={width} height={height} vibe={vibe} title={title} className={className} style={style}>
+    <Surface width={width} height={height} vibe={vibe} title={title} className={className} style={style} bare={bare}>
       <g transform={`translate(${plot.x}, ${plot.y})`}>
         {layout.edges.map((e) => (
           <FlowchartEdge key={`${e.from}->${e.to}`} edge={e} orientation={orientation} showArrowhead={showArrowheads} />

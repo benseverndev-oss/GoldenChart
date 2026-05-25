@@ -29,6 +29,7 @@ export function LineChart({
   title,
   className,
   style,
+  bare,
   curve = 'linear',
   showPoints = false,
   showAxes = true,
@@ -55,7 +56,7 @@ export function LineChart({
   }, [series, curve, plot.x, plot.y, plot.width, plot.height]);
 
   return (
-    <Surface width={width} height={height} vibe={vibe} title={title} className={className} style={style}>
+    <Surface width={width} height={height} vibe={vibe} title={title} className={className} style={style} bare={bare}>
       {showGrid && <Grid plot={plot} xScale={x} yScale={y} />}
       {lines.map((line, i) => (
         <g key={line.id}>

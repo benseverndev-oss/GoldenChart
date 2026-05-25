@@ -28,6 +28,7 @@ export function BarChart({
   title,
   className,
   style,
+  bare,
   showAxes = true,
   showGrid = true,
 }: BarChartProps) {
@@ -54,7 +55,7 @@ export function BarChart({
   }, [data, plot.x, plot.y, plot.width, plot.height]);
 
   return (
-    <Surface width={width} height={height} vibe={vibe} title={title} className={className} style={style}>
+    <Surface width={width} height={height} vibe={vibe} title={title} className={className} style={style} bare={bare}>
       {showGrid && <Grid plot={plot} yScale={y} />}
       {bars.map((bar, i) => (
         <BarChartBar key={bar.label} bar={bar} index={i} />

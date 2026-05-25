@@ -28,6 +28,7 @@ export function PieChart({
   title,
   className,
   style,
+  bare,
   innerRadius = 0,
   padAngle = 0.02,
   showLabels = true,
@@ -43,7 +44,7 @@ export function PieChart({
   );
 
   return (
-    <Surface width={width} height={height} vibe={vibe} title={title} className={className} style={style}>
+    <Surface width={width} height={height} vibe={vibe} title={title} className={className} style={style} bare={bare}>
       <g transform={`translate(${cx}, ${cy})`}>
         {slices.map((slice) => (
           <g key={slice.datum.label}>

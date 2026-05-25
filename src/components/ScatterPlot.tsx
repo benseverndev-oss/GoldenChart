@@ -37,6 +37,7 @@ export function ScatterPlot({
   title,
   className,
   style,
+  bare,
   radius = 5,
   maxRadius = 18,
   showAxes = true,
@@ -61,7 +62,7 @@ export function ScatterPlot({
   }, [data, radius, maxRadius, plot.x, plot.y, plot.width, plot.height]);
 
   return (
-    <Surface width={width} height={height} vibe={vibe} title={title} className={className} style={style}>
+    <Surface width={width} height={height} vibe={vibe} title={title} className={className} style={style} bare={bare}>
       {showGrid && <Grid plot={plot} xScale={x} yScale={y} />}
       {points.map((p, i) => (
         <ScatterDot key={i} point={p} index={i} />
