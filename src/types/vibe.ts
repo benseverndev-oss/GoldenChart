@@ -4,7 +4,20 @@ import type { Options as RoughOptions } from 'roughjs/bin/core';
  * Semantic aesthetics. Each maps to a fully-resolved set of Rough.js knobs in
  * `vibe/presets.ts`. This is the "dial" most consumers will touch.
  */
-export type VibePreset = 'messy_sketch' | 'clean_blueprint' | 'chaotic_notebook';
+export type VibePreset =
+  | 'messy_sketch'
+  | 'clean_blueprint'
+  | 'chaotic_notebook'
+  | 'pencil'
+  | 'marker'
+  | 'ink'
+  | 'crayon';
+
+/** Optional "draw-on" reveal: strokes animate as if being sketched. */
+export interface VibeAnimate {
+  drawOn?: boolean;
+  durationMs?: number;
+}
 
 /** Rough.js fill hatching styles, surfaced verbatim so power users keep full control. */
 export type FillStyle =
@@ -46,15 +59,19 @@ export interface VibeOverrides {
   seed?: number;
   fontFamily?: string;
   fontSize?: number;
+  /** Reveal animation. Not a Rough.js knob — consumed by the renderer. */
+  animate?: VibeAnimate;
 }
 
 /**
  * A preset with every knob filled in. The Vibe engine resolves any `VibeConfig`
- * down to this shape before it ever reaches Rough.js.
+ * down to this shape before it ever reaches Rough.js. `fill` and `animate` are
+ * handled explicitly (nullable / optional) rather than via `Required`.
  */
-export interface ResolvedVibe extends Required<Omit<VibeOverrides, 'fill'>> {
+export interface ResolvedVibe extends Required<Omit<VibeOverrides, 'fill' | 'animate'>> {
   preset: VibePreset;
   fill: string | null;
+  animate?: VibeAnimate;
 }
 
 /**

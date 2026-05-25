@@ -6,6 +6,10 @@ import {
   ScatterPlot,
   PieChart,
   Flowchart,
+  SankeyChart,
+  TreemapChart,
+  HeatmapChart,
+  RadarChart,
   Surface,
   RoughPath,
   RoughCircle,
@@ -15,6 +19,7 @@ import {
 import type {
   ChartDatum,
   FlowNode,
+  MultiSeriesDatum,
   Series,
   ScatterDatum,
   VibeConfig,
@@ -42,6 +47,49 @@ const SCATTER: ScatterDatum[] = Array.from({ length: 18 }, (_, i) => ({
   r: ((i * 17) % 9) + 1,
 }));
 
+const MULTI_BARS: MultiSeriesDatum[] = [
+  { label: 'Q1', values: { sales: 12, returns: 4, support: 6 } },
+  { label: 'Q2', values: { sales: 19, returns: 6, support: 5 } },
+  { label: 'Q3', values: { sales: 9, returns: 3, support: 8 } },
+];
+
+const SANKEY_NODES = [
+  { id: 'visits', label: 'Visits' },
+  { id: 'signup', label: 'Sign-up' },
+  { id: 'bounce', label: 'Bounce' },
+  { id: 'paid', label: 'Paid' },
+  { id: 'churn', label: 'Churn' },
+];
+const SANKEY_LINKS = [
+  { source: 'visits', target: 'signup', value: 6 },
+  { source: 'visits', target: 'bounce', value: 4 },
+  { source: 'signup', target: 'paid', value: 4 },
+  { source: 'signup', target: 'churn', value: 2 },
+];
+
+const TREEMAP_DATA = [
+  { id: 'root' },
+  { id: 'eng', parent: 'root', value: 8, label: 'Eng' },
+  { id: 'design', parent: 'root', value: 4, label: 'Design' },
+  { id: 'sales', parent: 'root', value: 6, label: 'Sales' },
+  { id: 'ops', parent: 'root', value: 3, label: 'Ops' },
+];
+
+const HEATMAP_DATA = Array.from({ length: 5 }, (_, x) =>
+  Array.from({ length: 4 }, (_, y) => ({ x: `c${x}`, y: `r${y}`, value: (x * 7 + y * 13) % 20 })),
+).flat();
+
+const RADAR_AXES = ['Speed', 'Power', 'Range', 'Cost', 'Style'];
+const RADAR_SERIES = [
+  { id: 'A', values: [4, 7, 5, 3, 6] },
+  { id: 'B', values: [6, 3, 7, 5, 4] },
+];
+
+const ANNOTATIONS = [
+  { kind: 'y-line' as const, value: 6, label: 'target' },
+  { kind: 'point-callout' as const, x: 7, y: 9, text: 'peak' },
+];
+
 const FLOW_NODES: FlowNode[] = [
   { id: 'a', label: 'Start', shape: 'ellipse' },
   { id: 'b', label: 'Clean', parent: 'a' },
@@ -55,6 +103,23 @@ const FLOW_EDGES = [
   { from: 'a', to: 'c', label: 'maybe' },
   { from: 'b', to: 'd' },
   { from: 'c', to: 'e', label: 'yes' },
+];
+
+// A non-tree graph: two entry points fan into a shared "Merge" node, which the
+// layered DAG layout handles (d3's tree layout can't — it needs a single root).
+const DAG_NODES: FlowNode[] = [
+  { id: 'api', label: 'API', shape: 'ellipse' },
+  { id: 'cache', label: 'Cache', shape: 'ellipse' },
+  { id: 'merge', label: 'Merge' },
+  { id: 'render', label: 'Render?', shape: 'diamond' },
+  { id: 'out', label: 'Output', shape: 'ellipse' },
+];
+
+const DAG_EDGES = [
+  { from: 'api', to: 'merge' },
+  { from: 'cache', to: 'merge' },
+  { from: 'merge', to: 'render' },
+  { from: 'render', to: 'out', label: 'ok' },
 ];
 
 const SPARK_POINTS = [3, 7, 4, 9, 6, 11, 8, 14].map((v, i) => ({ x: i * 50, y: 120 - v * 7 }));
@@ -141,6 +206,62 @@ export function App() {
             edges={FLOW_EDGES}
             direction="LR"
           />
+        </Panel>
+
+        <Panel title="Flowchart (orthogonal elbow routing, TB)">
+          <Flowchart
+            width={460}
+            height={300}
+            vibe={vibe}
+            nodes={FLOW_NODES}
+            edges={FLOW_EDGES}
+            direction="TB"
+            routing="orthogonal"
+          />
+        </Panel>
+
+        <Panel title="Flowchart (DAG merge — two roots into one node)">
+          <Flowchart
+            width={460}
+            height={320}
+            vibe={vibe}
+            nodes={DAG_NODES}
+            edges={DAG_EDGES}
+            direction="TB"
+            routing="orthogonal"
+          />
+        </Panel>
+
+        <Panel title="Sankey (weighted flow)">
+          <SankeyChart width={460} height={300} vibe={vibe} nodes={SANKEY_NODES} links={SANKEY_LINKS} showValues />
+        </Panel>
+
+        <Panel title="Treemap">
+          <TreemapChart width={460} height={300} vibe={vibe} data={TREEMAP_DATA} />
+        </Panel>
+
+        <Panel title="Heatmap (viridis)">
+          <HeatmapChart width={460} height={280} vibe={vibe} data={HEATMAP_DATA} showValues />
+        </Panel>
+
+        <Panel title="Radar (multi-series)">
+          <RadarChart width={360} height={320} vibe={vibe} axes={RADAR_AXES} series={RADAR_SERIES} />
+        </Panel>
+
+        <Panel title="Grouped bars (multi-series)">
+          <BarChart width={460} height={280} vibe={vibe} data={MULTI_BARS} mode="grouped" />
+        </Panel>
+
+        <Panel title="Stacked bars (multi-series)">
+          <BarChart width={460} height={280} vibe={vibe} data={MULTI_BARS} mode="stacked" />
+        </Panel>
+
+        <Panel title="Stacked area">
+          <AreaChart width={460} height={260} vibe={vibe} series={SERIES} stacked />
+        </Panel>
+
+        <Panel title="Line chart with annotations">
+          <LineChart width={460} height={260} vibe={vibe} series={[SERIES[0]]} annotations={ANNOTATIONS} />
         </Panel>
 
         <Panel title="Composed primitives (RoughPath + RoughCircle)">

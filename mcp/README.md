@@ -38,16 +38,20 @@ Or add it to a client config manually:
 
 | Level | Tools |
 |-------|-------|
-| Charts | `render_bar_chart`, `render_line_chart`, `render_area_chart`, `render_scatter_plot`, `render_pie_chart`, `render_flowchart` |
+| Charts | `render_bar_chart` (single/grouped/stacked), `render_line_chart`, `render_area_chart` (+ stacked), `render_scatter_plot`, `render_pie_chart`, `render_flowchart`, `render_sankey`, `render_treemap`, `render_heatmap`, `render_radar` |
 | Vibe | `list_vibe_presets`, `resolve_vibe`, `preview_vibe` |
-| Calculation | `compute_scale`, `compute_ticks`, `compute_line_path`, `compute_area_path`, `compute_pie`, `layout_tree` |
+| Calculation | `compute_scale`, `compute_ticks`, `compute_line_path`, `compute_area_path`, `compute_pie`, `layout_tree`, `compute_color_scale` |
 | Primitives | `render_rough_path`, `render_rough_rect`, `render_rough_circle`, `render_rough_line`, `render_rough_text` |
 | Orchestration / export | `compose_surface`, `build_flowchart_from_spec`, `export_svg`, `export_png` |
+
+The cartesian chart tools accept an `annotations` array (reference lines/bands, callouts,
+circled points) and `description` / `ariaLabel` / `dataTable` for accessible output.
 
 ## Resources & prompts
 
 - `vibe://presets` — every preset with resolved Rough.js knobs
-- `schema://chart/{type}` — JSON Schema for each chart's input (`bar`, `line`, `area`, `scatter`, `pie`, `flow`)
+- `palette://scales` — sequential/diverging color scales with sampled swatches
+- `schema://chart/{type}` — JSON Schema for each chart's input (`bar`, `line`, `area`, `scatter`, `pie`, `flow`, `sankey`, `treemap`, `heatmap`, `radar`)
 - `docs://architecture` — how the layers fit together
 - Prompt `make-me-a-chart` — guided flow: pick a vibe from a mood, choose a chart for the data, render it
 

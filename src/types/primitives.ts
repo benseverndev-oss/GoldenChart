@@ -63,4 +63,6 @@ export interface RoughTextProps extends RoughPrimitiveProps {
   rotate?: number;
   /** Overrides the vibe stroke as the text fill color. */
   fill?: string;
+  /** When set, wrap the text to this pixel width across multiple lines. */
+  maxWidth?: number;
 }

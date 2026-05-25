@@ -1,9 +1,11 @@
 import { z } from 'zod';
 import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { VIBE_PRESETS } from 'goldenchart';
+import { COLOR_SCALE_NAMES, VIBE_PRESETS, colorRamp } from 'goldenchart';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import { chartTools } from './tools';
+import { chartTools, extraChartTools } from './tools';
+
+const allChartTools = [...chartTools, ...extraChartTools];
 
 /** Short chart type -> render tool name, for the schema resource. */
 const CHART_TOOL_BY_TYPE: Record<string, string> = {
@@ -13,6 +15,10 @@ const CHART_TOOL_BY_TYPE: Record<string, string> = {
   scatter: 'render_scatter_plot',
   pie: 'render_pie_chart',
   flow: 'render_flowchart',
+  sankey: 'render_sankey',
+  treemap: 'render_treemap',
+  heatmap: 'render_heatmap',
+  radar: 'render_radar',
 };
 
 const ARCHITECTURE_DOC = `# GoldenChart architecture
@@ -64,12 +70,26 @@ export function registerResources(server: McpServer): void {
     async (uri, variables) => {
       const type = Array.isArray(variables.type) ? variables.type[0] : variables.type;
       const toolName = CHART_TOOL_BY_TYPE[type];
-      const tool = chartTools.find((t) => t.name === toolName);
+      const tool = allChartTools.find((t) => t.name === toolName);
       if (!tool) {
         throw new Error(`Unknown chart type: ${type}`);
       }
       const jsonSchema = zodToJsonSchema(z.object(tool.config.inputSchema), `${type}_chart_input`);
       return { contents: [{ uri: uri.href, mimeType: 'application/json', text: JSON.stringify(jsonSchema, null, 2) }] };
+    },
+  );
+
+  server.registerResource(
+    'color-scales',
+    'palette://scales',
+    {
+      title: 'Color scales',
+      description: 'Available sequential/diverging color scales with sampled swatches.',
+      mimeType: 'application/json',
+    },
+    async (uri) => {
+      const scales = COLOR_SCALE_NAMES.map((name) => ({ name, swatches: colorRamp(name, 7) }));
+      return { contents: [{ uri: uri.href, mimeType: 'application/json', text: JSON.stringify({ scales }, null, 2) }] };
     },
   );
 

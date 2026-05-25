@@ -45,6 +45,27 @@ export function linkPath(from: Point, to: Point, orientation: LinkOrientation = 
   return `M${from.x},${from.y} C${from.x},${midY} ${to.x},${midY} ${to.x},${to.y}`;
 }
 
+/**
+ * Vertices of an elbow (orthogonal) connector: it leaves `from` along the flow
+ * axis, jogs across at the midpoint, then arrives at `to` along the flow axis.
+ * The final segment is axis-aligned, so an arrowhead reads as a clean right
+ * angle into the target.
+ */
+export function orthogonalPoints(from: Point, to: Point, orientation: LinkOrientation = 'vertical'): Point[] {
+  if (orientation === 'horizontal') {
+    const midX = (from.x + to.x) / 2;
+    return [from, { x: midX, y: from.y }, { x: midX, y: to.y }, to];
+  }
+  const midY = (from.y + to.y) / 2;
+  return [from, { x: from.x, y: midY }, { x: to.x, y: midY }, to];
+}
+
+/** SVG path for an elbow (orthogonal) connector between two points. */
+export function orthogonalPath(from: Point, to: Point, orientation: LinkOrientation = 'vertical'): string {
+  const [head, ...rest] = orthogonalPoints(from, to, orientation);
+  return `M${head.x},${head.y} ` + rest.map((p) => `L${p.x},${p.y}`).join(' ');
+}
+
 /** SVG path for a diamond centered at (cx, cy) — flowchart decision nodes. */
 export function diamondPath(cx: number, cy: number, width: number, height: number): string {
   const hw = width / 2;

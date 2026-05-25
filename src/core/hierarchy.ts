@@ -28,11 +28,46 @@ export interface FlowLayout {
   edges: LaidOutEdge[];
 }
 
-const DEFAULT_NODE_W = 120;
-const DEFAULT_NODE_H = 48;
+export const DEFAULT_NODE_W = 120;
+export const DEFAULT_NODE_H = 48;
 
-function isHorizontal(direction: FlowDirection): boolean {
+export function isHorizontal(direction: FlowDirection): boolean {
   return direction === 'LR' || direction === 'RL';
+}
+
+/**
+ * Offset an edge's endpoints from node centers to the node boundaries facing
+ * the flow direction, so links start/end at an edge rather than the middle.
+ * Shared by the tree and DAG layout engines.
+ */
+export function connectEdge(
+  s: LaidOutNode,
+  t: LaidOutNode,
+  direction: FlowDirection,
+): { sx: number; sy: number; tx: number; ty: number } {
+  let sx = s.x;
+  let sy = s.y;
+  let tx = t.x;
+  let ty = t.y;
+  switch (direction) {
+    case 'TB':
+      sy = s.y + s.height / 2;
+      ty = t.y - t.height / 2;
+      break;
+    case 'BT':
+      sy = s.y - s.height / 2;
+      ty = t.y + t.height / 2;
+      break;
+    case 'LR':
+      sx = s.x + s.width / 2;
+      tx = t.x - t.width / 2;
+      break;
+    case 'RL':
+      sx = s.x - s.width / 2;
+      tx = t.x + t.width / 2;
+      break;
+  }
+  return { sx, sy, tx, ty };
 }
 
 /**
@@ -99,31 +134,7 @@ export function layoutTree(
     const s = byId.get(e.from);
     const t = byId.get(e.to);
     if (!s || !t) return [];
-
-    let sx = s.x;
-    let sy = s.y;
-    let tx = t.x;
-    let ty = t.y;
-    switch (direction) {
-      case 'TB':
-        sy = s.y + s.height / 2;
-        ty = t.y - t.height / 2;
-        break;
-      case 'BT':
-        sy = s.y - s.height / 2;
-        ty = t.y + t.height / 2;
-        break;
-      case 'LR':
-        sx = s.x + s.width / 2;
-        tx = t.x - t.width / 2;
-        break;
-      case 'RL':
-        sx = s.x - s.width / 2;
-        tx = t.x + t.width / 2;
-        break;
-    }
-
-    return [{ from: e.from, to: e.to, label: e.label, sx, sy, tx, ty }];
+    return [{ from: e.from, to: e.to, label: e.label, ...connectEdge(s, t, direction) }];
   });
 
   return { nodes: laidOutNodes, edges: laidOutEdges };

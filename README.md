@@ -66,17 +66,22 @@ A `VibeConfig` is either a preset name or a preset plus targeted overrides:
 <BarChart vibe={{ preset: 'clean_blueprint', roughness: 2, stroke: '#0f766e' }} ... />
 ```
 
-Built-in presets: `messy_sketch`, `clean_blueprint`, `chaotic_notebook`.
+Built-in presets: `messy_sketch`, `clean_blueprint`, `chaotic_notebook`, `pencil`, `marker`,
+`ink`, `crayon`. Add `animate: { drawOn: true }` for a hand-drawn reveal (honors
+`prefers-reduced-motion`).
 
 ## Components
 
-- **Charts:** `BarChart`, `LineChart`, `AreaChart`, `ScatterPlot`, `PieChart` (+ donut), `Flowchart`
-- **Chart furniture:** `Axis`, `Grid`, `Legend`
+- **Charts:** `BarChart` (single/grouped/stacked), `LineChart`, `AreaChart` (+ stacked),
+  `ScatterPlot`, `PieChart` (+ donut), `Flowchart`, `SankeyChart`, `TreemapChart`,
+  `HeatmapChart`, `RadarChart`
+- **Chart furniture:** `Axis`, `Grid`, `Legend`, `Annotations` (reference lines/bands, callouts)
 - **Primitives:** `RoughPath`, `RoughLine`, `RoughRectangle`, `RoughCircle`, `RoughText`
 - **Container:** `Surface` (Tailwind wrapper + `VibeProvider`)
 
 `Flowchart` supports four layout directions (`TB`/`BT`/`LR`/`RL`), `rect`/`ellipse`/`diamond`
-node shapes, edge labels, and arrowheads.
+node shapes, edge labels, arrowheads, `curved`/`orthogonal` routing, and general DAG layout
+(merges, multiple roots). Charts accept `description` / `ariaLabel` / `dataTable` for accessibility.
 
 ## Architecture
 
@@ -84,10 +89,11 @@ node shapes, edge labels, and arrowheads.
 src/
 ├── types/        # VibeConfig, base props, geometry, chart data shapes
 ├── vibe/         # presets + resolver (semantic string -> Rough.js options) + React context
-├── core/         # D3 calculation layer — scales, shapes, ticks, arc, hierarchy, palette (no DOM)
+├── core/         # D3 calculation layer — scales, shapes, ticks, arc, hierarchy, dag, sankey,
+│                 #   treemap, polar, color scales, text metrics, stack, palette (no DOM)
 ├── render/       # shared Rough.js generator (DOM-free)
 ├── primitives/   # RoughPath / RoughLine / RoughRectangle / RoughCircle / RoughText
-└── components/   # Surface, BarChart, LineChart, AreaChart, ScatterPlot, PieChart, Flowchart, Axis, Grid, Legend
+└── components/   # Surface, every chart, Axis, Grid, Legend, Annotations
 ```
 
 ## Playground

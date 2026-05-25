@@ -34,7 +34,7 @@ export function RoughRectangle({
   }, [x, y, width, height, resolved, stroke, fill]);
 
   return (
-    <SketchPaths paths={paths} className={className} style={style} onClick={onClick}>
+    <SketchPaths paths={paths} className={className} style={style} onClick={onClick} animate={!!resolved.animate?.drawOn}>
       {children}
     </SketchPaths>
   );

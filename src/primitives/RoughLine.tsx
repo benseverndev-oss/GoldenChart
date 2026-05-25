@@ -26,5 +26,7 @@ export function RoughLine({
     return drawableToPaths(drawable);
   }, [x1, y1, x2, y2, resolved, stroke]);
 
-  return <SketchPaths paths={paths} className={className} style={style} onClick={onClick} />;
+  return (
+    <SketchPaths paths={paths} className={className} style={style} onClick={onClick} animate={!!resolved.animate?.drawOn} />
+  );
 }

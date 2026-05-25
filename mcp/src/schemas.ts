@@ -90,13 +90,106 @@ export const FlowEdgeSchema = z.object({
 
 export const FlowDirectionSchema = z.enum(['TB', 'BT', 'LR', 'RL']);
 
-/** Common chart dimension/vibe fields shared by every render tool. */
+export const EdgeRoutingSchema = z.enum(['curved', 'orthogonal']);
+
+export const ColorScaleNameSchema = z.enum([
+  'viridis',
+  'magma',
+  'inferno',
+  'blues',
+  'greens',
+  'oranges',
+  'rdbu',
+  'rdylgn',
+  'spectral',
+]);
+
+export const MultiSeriesDatumSchema = z.object({
+  label: z.string(),
+  values: z.record(z.number()),
+});
+
+export const BarModeSchema = z.enum(['single', 'grouped', 'stacked']);
+
+export const SankeyNodeSchema = z.object({
+  id: z.string(),
+  label: z.string().optional(),
+  color: z.string().optional(),
+});
+
+export const SankeyLinkSchema = z.object({
+  source: z.string(),
+  target: z.string(),
+  value: z.number(),
+});
+
+export const TreemapDatumSchema = z.object({
+  id: z.string(),
+  parent: z.string().optional(),
+  value: z.number().optional(),
+  label: z.string().optional(),
+  color: z.string().optional(),
+});
+
+export const HeatmapDatumSchema = z.object({
+  x: z.union([z.string(), z.number()]),
+  y: z.union([z.string(), z.number()]),
+  value: z.number(),
+});
+
+export const RadarSeriesSchema = z.object({
+  id: z.string(),
+  values: z.array(z.number()),
+  color: z.string().optional(),
+});
+
+/** Reference-line/band/callout/circle overlays for cartesian charts. */
+export const AnnotationSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('x-line'), value: z.number(), label: z.string().optional(), color: z.string().optional() }),
+  z.object({ kind: z.literal('y-line'), value: z.number(), label: z.string().optional(), color: z.string().optional() }),
+  z.object({
+    kind: z.literal('x-band'),
+    from: z.number(),
+    to: z.number(),
+    label: z.string().optional(),
+    color: z.string().optional(),
+  }),
+  z.object({
+    kind: z.literal('y-band'),
+    from: z.number(),
+    to: z.number(),
+    label: z.string().optional(),
+    color: z.string().optional(),
+  }),
+  z.object({
+    kind: z.literal('point-callout'),
+    x: z.number(),
+    y: z.number(),
+    text: z.string(),
+    dx: z.number().optional(),
+    dy: z.number().optional(),
+    color: z.string().optional(),
+  }),
+  z.object({
+    kind: z.literal('circle'),
+    x: z.number(),
+    y: z.number(),
+    r: z.number(),
+    label: z.string().optional(),
+    color: z.string().optional(),
+  }),
+]);
+
+/** Common chart dimension/vibe/a11y fields shared by every render tool. */
 export const baseChartShape = {
   width: z.number().positive(),
   height: z.number().positive(),
   margin: MarginSchema.optional(),
   vibe: VibeConfigSchema.optional(),
   title: z.string().optional(),
+  description: z.string().optional(),
+  ariaLabel: z.string().optional(),
+  dataTable: z.boolean().optional(),
 };
 
 /** Standard structured output for every render tool. */

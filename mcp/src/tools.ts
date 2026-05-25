@@ -1,5 +1,16 @@
 import { z } from 'zod';
-import { AreaChart, BarChart, Flowchart, LineChart, PieChart, ScatterPlot } from 'goldenchart';
+import {
+  AreaChart,
+  BarChart,
+  Flowchart,
+  HeatmapChart,
+  LineChart,
+  PieChart,
+  RadarChart,
+  SankeyChart,
+  ScatterPlot,
+  TreemapChart,
+} from 'goldenchart';
 import { makeRenderTool } from './registry';
 import type { ToolDef } from './registry';
 import { vibeTools } from './vibeTools';
@@ -8,19 +19,33 @@ import { primitiveTools } from './primitiveTools';
 import { orchestrationTools } from './orchestrationTools';
 import { exportTools } from './exportTools';
 import {
+  AnnotationSchema,
   baseChartShape,
+  BarModeSchema,
   ChartDatumSchema,
+  ColorScaleNameSchema,
   CurveSchema,
+  EdgeRoutingSchema,
   FlowDirectionSchema,
   FlowEdgeSchema,
   FlowNodeSchema,
+  HeatmapDatumSchema,
+  MultiSeriesDatumSchema,
+  RadarSeriesSchema,
+  SankeyLinkSchema,
+  SankeyNodeSchema,
   ScatterDatumSchema,
   SeriesSchema,
+  TreemapDatumSchema,
 } from './schemas';
 
 const axesShape = {
   showAxes: z.boolean().optional(),
   showGrid: z.boolean().optional(),
+};
+
+const annotationsShape = {
+  annotations: z.array(AnnotationSchema).optional(),
 };
 
 /**
@@ -38,7 +63,11 @@ export const chartTools: ToolDef[] = [
     inputShape: {
       ...baseChartShape,
       ...axesShape,
-      data: z.array(ChartDatumSchema).min(1),
+      ...annotationsShape,
+      data: z.union([z.array(ChartDatumSchema).min(1), z.array(MultiSeriesDatumSchema).min(1)]),
+      mode: BarModeSchema.optional(),
+      seriesKeys: z.array(z.string()).optional(),
+      showLegend: z.boolean().optional(),
     },
   }),
   makeRenderTool({
@@ -50,6 +79,7 @@ export const chartTools: ToolDef[] = [
     inputShape: {
       ...baseChartShape,
       ...axesShape,
+      ...annotationsShape,
       series: z.array(SeriesSchema).min(1),
       curve: CurveSchema.optional(),
       showPoints: z.boolean().optional(),
@@ -64,10 +94,12 @@ export const chartTools: ToolDef[] = [
     inputShape: {
       ...baseChartShape,
       ...axesShape,
+      ...annotationsShape,
       series: z.array(SeriesSchema).min(1),
       curve: CurveSchema.optional(),
       baseline: z.number().optional(),
       showLine: z.boolean().optional(),
+      stacked: z.boolean().optional(),
     },
   }),
   makeRenderTool({
@@ -79,6 +111,7 @@ export const chartTools: ToolDef[] = [
     inputShape: {
       ...baseChartShape,
       ...axesShape,
+      ...annotationsShape,
       data: z.array(ScatterDatumSchema).min(1),
       radius: z.number().optional(),
       maxRadius: z.number().optional(),
@@ -102,7 +135,7 @@ export const chartTools: ToolDef[] = [
     name: 'render_flowchart',
     title: 'Render Flowchart',
     description:
-      'Render a hand-drawn flowchart (tree layout, four directions, rect/ellipse/diamond nodes) as a standalone SVG.',
+      'Render a hand-drawn flowchart (tree layout, four directions, rect/ellipse/diamond nodes, curved or orthogonal edges) as a standalone SVG.',
     kind: 'flow',
     component: Flowchart,
     inputShape: {
@@ -110,7 +143,74 @@ export const chartTools: ToolDef[] = [
       nodes: z.array(FlowNodeSchema).min(1),
       edges: z.array(FlowEdgeSchema).optional(),
       direction: FlowDirectionSchema.optional(),
+      routing: EdgeRoutingSchema.optional(),
       showArrowheads: z.boolean().optional(),
+    },
+  }),
+];
+
+/** Charts added beyond the original six; kept separate so the M1 catalog/tests stay stable. */
+export const extraChartTools: ToolDef[] = [
+  makeRenderTool({
+    name: 'render_sankey',
+    title: 'Render Sankey Diagram',
+    description: 'Render a hand-drawn weighted flow (Sankey) diagram as a standalone SVG.',
+    kind: 'sankey',
+    component: SankeyChart,
+    inputShape: {
+      ...baseChartShape,
+      nodes: z.array(SankeyNodeSchema).min(1),
+      links: z.array(SankeyLinkSchema),
+      direction: z.enum(['LR', 'TB']).optional(),
+      nodeWidth: z.number().optional(),
+      nodePadding: z.number().optional(),
+      showValues: z.boolean().optional(),
+    },
+  }),
+  makeRenderTool({
+    name: 'render_treemap',
+    title: 'Render Treemap',
+    description: 'Render a hand-drawn treemap (nested rectangles sized by value) as a standalone SVG.',
+    kind: 'treemap',
+    component: TreemapChart,
+    inputShape: {
+      ...baseChartShape,
+      data: z.array(TreemapDatumSchema).min(1),
+      padding: z.number().optional(),
+      tile: z.enum(['squarify', 'binary', 'slice', 'dice']).optional(),
+      showLabels: z.boolean().optional(),
+    },
+  }),
+  makeRenderTool({
+    name: 'render_heatmap',
+    title: 'Render Heatmap',
+    description: 'Render a hand-drawn heatmap (grid of cells on a sequential color scale) as a standalone SVG.',
+    kind: 'heatmap',
+    component: HeatmapChart,
+    inputShape: {
+      ...baseChartShape,
+      data: z.array(HeatmapDatumSchema).min(1),
+      xLabels: z.array(z.union([z.string(), z.number()])).optional(),
+      yLabels: z.array(z.union([z.string(), z.number()])).optional(),
+      colorScale: ColorScaleNameSchema.optional(),
+      showValues: z.boolean().optional(),
+      showAxes: z.boolean().optional(),
+    },
+  }),
+  makeRenderTool({
+    name: 'render_radar',
+    title: 'Render Radar Chart',
+    description: 'Render a hand-drawn radar / spider chart (polar multi-axis) as a standalone SVG.',
+    kind: 'radar',
+    component: RadarChart,
+    inputShape: {
+      ...baseChartShape,
+      axes: z.array(z.string()).min(3),
+      series: z.array(RadarSeriesSchema).min(1),
+      maxValue: z.number().optional(),
+      levels: z.number().int().positive().optional(),
+      showDots: z.boolean().optional(),
+      showLabels: z.boolean().optional(),
     },
   }),
 ];
@@ -118,6 +218,7 @@ export const chartTools: ToolDef[] = [
 /** The full catalog the server registers across every level. */
 export const tools: ToolDef[] = [
   ...chartTools,
+  ...extraChartTools,
   ...vibeTools,
   ...calcTools,
   ...primitiveTools,

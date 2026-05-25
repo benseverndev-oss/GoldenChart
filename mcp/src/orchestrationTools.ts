@@ -10,12 +10,13 @@ import {
   PieChart,
   Flowchart,
 } from 'goldenchart';
-import type { FlowEdge, FlowNode, FlowNodeShape, VibeConfig } from 'goldenchart';
+import type { EdgeRouting, FlowEdge, FlowNode, FlowNodeShape, VibeConfig } from 'goldenchart';
 import { renderToSVGString } from 'goldenchart/server';
 import type { ToolDef } from './registry';
 import { primitiveToElement } from './primitives';
 import type { PrimitiveSpec, SceneNode } from './schemas';
 import {
+  EdgeRoutingSchema,
   FlowDirectionSchema,
   FlowEdgeSchema,
   FlowNodeSchema,
@@ -49,9 +50,9 @@ function sceneNodeToElement(node: SceneNode, key: number, sceneVibe: VibeConfig 
   return primitiveToElement(node as PrimitiveSpec, key);
 }
 
-/** Pick a node shape from light structural heuristics. */
-function pickShape(node: FlowNode, outDegree: number): FlowNodeShape {
-  if (!node.parent) return 'ellipse'; // root / entry
+/** Pick a node shape from light structural heuristics (in/out degree). */
+function pickShape(node: FlowNode, inDegree: number, outDegree: number): FlowNodeShape {
+  if (inDegree === 0) return 'ellipse'; // root / entry
   if (outDegree === 0) return 'ellipse'; // terminal
   if (node.label.trim().endsWith('?') || outDegree > 1) return 'diamond'; // decision / branch
   return 'rect';
@@ -95,6 +96,7 @@ export const orchestrationTools: ToolDef[] = [
         nodes: z.array(FlowNodeSchema).min(1),
         edges: z.array(FlowEdgeSchema).optional(),
         direction: FlowDirectionSchema.optional(),
+        routing: EdgeRoutingSchema.optional(),
         autoShape: z.boolean().optional(),
         width: z.number().positive(),
         height: z.number().positive(),
@@ -104,15 +106,27 @@ export const orchestrationTools: ToolDef[] = [
     },
     handler: async (args) => {
       const nodes = args.nodes as FlowNode[];
+      const explicitEdges = args.edges as FlowEdge[] | undefined;
       const autoShape = (args.autoShape as boolean | undefined) ?? true;
 
+      // Degree counts drive the shape heuristic. Prefer explicit edges (which
+      // can express merges/DAGs); fall back to the `parent` tree links.
+      const degreeEdges: FlowEdge[] =
+        explicitEdges && explicitEdges.length > 0
+          ? explicitEdges
+          : nodes.filter((n) => n.parent != null).map((n) => ({ from: n.parent as string, to: n.id }));
+      const inDegree = new Map<string, number>();
       const outDegree = new Map<string, number>();
-      for (const node of nodes) {
-        if (node.parent) outDegree.set(node.parent, (outDegree.get(node.parent) ?? 0) + 1);
+      for (const edge of degreeEdges) {
+        outDegree.set(edge.from, (outDegree.get(edge.from) ?? 0) + 1);
+        inDegree.set(edge.to, (inDegree.get(edge.to) ?? 0) + 1);
       }
 
       const shaped = autoShape
-        ? nodes.map((node) => ({ ...node, shape: node.shape ?? pickShape(node, outDegree.get(node.id) ?? 0) }))
+        ? nodes.map((node) => ({
+            ...node,
+            shape: node.shape ?? pickShape(node, inDegree.get(node.id) ?? 0, outDegree.get(node.id) ?? 0),
+          }))
         : nodes;
 
       const width = args.width as number;
@@ -123,8 +137,9 @@ export const orchestrationTools: ToolDef[] = [
           height,
           vibe: args.vibe as VibeConfig | undefined,
           nodes: shaped,
-          edges: args.edges as FlowEdge[] | undefined,
+          edges: explicitEdges,
           direction: (args.direction as 'TB' | 'BT' | 'LR' | 'RL' | undefined) ?? 'TB',
+          routing: (args.routing as EdgeRouting | undefined) ?? 'curved',
           bare: true,
         }),
       );

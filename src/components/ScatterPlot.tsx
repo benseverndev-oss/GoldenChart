@@ -5,6 +5,8 @@ import { getPlotArea } from '../core/geometry';
 import { Surface } from './Surface';
 import { Axis } from './Axis';
 import { Grid } from './Grid';
+import { Annotations } from './Annotations';
+import type { Annotation } from './Annotations';
 import { RoughCircle } from '../primitives/RoughCircle';
 import { useVibeContext } from '../vibe/VibeProvider';
 
@@ -25,6 +27,7 @@ export interface ScatterPlotProps extends BaseChartProps {
   maxRadius?: number;
   showAxes?: boolean;
   showGrid?: boolean;
+  annotations?: Annotation[];
 }
 
 /** Scatter / bubble chart: each datum maps to a sketchy `<RoughCircle>`. */
@@ -38,10 +41,14 @@ export function ScatterPlot({
   className,
   style,
   bare,
+  description,
+  ariaLabel,
+  dataTable,
   radius = 5,
   maxRadius = 18,
   showAxes = true,
   showGrid = true,
+  annotations,
 }: ScatterPlotProps) {
   const plot = getPlotArea(width, height, margin);
 
@@ -62,11 +69,27 @@ export function ScatterPlot({
   }, [data, radius, maxRadius, plot.x, plot.y, plot.width, plot.height]);
 
   return (
-    <Surface width={width} height={height} vibe={vibe} title={title} className={className} style={style} bare={bare}>
+    <Surface
+      width={width}
+      height={height}
+      vibe={vibe}
+      title={title}
+      description={description}
+      ariaLabel={ariaLabel}
+      dataTable={
+        dataTable
+          ? { caption: title, columns: ['X', 'Y'], rows: data.map((d) => [d.x, d.y] as (string | number)[]) }
+          : undefined
+      }
+      className={className}
+      style={style}
+      bare={bare}
+    >
       {showGrid && <Grid plot={plot} xScale={x} yScale={y} />}
       {points.map((p, i) => (
         <ScatterDot key={i} point={p} index={i} />
       ))}
+      {annotations && <Annotations annotations={annotations} plot={plot} xScale={x} yScale={y} />}
       {showAxes && (
         <>
           <Axis scale={x} orientation="bottom" plot={plot} />
