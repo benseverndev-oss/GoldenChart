@@ -12,3 +12,6 @@ export * from './palette';
 export * from './colorScales';
 export * from './text';
 export * from './dataTable';
+export * from './profile';
+export * from './recommend';
+export * from './compile';

@@ -11,6 +11,7 @@ import {
   colorRamp,
   divergingColor,
   sequentialColor,
+  profileData,
 } from 'goldenchart';
 import type { ChartDatum, ColorScaleName, FlowDirection, FlowEdge, FlowNode } from 'goldenchart';
 import type { ToolDef } from './registry';
@@ -207,6 +208,27 @@ export const calcTools: ToolDef[] = [
       const valueColor = args.value !== undefined ? color(args.value as number) : undefined;
       const payload = { ramp, valueColor };
       return { content: [{ type: 'text', text: JSON.stringify(payload, null, 2) }], structuredContent: payload };
+    },
+  },
+  {
+    name: 'profile_data',
+    config: {
+      title: 'Profile Data',
+      description:
+        'Inspect an array of records and report field types/cardinality and the overall data shape (feeds chart recommendation).',
+      inputSchema: { data: z.array(z.record(z.unknown())).min(1) },
+      outputSchema: {
+        rowCount: z.number(),
+        shape: z.string(),
+        fields: z.array(z.record(z.unknown())),
+      },
+    },
+    handler: async (args) => {
+      const profile = profileData(args.data as Record<string, unknown>[]);
+      return {
+        content: [{ type: 'text', text: JSON.stringify(profile, null, 2) }],
+        structuredContent: profile as unknown as Record<string, unknown>,
+      };
     },
   },
 ];
