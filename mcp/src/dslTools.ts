@@ -1,4 +1,5 @@
-import { renderDiagram } from 'goldenchart';
+import { z } from 'zod';
+import { MermaidParseError, parseMermaid, renderDiagram } from 'goldenchart';
 import type { DiagramSpec, VibeConfig } from 'goldenchart';
 import { renderToSVGString } from 'goldenchart/server';
 import type { ToolDef } from './registry';
@@ -30,6 +31,31 @@ export const dslTools: ToolDef[] = [
     },
     handler: async (args) => {
       const spec = args.spec as DiagramSpec;
+      const svg = render(spec, args);
+      return {
+        content: [{ type: 'text', text: svg }],
+        structuredContent: { svg, meta: { kind: spec.kind, width: args.width as number, height: args.height as number } },
+      };
+    },
+  },
+  {
+    name: 'build_diagram_from_mermaid',
+    config: {
+      title: 'Build Diagram From Mermaid',
+      description:
+        'Parse a Mermaid snippet (flowchart/graph, sequenceDiagram, mindmap) and render it hand-drawn. Unsupported Mermaid features return a structured error rather than a crash.',
+      inputSchema: { ...baseChartShape, source: z.string().min(1) },
+      outputSchema: renderOutputShape,
+    },
+    handler: async (args) => {
+      let spec: DiagramSpec;
+      try {
+        spec = parseMermaid(args.source as string);
+      } catch (err) {
+        const message =
+          err instanceof MermaidParseError ? err.message : `Could not parse Mermaid: ${(err as Error).message}`;
+        return { content: [{ type: 'text', text: message }], isError: true };
+      }
       const svg = render(spec, args);
       return {
         content: [{ type: 'text', text: svg }],

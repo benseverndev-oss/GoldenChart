@@ -52,3 +52,45 @@ describe('render_diagram (diagram DSL tool)', () => {
     expect(parsed.success).toBe(false);
   });
 });
+
+const mermaidTool = dslTools.find((t) => t.name === 'build_diagram_from_mermaid')!;
+
+describe('build_diagram_from_mermaid', () => {
+  it('is registered', () => {
+    expect(mermaidTool).toBeDefined();
+  });
+
+  it('renders a Mermaid flowchart snippet', async () => {
+    const result = await mermaidTool.handler({
+      width: 360,
+      height: 280,
+      vibe: 'clean_blueprint',
+      source: 'flowchart TD\n  A[Start] --> B{OK?}\n  B -->|yes| C((Done))',
+    });
+    expect(result.isError).toBeFalsy();
+    expect(result.content[0].text.startsWith('<svg')).toBe(true);
+    expect(result.content[0].text).toContain('Start');
+    expect(result.structuredContent?.meta).toMatchObject({ kind: 'flowchart' });
+  });
+
+  it('renders a Mermaid sequenceDiagram snippet', async () => {
+    const result = await mermaidTool.handler({
+      width: 400,
+      height: 300,
+      source: 'sequenceDiagram\n  U->>S: request\n  S-->>U: response',
+    });
+    expect(result.isError).toBeFalsy();
+    expect(result.content[0].text).toContain('request');
+    expect(result.structuredContent?.meta).toMatchObject({ kind: 'sequence' });
+  });
+
+  it('returns a structured error (not a crash) for unsupported Mermaid', async () => {
+    const result = await mermaidTool.handler({
+      width: 300,
+      height: 200,
+      source: 'gantt\n  title Roadmap',
+    });
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toMatch(/Unrecognized Mermaid diagram type/);
+  });
+});

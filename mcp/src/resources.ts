@@ -35,6 +35,34 @@ This MCP server surfaces a tool at every level: vibe (list/resolve/preview),
 calculation (compute_*), primitives (render_rough_*), charts (render_*),
 and orchestration/export (compose_surface, build_flowchart_from_spec, export_*).`;
 
+const DIAGRAM_SPEC_DOC = `# GoldenChart diagram spec
+
+\`render_diagram\` takes one high-level spec \`{ kind, ... }\` and dispatches to the
+matching hand-drawn diagram. \`build_diagram_from_mermaid\` parses a Mermaid
+snippet into the same spec.
+
+## Kinds and their fields
+- **flowchart** — \`nodes: { id, label, parent?, shape?: rect|ellipse|diamond }[]\`,
+  \`edges?: { from, to, label? }[]\`, \`direction?: TB|BT|LR|RL\`, \`routing?: curved|orthogonal\`.
+- **org** — same shape as flowchart (boxes + elbow connectors); \`direction?\`.
+- **mindmap** — \`nodes\` (a single-root tree via \`parent\`), \`edges?\`.
+- **arch** — \`nodes\` with optional \`group\` (zone container), \`edges?\`, \`direction?\`;
+  connectors route orthogonally around boxes.
+- **sequence** — \`actors: { id, label? }[]\`, \`messages: { from, to, label?, kind?: sync|async|reply }[]\`.
+- **er** — \`entities: { id, label?, fields?: { name, type?, key?: PK|FK }[] }[]\`,
+  \`relationships?: { from, to, label?, fromCardinality?, toCardinality? }[]\`, \`direction?\`.
+- **timeline** — \`events: { label, date?, detail? }[]\`, \`orientation?: horizontal|vertical\`.
+
+All kinds also take the base chart props (\`width\`, \`height\`, \`vibe\`, \`title\`, …).
+
+## Mermaid subset (build_diagram_from_mermaid)
+Supported headers: \`flowchart\`/\`graph\` (directions TB/TD/BT/LR/RL; node shapes
+\`[rect]\`, \`(round)\`, \`([stadium])\`, \`((circle))\`, \`{diamond}\`; edges \`-->\`, \`---\`,
+labels via \`-->|text|\` or \`-- text -->\`), \`sequenceDiagram\` (\`participant X as Name\`,
+messages \`A->>B: text\`, dashed \`A-->>B: text\`), and \`mindmap\` (indentation-nested
+nodes). Unsupported headers (e.g. \`erDiagram\`, \`gantt\`) and constructs (notes,
+loops, activations) return a structured error.`;
+
 /** Register the read-only resources: vibe presets, per-chart schemas, docs. */
 export function registerResources(server: McpServer): void {
   server.registerResource(
@@ -102,5 +130,16 @@ export function registerResources(server: McpServer): void {
       mimeType: 'text/markdown',
     },
     async (uri) => ({ contents: [{ uri: uri.href, mimeType: 'text/markdown', text: ARCHITECTURE_DOC }] }),
+  );
+
+  server.registerResource(
+    'diagram-spec',
+    'docs://diagram-spec',
+    {
+      title: 'GoldenChart diagram spec',
+      description: 'The render_diagram spec union and the supported Mermaid subset.',
+      mimeType: 'text/markdown',
+    },
+    async (uri) => ({ contents: [{ uri: uri.href, mimeType: 'text/markdown', text: DIAGRAM_SPEC_DOC }] }),
   );
 }
