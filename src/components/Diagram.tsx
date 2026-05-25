@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import type { BaseChartProps, EdgeRouting, FlowEdge, FlowNode } from '../types/charts';
 import { getPlotArea } from '../core/geometry';
+import { sceneBounds } from '../core/diagram';
 import type { DiagramOrientation, LaidGroup, LaidOutEdge, LaidOutNode, LayoutEngine } from '../core/diagram';
 import { arrowHeadPath, diamondPath, ellipsePath, linkPath, orthogonalPath, orthogonalPoints } from '../core/shapes';
 import { Surface } from './Surface';
@@ -47,6 +48,13 @@ export function Diagram({
     [layout, nodes, edges, plot.width, plot.height],
   );
 
+  // Fit the viewBox to the laid-out content so it scales uniformly into the
+  // canvas — never clips, regardless of how large the layout grew.
+  const viewBox = useMemo(() => {
+    const b = sceneBounds(scene);
+    return `${b.x} ${b.y} ${b.width} ${b.height}`;
+  }, [scene]);
+
   return (
     <Surface
       width={width}
@@ -58,8 +66,9 @@ export function Diagram({
       className={className}
       style={style}
       bare={bare}
+      viewBox={viewBox}
     >
-      <g transform={`translate(${plot.x}, ${plot.y})`}>
+      <g>
         {scene.groups?.map((g) => <DiagramGroup key={g.id} group={g} />)}
         {scene.edges.map((e) => (
           <DiagramEdge

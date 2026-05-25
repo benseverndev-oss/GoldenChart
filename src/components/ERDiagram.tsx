@@ -42,6 +42,29 @@ export function ERDiagram({
     [entities, relationships, plot.width, plot.height, direction],
   );
 
+  // Fit the viewBox to the entity boxes + routed relationships so the diagram
+  // scales into the canvas without clipping, however wide the layout grew.
+  const viewBox = useMemo(() => {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    const add = (x: number, y: number): void => {
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+    };
+    for (const e of layout.entities) {
+      add(e.x - e.width / 2, e.y - e.height / 2);
+      add(e.x + e.width / 2, e.y + e.height / 2);
+    }
+    for (const r of layout.relationships) for (const p of r.points) add(p.x, p.y);
+    if (!Number.isFinite(minX)) return `0 0 ${width} ${height}`;
+    const pad = 16;
+    return `${minX - pad} ${minY - pad} ${maxX - minX + 2 * pad} ${maxY - minY + 2 * pad}`;
+  }, [layout, width, height]);
+
   return (
     <Surface
       width={width}
@@ -53,8 +76,9 @@ export function ERDiagram({
       className={className}
       style={style}
       bare={bare}
+      viewBox={viewBox}
     >
-      <g transform={`translate(${plot.x}, ${plot.y})`}>
+      <g>
         {layout.relationships.map((r, i) => {
           const pts = r.points;
           const d = `M${pts[0].x},${pts[0].y} ` + pts.slice(1).map((p) => `L${p.x},${p.y}`).join(' ');

@@ -36,4 +36,12 @@ describe('layoutTree', () => {
     const { nodes: laid } = layoutTree(nodes, [200, 100]);
     expect(laid.every((n) => n.shape === 'rect')).toBe(true);
   });
+
+  it('separates sibling boxes by at least their width (no abutting)', () => {
+    // A small canvas that would otherwise cram the siblings together.
+    const { nodes: laid } = layoutTree(nodes, [200, 120], undefined, 'TB');
+    const a = laid.find((n) => n.id === 'a')!;
+    const b = laid.find((n) => n.id === 'b')!;
+    expect(Math.abs(a.x - b.x)).toBeGreaterThanOrEqual(a.width);
+  });
 });

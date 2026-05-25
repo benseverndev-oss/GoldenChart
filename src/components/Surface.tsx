@@ -21,6 +21,8 @@ export interface SurfaceProps {
   className?: string;
   /** Tailwind classes applied to the inner `<svg>`. */
   svgClassName?: string;
+  /** Override the SVG `viewBox` (e.g. fit-to-content); defaults to `0 0 w h`. */
+  viewBox?: string;
   style?: CSSProperties;
   children?: ReactNode;
   /**
@@ -71,6 +73,7 @@ export function Surface({
   dataTable,
   className = 'inline-block max-w-full overflow-visible',
   svgClassName = 'block h-auto w-full',
+  viewBox,
   style,
   children,
   bare = false,
@@ -84,7 +87,7 @@ export function Surface({
   const svg = (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox={`0 0 ${width} ${height}`}
+      viewBox={viewBox ?? `0 0 ${width} ${height}`}
       width={width}
       height={height}
       className={bare ? undefined : svgClassName}

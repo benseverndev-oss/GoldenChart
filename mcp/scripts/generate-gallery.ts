@@ -249,8 +249,8 @@ const entries: Entry[] = [
   {
     name: 'er-diagram',
     el: el(ERDiagram, {
-      width: 860,
-      height: 320,
+      width: 820,
+      height: 240,
       vibe: BLUEPRINT,
       entities: [
         { id: 'user', label: 'User', fields: [{ name: 'id', type: 'uuid', key: 'PK' }, { name: 'email', type: 'text' }] },

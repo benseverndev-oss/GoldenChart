@@ -86,13 +86,8 @@ export function layoutDag(
 
   const [width, height] = size;
   const horizontal = isHorizontal(direction);
-  // Inset by half the largest node so extreme layers/slots don't clip the edge.
   const maxW = Math.max(DEFAULT_NODE_W, ...nodes.map((n) => n.width ?? DEFAULT_NODE_W));
   const maxH = Math.max(DEFAULT_NODE_H, ...nodes.map((n) => n.height ?? DEFAULT_NODE_H));
-  const innerW = Math.max(1, width - maxW);
-  const innerH = Math.max(1, height - maxH);
-  const ox = maxW / 2;
-  const oy = maxH / 2;
   const ids = new Set(nodes.map((n) => n.id));
   const links = edges.filter((e) => ids.has(e.from) && ids.has(e.to) && e.from !== e.to);
 
@@ -107,6 +102,16 @@ export function layoutDag(
   const maxLayer = Math.max(...nodes.map((n) => layer.get(n.id)!));
   const byLayer: string[][] = Array.from({ length: maxLayer + 1 }, () => []);
   for (const n of nodes) byLayer[layer.get(n.id)!].push(n.id);
+
+  // Size each axis by node extent so the densest layer's slots can't abut; the
+  // Diagram fits the resulting extent into the canvas.
+  const SIBLING_GAP = 28;
+  const LAYER_GAP = 44;
+  const maxSlots = Math.max(1, ...byLayer.map((l) => l.length));
+  const breadthNode = horizontal ? maxH : maxW;
+  const depthNode = horizontal ? maxW : maxH;
+  const breadthExtent = Math.max(horizontal ? height : width, (maxSlots + 1) * (breadthNode + SIBLING_GAP));
+  const depthExtent = Math.max(horizontal ? width : height, Math.max(1, maxLayer) * (depthNode + LAYER_GAP));
 
   // Crossing reduction: alternate down/up median sweeps. A node moves to the
   // median position of its already-ordered neighbours in the adjacent layer.
@@ -146,22 +151,22 @@ export function layoutDag(
     const l = layer.get(n.id)!;
     const slots = byLayer[l];
     const breadthFrac = (slots.indexOf(n.id) + 1) / (slots.length + 1);
-    const depthPx = (horizontal ? innerW : innerH) * depthFrac(l);
-    const breadthPx = (horizontal ? innerH : innerW) * breadthFrac;
+    const depthPx = depthExtent * depthFrac(l);
+    const breadthPx = breadthExtent * breadthFrac;
 
     let x: number;
     let y: number;
     switch (direction) {
       case 'BT':
         x = breadthPx;
-        y = innerH - depthPx;
+        y = depthExtent - depthPx;
         break;
       case 'LR':
         x = depthPx;
         y = breadthPx;
         break;
       case 'RL':
-        x = innerW - depthPx;
+        x = depthExtent - depthPx;
         y = breadthPx;
         break;
       case 'TB':
@@ -170,8 +175,6 @@ export function layoutDag(
         y = depthPx;
         break;
     }
-    x += ox;
-    y += oy;
 
     const node: LaidOutNode = {
       id: n.id,

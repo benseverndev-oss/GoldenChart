@@ -59,6 +59,23 @@ describe('layoutDag', () => {
     expect(laidEdges).toHaveLength(2);
   });
 
+  it('separates same-layer slots by at least their width (no abutting)', () => {
+    const nodes: FlowNode[] = [
+      { id: 'a', label: 'A' },
+      { id: 'b', label: 'B' },
+      { id: 'c', label: 'C' },
+    ];
+    const edges: FlowEdge[] = [
+      { from: 'a', to: 'c' },
+      { from: 'b', to: 'c' },
+    ];
+    // Tiny canvas: a and b share layer 0 and must not overlap.
+    const { nodes: laid } = layoutDag(nodes, [200, 200], edges, 'TB');
+    const a = laid.find((n) => n.id === 'a')!;
+    const b = laid.find((n) => n.id === 'b')!;
+    expect(Math.abs(a.x - b.x)).toBeGreaterThanOrEqual(a.width);
+  });
+
   it('ignores self-loops and edges to unknown nodes', () => {
     const nodes: FlowNode[] = [
       { id: 'a', label: 'A' },

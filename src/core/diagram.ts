@@ -40,6 +40,40 @@ export function flowLayout(direction: FlowDirection = 'TB'): LayoutEngine {
 }
 
 /**
+ * Tight bounding box of everything a scene draws — node boxes, group containers
+ * and edge waypoints — expanded by `pad`. Used to fit the SVG `viewBox` to the
+ * content so the diagram scales uniformly into the canvas without clipping,
+ * whatever the layout produced.
+ */
+export function sceneBounds(scene: DiagramScene, pad = 16): { x: number; y: number; width: number; height: number } {
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  const add = (x: number, y: number): void => {
+    if (x < minX) minX = x;
+    if (y < minY) minY = y;
+    if (x > maxX) maxX = x;
+    if (y > maxY) maxY = y;
+  };
+  for (const n of scene.nodes) {
+    add(n.x - n.width / 2, n.y - n.height / 2);
+    add(n.x + n.width / 2, n.y + n.height / 2);
+  }
+  for (const g of scene.groups ?? []) {
+    add(g.x, g.y);
+    add(g.x + g.width, g.y + g.height);
+  }
+  for (const e of scene.edges) {
+    add(e.sx, e.sy);
+    add(e.tx, e.ty);
+    for (const p of e.points ?? []) add(p.x, p.y);
+  }
+  if (!Number.isFinite(minX)) return { x: 0, y: 0, width: 1, height: 1 };
+  return { x: minX - pad, y: minY - pad, width: maxX - minX + 2 * pad, height: maxY - minY + 2 * pad };
+}
+
+/**
  * Bounding boxes for node groups, keyed off each node's `group` field. Used by
  * diagram types that draw subgraph/lane containers (e.g. architecture diagrams).
  */

@@ -97,32 +97,36 @@ export function layoutTree(
     .id((n) => n.id)
     .parentId((n) => n.parent)(nodes);
 
-  // Inset the usable area by half the largest node so the extreme nodes' boxes
-  // sit fully inside the plot rather than straddling its edge.
+  // Size the axes by node extent rather than forcing the data into the canvas:
+  // the breadth axis gives every sibling a slot at least its own size + a gap
+  // (so boxes never abut), and the depth axis spaces the generations. The
+  // Diagram then fits this (possibly larger) extent into the canvas.
   const maxW = Math.max(DEFAULT_NODE_W, ...nodes.map((n) => n.width ?? DEFAULT_NODE_W));
   const maxH = Math.max(DEFAULT_NODE_H, ...nodes.map((n) => n.height ?? DEFAULT_NODE_H));
-  const innerW = Math.max(1, width - maxW);
-  const innerH = Math.max(1, height - maxH);
-  const ox = maxW / 2;
-  const oy = maxH / 2;
+  const SIBLING_GAP = 28;
+  const LAYER_GAP = 44;
+  const breadthNode = horizontal ? maxH : maxW;
+  const depthNode = horizontal ? maxW : maxH;
+  const breadthExtent = Math.max(horizontal ? height : width, root.leaves().length * (breadthNode + SIBLING_GAP));
+  const depthExtent = Math.max(horizontal ? width : height, Math.max(1, root.height) * (depthNode + LAYER_GAP));
 
-  // For horizontal layouts, depth runs along x, so the tree's own size is swapped.
+  // d3's first coord is the breadth (across siblings), the second is the depth.
   const layout = tree<FlowNode>()
-    .size(horizontal ? [innerH, innerW] : [innerW, innerH])
+    .size([breadthExtent, depthExtent])
     .separation((a, b) => (a.parent === b.parent ? 1 : 1.4));
   const positioned = layout(root);
 
-  const place = (dx: number, dy: number): { x: number; y: number } => {
+  const place = (breadthPos: number, depthPos: number): { x: number; y: number } => {
     switch (direction) {
       case 'BT':
-        return { x: dx, y: innerH - dy };
+        return { x: breadthPos, y: depthExtent - depthPos };
       case 'LR':
-        return { x: dy, y: dx };
+        return { x: depthPos, y: breadthPos };
       case 'RL':
-        return { x: innerW - dy, y: dx };
+        return { x: depthExtent - depthPos, y: breadthPos };
       case 'TB':
       default:
-        return { x: dx, y: dy };
+        return { x: breadthPos, y: depthPos };
     }
   };
 
@@ -132,8 +136,8 @@ export function layoutTree(
     const node: LaidOutNode = {
       id: d.data.id,
       label: d.data.label,
-      x: x + ox,
-      y: y + oy,
+      x,
+      y,
       width: d.data.width ?? DEFAULT_NODE_W,
       height: d.data.height ?? DEFAULT_NODE_H,
       shape: d.data.shape ?? 'rect',
