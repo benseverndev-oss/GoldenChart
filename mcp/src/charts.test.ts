@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { tools } from './tools';
+import { chartTools as tools } from './tools';
 
 /** Minimal, fully-seeded sample input per tool so output is deterministic. */
 const SAMPLES: Record<string, Record<string, unknown>> = {

@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { AreaChart, BarChart, Flowchart, LineChart, PieChart, ScatterPlot } from 'goldenchart';
 import { makeRenderTool } from './registry';
 import type { ToolDef } from './registry';
+import { vibeTools } from './vibeTools';
 import {
   baseChartShape,
   ChartDatumSchema,
@@ -23,7 +24,7 @@ const axesShape = {
  * iterates this array to register tools and route calls. Adding a chart is one
  * entry here plus its input shape.
  */
-export const tools: ToolDef[] = [
+export const chartTools: ToolDef[] = [
   makeRenderTool({
     name: 'render_bar_chart',
     title: 'Render Bar Chart',
@@ -109,3 +110,6 @@ export const tools: ToolDef[] = [
     },
   }),
 ];
+
+/** The full catalog the server registers: charts + vibe tools. */
+export const tools: ToolDef[] = [...chartTools, ...vibeTools];
