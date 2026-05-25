@@ -86,6 +86,13 @@ export function layoutDag(
 
   const [width, height] = size;
   const horizontal = isHorizontal(direction);
+  // Inset by half the largest node so extreme layers/slots don't clip the edge.
+  const maxW = Math.max(DEFAULT_NODE_W, ...nodes.map((n) => n.width ?? DEFAULT_NODE_W));
+  const maxH = Math.max(DEFAULT_NODE_H, ...nodes.map((n) => n.height ?? DEFAULT_NODE_H));
+  const innerW = Math.max(1, width - maxW);
+  const innerH = Math.max(1, height - maxH);
+  const ox = maxW / 2;
+  const oy = maxH / 2;
   const ids = new Set(nodes.map((n) => n.id));
   const links = edges.filter((e) => ids.has(e.from) && ids.has(e.to) && e.from !== e.to);
 
@@ -139,22 +146,22 @@ export function layoutDag(
     const l = layer.get(n.id)!;
     const slots = byLayer[l];
     const breadthFrac = (slots.indexOf(n.id) + 1) / (slots.length + 1);
-    const depthPx = (horizontal ? width : height) * depthFrac(l);
-    const breadthPx = (horizontal ? height : width) * breadthFrac;
+    const depthPx = (horizontal ? innerW : innerH) * depthFrac(l);
+    const breadthPx = (horizontal ? innerH : innerW) * breadthFrac;
 
     let x: number;
     let y: number;
     switch (direction) {
       case 'BT':
         x = breadthPx;
-        y = height - depthPx;
+        y = innerH - depthPx;
         break;
       case 'LR':
         x = depthPx;
         y = breadthPx;
         break;
       case 'RL':
-        x = width - depthPx;
+        x = innerW - depthPx;
         y = breadthPx;
         break;
       case 'TB':
@@ -163,6 +170,8 @@ export function layoutDag(
         y = depthPx;
         break;
     }
+    x += ox;
+    y += oy;
 
     const node: LaidOutNode = {
       id: n.id,

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   COLOR_SCALE_NAMES,
   colorRamp,
+  contrastText,
   divergingColor,
   interpolateRamp,
   ordinalColor,
@@ -13,6 +14,13 @@ describe('color scales', () => {
     expect(interpolateRamp(['#000000', '#ffffff'], 0)).toBe('#000000');
     expect(interpolateRamp(['#000000', '#ffffff'], 1)).toBe('#ffffff');
     expect(interpolateRamp(['#000000', '#ffffff'], 0.5)).toBe('#808080');
+  });
+
+  it('picks a light label on dark fills and a dark label on light fills', () => {
+    expect(contrastText('#440154')).toBe('#f9fafb'); // dark viridis purple -> light text
+    expect(contrastText('#000000')).toBe('#f9fafb');
+    expect(contrastText('#fde725')).toBe('#1f2937'); // bright viridis yellow -> dark text
+    expect(contrastText('#ffffff')).toBe('#1f2937');
   });
 
   it('clamps out-of-range t', () => {

@@ -98,9 +98,8 @@ const entries: Entry[] = [
   {
     name: 'sankey',
     el: el(SankeyChart, {
-      width: 500,
+      width: 480,
       height: 300,
-      margin: { top: 20, right: 70, bottom: 20, left: 20 },
       vibe: SKETCH,
       showValues: true,
       nodes: [
@@ -163,9 +162,8 @@ const entries: Entry[] = [
   {
     name: 'flowchart',
     el: el(Flowchart, {
-      width: 540,
+      width: 480,
       height: 300,
-      margin: { top: 36, right: 76, bottom: 36, left: 76 },
       vibe: BLUEPRINT,
       direction: 'LR',
       nodes: [
@@ -208,29 +206,26 @@ const entries: Entry[] = [
   {
     name: 'mindmap',
     el: el(MindMap, {
-      width: 680,
+      width: 620,
       height: 560,
-      // Solid (opaque) node fill so the centre-to-centre spokes are masked by
-      // the boxes they pass under, rather than showing through hachure fill.
-      vibe: { preset: 'clean_blueprint', fillStyle: 'solid' },
+      vibe: BLUEPRINT,
       nodes: [
-        { id: 'root', label: 'Launch', width: 110, height: 44 },
-        { id: 'mkt', label: 'Marketing', parent: 'root', width: 104, height: 40 },
-        { id: 'eng', label: 'Engineering', parent: 'root', width: 104, height: 40 },
-        { id: 'ops', label: 'Ops', parent: 'root', width: 104, height: 40 },
-        { id: 'mkt1', label: 'Campaign', parent: 'mkt', width: 100, height: 38 },
-        { id: 'eng1', label: 'API', parent: 'eng', width: 100, height: 38 },
-        { id: 'eng2', label: 'Web app', parent: 'eng', width: 100, height: 38 },
-        { id: 'ops1', label: 'Support', parent: 'ops', width: 100, height: 38 },
+        { id: 'root', label: 'Launch' },
+        { id: 'mkt', label: 'Marketing', parent: 'root' },
+        { id: 'eng', label: 'Engineering', parent: 'root' },
+        { id: 'ops', label: 'Ops', parent: 'root' },
+        { id: 'mkt1', label: 'Campaign', parent: 'mkt' },
+        { id: 'eng1', label: 'API', parent: 'eng' },
+        { id: 'eng2', label: 'Web app', parent: 'eng' },
+        { id: 'ops1', label: 'Support', parent: 'ops' },
       ],
     }),
   },
   {
     name: 'architecture',
     el: el(ArchitectureDiagram, {
-      width: 540,
-      height: 440,
-      margin: { top: 64, right: 50, bottom: 64, left: 50 },
+      width: 620,
+      height: 420,
       vibe: BLUEPRINT,
       nodes: [
         { id: 'web', label: 'Web App', group: 'Frontend' },
@@ -254,9 +249,8 @@ const entries: Entry[] = [
   {
     name: 'er-diagram',
     el: el(ERDiagram, {
-      width: 880,
-      height: 340,
-      margin: { top: 56, right: 130, bottom: 56, left: 130 },
+      width: 860,
+      height: 320,
       vibe: BLUEPRINT,
       entities: [
         { id: 'user', label: 'User', fields: [{ name: 'id', type: 'uuid', key: 'PK' }, { name: 'email', type: 'text' }] },
@@ -276,14 +270,14 @@ const entries: Entry[] = [
   {
     name: 'timeline',
     el: el(Timeline, {
-      width: 560,
-      height: 240,
-      margin: { top: 24, right: 56, bottom: 24, left: 56 },
+      width: 580,
+      height: 300,
+      margin: { top: 24, right: 60, bottom: 24, left: 60 },
       vibe: BLUEPRINT,
       events: [
-        { date: '2021', label: 'Founded' },
+        { date: '2021', label: 'Founded', detail: 'Two people, one idea' },
         { date: '2022', label: 'Seed round' },
-        { date: '2023', label: 'Public launch' },
+        { date: '2023', label: 'Public launch', detail: 'First 10k users' },
         { date: '2024', label: 'Series A' },
         { date: '2025', label: 'Profitable' },
       ],
@@ -292,9 +286,8 @@ const entries: Entry[] = [
   {
     name: 'org-chart',
     el: el(OrgChart, {
-      width: 540,
-      height: 320,
-      margin: { top: 36, right: 72, bottom: 48, left: 72 },
+      width: 640,
+      height: 300,
       vibe: BLUEPRINT,
       nodes: [
         { id: 'ceo', label: 'CEO' },
@@ -312,7 +305,7 @@ const entries: Entry[] = [
     name: 'mermaid',
     el: renderDiagram(
       parseMermaid('flowchart LR\n  A([Start]) --> B[Build]\n  B --> C{Tests pass?}\n  C -->|yes| D((Ship))\n  C -->|no| E[Fix it]'),
-      { width: 600, height: 320, margin: { top: 40, right: 80, bottom: 40, left: 80 }, vibe: BLUEPRINT, bare: true },
+      { width: 560, height: 320, vibe: BLUEPRINT, bare: true },
     ),
   },
 

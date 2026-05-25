@@ -55,6 +55,10 @@ export function SankeyChart({
   }, [layout.nodes]);
 
   const horizontal = direction === 'LR';
+  // Terminal nodes sit at the far edge; flip their labels inward so they don't
+  // overflow the canvas (labels otherwise extend past the last column/row).
+  const maxX = Math.max(0, ...layout.nodes.map((n) => n.x));
+  const maxY = Math.max(0, ...layout.nodes.map((n) => n.y));
 
   return (
     <Surface
@@ -80,26 +84,29 @@ export function SankeyChart({
             seed={i + 1}
           />
         ))}
-        {layout.nodes.map((node, i) => (
-          <g key={node.id}>
-            <RoughRectangle
-              x={node.x}
-              y={node.y}
-              width={node.width}
-              height={node.height}
-              fill={colorOf.get(node.id)}
-              seed={i + 1}
-            />
-            <RoughText
-              x={horizontal ? node.x + node.width + 4 : node.x + node.width / 2}
-              y={horizontal ? node.y + node.height / 2 : node.y + node.height + 4}
-              anchor={horizontal ? 'start' : 'middle'}
-              baseline={horizontal ? 'middle' : 'hanging'}
-            >
-              {`${node.label ?? node.id}${showValues ? ` (${node.value})` : ''}`}
-            </RoughText>
-          </g>
-        ))}
+        {layout.nodes.map((node, i) => {
+          const isLast = horizontal ? node.x >= maxX : node.y >= maxY;
+          return (
+            <g key={node.id}>
+              <RoughRectangle
+                x={node.x}
+                y={node.y}
+                width={node.width}
+                height={node.height}
+                fill={colorOf.get(node.id)}
+                seed={i + 1}
+              />
+              <RoughText
+                x={horizontal ? (isLast ? node.x - 4 : node.x + node.width + 4) : node.x + node.width / 2}
+                y={horizontal ? node.y + node.height / 2 : isLast ? node.y - 4 : node.y + node.height + 4}
+                anchor={horizontal ? (isLast ? 'end' : 'start') : 'middle'}
+                baseline={horizontal ? 'middle' : isLast ? 'auto' : 'hanging'}
+              >
+                {`${node.label ?? node.id}${showValues ? ` (${node.value})` : ''}`}
+              </RoughText>
+            </g>
+          );
+        })}
       </g>
     </Surface>
   );

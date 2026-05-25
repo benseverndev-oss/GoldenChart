@@ -70,6 +70,16 @@ export function divergingColor(
   };
 }
 
+/**
+ * Pick a legible text color (near-black or near-white) for a hex background,
+ * by its perceived luminance. Keeps value labels readable on dark scale cells.
+ */
+export function contrastText(background: string, dark = '#1f2937', light = '#f9fafb'): string {
+  const [r, g, b] = hexToRgb(background);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.55 ? dark : light;
+}
+
 /** Stable categorical color for a string key (cycles through the palette). */
 export function ordinalColor(values: string[], palette: string[] = DEFAULT_PALETTE): (v: string) => string {
   const index = new Map<string, number>();

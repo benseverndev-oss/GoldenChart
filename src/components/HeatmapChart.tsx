@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import type { BaseChartProps } from '../types/charts';
 import type { ColorScaleName } from '../core/colorScales';
-import { sequentialColor } from '../core/colorScales';
+import { contrastText, sequentialColor } from '../core/colorScales';
 import { bandScale } from '../core/scales';
 import { getPlotArea } from '../core/geometry';
 import { Surface } from './Surface';
@@ -109,7 +109,13 @@ export function HeatmapChart({
             seed={i + 1}
           />
           {showValues && (
-            <RoughText x={cell.x + cell.width / 2} y={cell.y + cell.height / 2} anchor="middle" baseline="middle">
+            <RoughText
+              x={cell.x + cell.width / 2}
+              y={cell.y + cell.height / 2}
+              anchor="middle"
+              baseline="middle"
+              fill={contrastText(cell.fill)}
+            >
               {String(cell.value)}
             </RoughText>
           )}

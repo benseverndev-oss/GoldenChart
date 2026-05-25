@@ -97,20 +97,29 @@ export function layoutTree(
     .id((n) => n.id)
     .parentId((n) => n.parent)(nodes);
 
+  // Inset the usable area by half the largest node so the extreme nodes' boxes
+  // sit fully inside the plot rather than straddling its edge.
+  const maxW = Math.max(DEFAULT_NODE_W, ...nodes.map((n) => n.width ?? DEFAULT_NODE_W));
+  const maxH = Math.max(DEFAULT_NODE_H, ...nodes.map((n) => n.height ?? DEFAULT_NODE_H));
+  const innerW = Math.max(1, width - maxW);
+  const innerH = Math.max(1, height - maxH);
+  const ox = maxW / 2;
+  const oy = maxH / 2;
+
   // For horizontal layouts, depth runs along x, so the tree's own size is swapped.
   const layout = tree<FlowNode>()
-    .size(horizontal ? [height, width] : [width, height])
+    .size(horizontal ? [innerH, innerW] : [innerW, innerH])
     .separation((a, b) => (a.parent === b.parent ? 1 : 1.4));
   const positioned = layout(root);
 
   const place = (dx: number, dy: number): { x: number; y: number } => {
     switch (direction) {
       case 'BT':
-        return { x: dx, y: height - dy };
+        return { x: dx, y: innerH - dy };
       case 'LR':
         return { x: dy, y: dx };
       case 'RL':
-        return { x: width - dy, y: dx };
+        return { x: innerW - dy, y: dx };
       case 'TB':
       default:
         return { x: dx, y: dy };
@@ -123,8 +132,8 @@ export function layoutTree(
     const node: LaidOutNode = {
       id: d.data.id,
       label: d.data.label,
-      x,
-      y,
+      x: x + ox,
+      y: y + oy,
       width: d.data.width ?? DEFAULT_NODE_W,
       height: d.data.height ?? DEFAULT_NODE_H,
       shape: d.data.shape ?? 'rect',
