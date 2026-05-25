@@ -6,6 +6,8 @@ import {
   ScatterPlot,
   PieChart,
   Flowchart,
+  MindMap,
+  OrgChart,
   SankeyChart,
   TreemapChart,
   HeatmapChart,
@@ -131,6 +133,27 @@ const DAG_EDGES = [
   { from: 'render', to: 'out', label: 'ok' },
 ];
 
+const MIND_NODES: FlowNode[] = [
+  { id: 'root', label: 'Launch' },
+  { id: 'mkt', label: 'Marketing', parent: 'root' },
+  { id: 'eng', label: 'Engineering', parent: 'root' },
+  { id: 'ops', label: 'Ops', parent: 'root' },
+  { id: 'mkt1', label: 'Campaign', parent: 'mkt' },
+  { id: 'mkt2', label: 'Launch event', parent: 'mkt' },
+  { id: 'eng1', label: 'API', parent: 'eng' },
+  { id: 'eng2', label: 'Web app', parent: 'eng' },
+  { id: 'ops1', label: 'Support', parent: 'ops' },
+];
+
+const ORG_NODES: FlowNode[] = [
+  { id: 'ceo', label: 'CEO' },
+  { id: 'cto', label: 'CTO', parent: 'ceo' },
+  { id: 'cfo', label: 'CFO', parent: 'ceo' },
+  { id: 'eng', label: 'Eng Lead', parent: 'cto' },
+  { id: 'data', label: 'Data Lead', parent: 'cto' },
+  { id: 'fin', label: 'Finance', parent: 'cfo' },
+];
+
 const SPARK_POINTS = [3, 7, 4, 9, 6, 11, 8, 14].map((v, i) => ({ x: i * 50, y: 120 - v * 7 }));
 
 export function App() {
@@ -239,6 +262,14 @@ export function App() {
             direction="TB"
             routing="orthogonal"
           />
+        </Panel>
+
+        <Panel title="MindMap (radial tree)">
+          <MindMap width={460} height={360} vibe={vibe} nodes={MIND_NODES} />
+        </Panel>
+
+        <Panel title="OrgChart (hierarchy of boxes)">
+          <OrgChart width={460} height={300} vibe={vibe} nodes={ORG_NODES} />
         </Panel>
 
         <Panel title="Sankey (weighted flow)">

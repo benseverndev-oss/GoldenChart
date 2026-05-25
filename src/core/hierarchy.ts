@@ -1,6 +1,7 @@
 import { stratify, tree } from 'd3-hierarchy';
 import type { HierarchyNode } from 'd3-hierarchy';
 import type { FlowDirection, FlowEdge, FlowNode, FlowNodeShape } from '../types/charts';
+import type { Point } from '../types/geometry';
 
 export interface LaidOutNode {
   id: string;
@@ -21,6 +22,12 @@ export interface LaidOutEdge {
   sy: number;
   tx: number;
   ty: number;
+  /**
+   * Explicit waypoints for the connector, source boundary → target boundary
+   * (e.g. obstacle-routed architecture edges or straight mind-map spokes). When
+   * present the renderer draws this polyline instead of deriving a curve/elbow.
+   */
+  points?: Point[];
 }
 
 export interface FlowLayout {

@@ -5,6 +5,8 @@ import {
   Flowchart,
   HeatmapChart,
   LineChart,
+  MindMap,
+  OrgChart,
   PieChart,
   RadarChart,
   SankeyChart,
@@ -216,10 +218,45 @@ export const extraChartTools: ToolDef[] = [
   }),
 ];
 
+/**
+ * Roadmap 1 diagram types — each a layout engine plus the shared diagram
+ * renderer. Kept in their own array so the chart catalog/tests stay stable.
+ */
+export const diagramTools: ToolDef[] = [
+  makeRenderTool({
+    name: 'render_mind_map',
+    title: 'Render Mind Map',
+    description:
+      'Render a hand-drawn mind map: a radial tree fanning out from a central root node, with straight spokes.',
+    kind: 'mindmap',
+    component: MindMap,
+    inputShape: {
+      ...baseChartShape,
+      nodes: z.array(FlowNodeSchema).min(1),
+      edges: z.array(FlowEdgeSchema).optional(),
+    },
+  }),
+  makeRenderTool({
+    name: 'render_org_chart',
+    title: 'Render Org Chart',
+    description:
+      'Render a hand-drawn organisation chart: a tidy hierarchy of rectangular boxes joined by plain elbow connectors.',
+    kind: 'org',
+    component: OrgChart,
+    inputShape: {
+      ...baseChartShape,
+      nodes: z.array(FlowNodeSchema).min(1),
+      edges: z.array(FlowEdgeSchema).optional(),
+      direction: FlowDirectionSchema.optional(),
+    },
+  }),
+];
+
 /** The full catalog the server registers across every level. */
 export const tools: ToolDef[] = [
   ...chartTools,
   ...extraChartTools,
+  ...diagramTools,
   ...vibeTools,
   ...calcTools,
   ...primitiveTools,

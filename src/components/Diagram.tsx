@@ -108,7 +108,13 @@ function DiagramEdge({
   // not the straight source->target line, so it reads as a clean right angle.
   let d: string;
   let arrowTail = from;
-  if (routing === 'orthogonal') {
+  let labelAt = { x: (edge.sx + edge.tx) / 2, y: (edge.sy + edge.ty) / 2 };
+  if (edge.points && edge.points.length >= 2) {
+    const pts = edge.points;
+    d = `M${pts[0].x},${pts[0].y} ` + pts.slice(1).map((p) => `L${p.x},${p.y}`).join(' ');
+    arrowTail = pts[pts.length - 2];
+    labelAt = pts[Math.floor((pts.length - 1) / 2)];
+  } else if (routing === 'orthogonal') {
     const pts = orthogonalPoints(from, to, orientation);
     d = orthogonalPath(from, to, orientation);
     arrowTail = pts[pts.length - 2];
@@ -120,7 +126,7 @@ function DiagramEdge({
       <RoughPath d={d} fill={null} />
       {showArrowhead && <RoughPath d={arrowHeadPath(arrowTail, to)} fill={null} />}
       {edge.label && (
-        <RoughText x={(edge.sx + edge.tx) / 2} y={(edge.sy + edge.ty) / 2} anchor="middle" baseline="middle">
+        <RoughText x={labelAt.x} y={labelAt.y} anchor="middle" baseline="middle">
           {edge.label}
         </RoughText>
       )}
