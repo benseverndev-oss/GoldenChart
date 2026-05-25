@@ -51,6 +51,20 @@ describe('annotations', () => {
   });
 });
 
+describe('profile_data', () => {
+  it('reports field types and shape', async () => {
+    const res = await tool('profile_data').handler({
+      data: [
+        { date: '2024-01-01', revenue: 10 },
+        { date: '2024-02-01', revenue: 20 },
+      ],
+    });
+    const profile = res.structuredContent as { shape: string; fields: { name: string; type: string }[] };
+    expect(profile.shape).toBe('single-series');
+    expect(profile.fields.find((f) => f.name === 'revenue')!.type).toBe('quantitative');
+  });
+});
+
 describe('compute_color_scale', () => {
   it('returns a ramp and a value color', async () => {
     const res = await tool('compute_color_scale').handler({ scale: 'viridis', domain: [0, 10], steps: 5, value: 5 });
