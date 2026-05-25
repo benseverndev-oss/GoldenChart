@@ -8,6 +8,18 @@ export interface Obstacle {
   height: number;
 }
 
+/** Midpoint of the box side facing `toward` — a connector's port on that box. */
+export function boxPort(box: Obstacle, toward: Point): Point {
+  const cx = box.x + box.width / 2;
+  const cy = box.y + box.height / 2;
+  const dx = toward.x - cx;
+  const dy = toward.y - cy;
+  if (Math.abs(dx) >= Math.abs(dy)) {
+    return { x: cx + (dx >= 0 ? box.width / 2 : -box.width / 2), y: cy };
+  }
+  return { x: cx, y: cy + (dy >= 0 ? box.height / 2 : -box.height / 2) };
+}
+
 export interface RouteOptions {
   /** Clearance kept between a connector and every obstacle. */
   padding?: number;

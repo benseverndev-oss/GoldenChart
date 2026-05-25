@@ -57,12 +57,43 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
       { from: 'db', to: 'app', label: 'rows', kind: 'reply' },
     ],
   },
+  render_er_diagram: {
+    width: 560,
+    height: 320,
+    vibe: 'clean_blueprint',
+    entities: [
+      { id: 'user', label: 'User', fields: [{ name: 'id', type: 'uuid', key: 'PK' }, { name: 'email', type: 'text' }] },
+      {
+        id: 'order',
+        label: 'Order',
+        fields: [{ name: 'id', type: 'uuid', key: 'PK' }, { name: 'user_id', type: 'uuid', key: 'FK' }],
+      },
+    ],
+    relationships: [{ from: 'user', to: 'order', label: 'places', fromCardinality: '1', toCardinality: 'N' }],
+  },
+  render_timeline: {
+    width: 600,
+    height: 240,
+    vibe: 'clean_blueprint',
+    events: [
+      { date: '2021', label: 'Founded', detail: 'Two people, one idea' },
+      { date: '2022', label: 'Seed round' },
+      { date: '2023', label: 'Launch' },
+    ],
+  },
 };
 
 describe('diagram render tools', () => {
   it('registers the Roadmap 1 diagram types', () => {
     expect(tools.map((t) => t.name).sort()).toEqual(
-      ['render_architecture', 'render_mind_map', 'render_org_chart', 'render_sequence'].sort(),
+      [
+        'render_architecture',
+        'render_er_diagram',
+        'render_mind_map',
+        'render_org_chart',
+        'render_sequence',
+        'render_timeline',
+      ].sort(),
     );
   });
 

@@ -4,6 +4,7 @@ import {
   BarChart,
   Flowchart,
   ArchitectureDiagram,
+  ERDiagram,
   HeatmapChart,
   LineChart,
   MindMap,
@@ -13,6 +14,7 @@ import {
   SankeyChart,
   ScatterPlot,
   SequenceDiagram,
+  Timeline,
   TreemapChart,
 } from 'goldenchart';
 import { makeRenderTool } from './registry';
@@ -31,6 +33,8 @@ import {
   ColorScaleNameSchema,
   CurveSchema,
   EdgeRoutingSchema,
+  EREntitySchema,
+  ERRelationshipSchema,
   FlowDirectionSchema,
   FlowEdgeSchema,
   FlowNodeSchema,
@@ -41,6 +45,7 @@ import {
   SankeyNodeSchema,
   SequenceActorSchema,
   SequenceMessageSchema,
+  TimelineEventSchema,
   ScatterDatumSchema,
   SeriesSchema,
   TreemapDatumSchema,
@@ -281,6 +286,33 @@ export const diagramTools: ToolDef[] = [
       actors: z.array(SequenceActorSchema).min(1),
       messages: z.array(SequenceMessageSchema),
       actorHeight: z.number().optional(),
+    },
+  }),
+  makeRenderTool({
+    name: 'render_er_diagram',
+    title: 'Render ER Diagram',
+    description:
+      'Render a hand-drawn entity-relationship diagram: titled entity boxes with field rows (PK/FK markers), joined by orthogonally routed connectors carrying cardinality markers.',
+    kind: 'er',
+    component: ERDiagram,
+    inputShape: {
+      ...baseChartShape,
+      entities: z.array(EREntitySchema).min(1),
+      relationships: z.array(ERRelationshipSchema).optional(),
+      direction: FlowDirectionSchema.optional(),
+    },
+  }),
+  makeRenderTool({
+    name: 'render_timeline',
+    title: 'Render Timeline',
+    description:
+      'Render a hand-drawn timeline: ordered events along a central axis (horizontal or vertical), labels alternating to either side.',
+    kind: 'timeline',
+    component: Timeline,
+    inputShape: {
+      ...baseChartShape,
+      events: z.array(TimelineEventSchema).min(1),
+      orientation: z.enum(['horizontal', 'vertical']).optional(),
     },
   }),
 ];

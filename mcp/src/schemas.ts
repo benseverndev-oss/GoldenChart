@@ -136,6 +136,32 @@ export const SequenceMessageSchema = z.object({
   kind: z.enum(['sync', 'async', 'reply']).optional(),
 });
 
+export const ERFieldSchema = z.object({
+  name: z.string(),
+  type: z.string().optional(),
+  key: z.enum(['PK', 'FK']).optional(),
+});
+
+export const EREntitySchema = z.object({
+  id: z.string(),
+  label: z.string().optional(),
+  fields: z.array(ERFieldSchema).optional(),
+});
+
+export const ERRelationshipSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  label: z.string().optional(),
+  fromCardinality: z.string().optional(),
+  toCardinality: z.string().optional(),
+});
+
+export const TimelineEventSchema = z.object({
+  label: z.string(),
+  date: z.string().optional(),
+  detail: z.string().optional(),
+});
+
 export const TreemapDatumSchema = z.object({
   id: z.string(),
   parent: z.string().optional(),

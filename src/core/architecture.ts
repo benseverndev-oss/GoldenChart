@@ -1,10 +1,9 @@
 import type { FlowDirection } from '../types/charts';
-import type { Point } from '../types/geometry';
 import { computeGroups, type LayoutEngine } from './diagram';
 import { layoutFlow } from './dag';
 import { isHorizontal } from './hierarchy';
 import type { LaidOutEdge, LaidOutNode } from './hierarchy';
-import { routeOrthogonal, type Obstacle } from './routing';
+import { boxPort, routeOrthogonal, type Obstacle } from './routing';
 
 const toBox = (n: LaidOutNode): Obstacle => ({
   x: n.x - n.width / 2,
@@ -12,16 +11,6 @@ const toBox = (n: LaidOutNode): Obstacle => ({
   width: n.width,
   height: n.height,
 });
-
-/** Midpoint of the box side facing `toward` — the connector's port on that node. */
-function sidePort(n: LaidOutNode, toward: Point): Point {
-  const dx = toward.x - n.x;
-  const dy = toward.y - n.y;
-  if (Math.abs(dx) >= Math.abs(dy)) {
-    return { x: n.x + (dx >= 0 ? n.width / 2 : -n.width / 2), y: n.y };
-  }
-  return { x: n.x, y: n.y + (dy >= 0 ? n.height / 2 : -n.height / 2) };
-}
 
 /**
  * Architecture / network layout: position components with the flow engine, draw
@@ -39,8 +28,10 @@ export function architectureLayout(direction: FlowDirection = 'TB'): LayoutEngin
       const s = byId.get(e.from);
       const t = byId.get(e.to);
       if (!s || !t) return [];
-      const sPort = sidePort(s, { x: t.x, y: t.y });
-      const tPort = sidePort(t, { x: s.x, y: s.y });
+      const sBox = toBox(s);
+      const tBox = toBox(t);
+      const sPort = boxPort(sBox, { x: t.x, y: t.y });
+      const tPort = boxPort(tBox, { x: s.x, y: s.y });
       const obstacles = base.nodes.filter((n) => n.id !== e.from && n.id !== e.to).map(toBox);
       const points = routeOrthogonal(sPort, tPort, obstacles, { padding: 10 });
       return [{ ...e, sx: sPort.x, sy: sPort.y, tx: tPort.x, ty: tPort.y, points }];

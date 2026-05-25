@@ -10,6 +10,8 @@ import {
   OrgChart,
   ArchitectureDiagram,
   SequenceDiagram,
+  ERDiagram,
+  Timeline,
   SankeyChart,
   TreemapChart,
   HeatmapChart,
@@ -29,6 +31,9 @@ import type {
   ScatterDatum,
   SequenceActorInput,
   SequenceMessageInput,
+  EREntityInput,
+  ERRelationshipInput,
+  TimelineEventInput,
   VibeConfig,
   VibePreset,
 } from 'goldenchart';
@@ -194,6 +199,49 @@ const SEQ_MESSAGES: SequenceMessageInput[] = [
   { from: 'web', to: 'user', label: 'confirmation', kind: 'reply' },
 ];
 
+const ER_ENTITIES: EREntityInput[] = [
+  {
+    id: 'user',
+    label: 'User',
+    fields: [
+      { name: 'id', type: 'uuid', key: 'PK' },
+      { name: 'email', type: 'text' },
+      { name: 'name', type: 'text' },
+    ],
+  },
+  {
+    id: 'order',
+    label: 'Order',
+    fields: [
+      { name: 'id', type: 'uuid', key: 'PK' },
+      { name: 'user_id', type: 'uuid', key: 'FK' },
+      { name: 'total', type: 'numeric' },
+    ],
+  },
+  {
+    id: 'item',
+    label: 'LineItem',
+    fields: [
+      { name: 'id', type: 'uuid', key: 'PK' },
+      { name: 'order_id', type: 'uuid', key: 'FK' },
+      { name: 'qty', type: 'int' },
+    ],
+  },
+];
+
+const ER_RELS: ERRelationshipInput[] = [
+  { from: 'user', to: 'order', fromCardinality: '1', toCardinality: 'N' },
+  { from: 'order', to: 'item', fromCardinality: '1', toCardinality: 'N' },
+];
+
+const TIMELINE_EVENTS: TimelineEventInput[] = [
+  { date: '2021', label: 'Founded', detail: 'Two people, one idea' },
+  { date: '2022', label: 'Seed round' },
+  { date: '2023', label: 'Public launch', detail: 'First 10k users' },
+  { date: '2024', label: 'Series A' },
+  { date: '2025', label: 'Profitable' },
+];
+
 const SPARK_POINTS = [3, 7, 4, 9, 6, 11, 8, 14].map((v, i) => ({ x: i * 50, y: 120 - v * 7 }));
 
 export function App() {
@@ -318,6 +366,14 @@ export function App() {
 
         <Panel title="SequenceDiagram (actors + messages)">
           <SequenceDiagram width={460} height={360} vibe={vibe} actors={SEQ_ACTORS} messages={SEQ_MESSAGES} />
+        </Panel>
+
+        <Panel title="ERDiagram (entities + cardinality)">
+          <ERDiagram width={460} height={340} vibe={vibe} entities={ER_ENTITIES} relationships={ER_RELS} />
+        </Panel>
+
+        <Panel title="Timeline (events along an axis)">
+          <Timeline width={460} height={240} vibe={vibe} events={TIMELINE_EVENTS} />
         </Panel>
 
         <Panel title="Sankey (weighted flow)">
