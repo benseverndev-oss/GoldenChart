@@ -3,6 +3,8 @@ import { AreaChart, BarChart, Flowchart, LineChart, PieChart, ScatterPlot } from
 import { makeRenderTool } from './registry';
 import type { ToolDef } from './registry';
 import { vibeTools } from './vibeTools';
+import { calcTools } from './calcTools';
+import { primitiveTools } from './primitiveTools';
 import {
   baseChartShape,
   ChartDatumSchema,
@@ -111,5 +113,5 @@ export const chartTools: ToolDef[] = [
   }),
 ];
 
-/** The full catalog the server registers: charts + vibe tools. */
-export const tools: ToolDef[] = [...chartTools, ...vibeTools];
+/** The full catalog the server registers: charts + vibe + calc + primitive tools. */
+export const tools: ToolDef[] = [...chartTools, ...vibeTools, ...calcTools, ...primitiveTools];

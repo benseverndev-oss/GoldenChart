@@ -104,3 +104,68 @@ export const renderOutputShape = {
   svg: z.string(),
   meta: z.object({ kind: z.string(), width: z.number(), height: z.number() }),
 };
+
+export const ViewportSchema = z.object({
+  width: z.number().positive(),
+  height: z.number().positive(),
+});
+
+/**
+ * Serializable description of a single sketched primitive. Shared by the
+ * Level-2 primitive render tools (M3) and `compose_surface` (M4), so a scene is
+ * just an array of these.
+ */
+export const PrimitiveSpecSchema = z.discriminatedUnion('kind', [
+  z.object({
+    kind: z.literal('path'),
+    d: z.string(),
+    stroke: z.string().optional(),
+    fill: z.string().nullable().optional(),
+    seed: z.number().optional(),
+    vibe: VibeConfigSchema.optional(),
+  }),
+  z.object({
+    kind: z.literal('rect'),
+    x: z.number(),
+    y: z.number(),
+    width: z.number(),
+    height: z.number(),
+    stroke: z.string().optional(),
+    fill: z.string().nullable().optional(),
+    seed: z.number().optional(),
+    vibe: VibeConfigSchema.optional(),
+  }),
+  z.object({
+    kind: z.literal('circle'),
+    cx: z.number(),
+    cy: z.number(),
+    diameter: z.number(),
+    stroke: z.string().optional(),
+    fill: z.string().nullable().optional(),
+    seed: z.number().optional(),
+    vibe: VibeConfigSchema.optional(),
+  }),
+  z.object({
+    kind: z.literal('line'),
+    x1: z.number(),
+    y1: z.number(),
+    x2: z.number(),
+    y2: z.number(),
+    stroke: z.string().optional(),
+    seed: z.number().optional(),
+    vibe: VibeConfigSchema.optional(),
+  }),
+  z.object({
+    kind: z.literal('text'),
+    x: z.number(),
+    y: z.number(),
+    text: z.string(),
+    anchor: z.enum(['start', 'middle', 'end']).optional(),
+    baseline: z.enum(['auto', 'middle', 'hanging']).optional(),
+    rotate: z.number().optional(),
+    seed: z.number().optional(),
+    vibe: VibeConfigSchema.optional(),
+  }),
+]);
+
+export type PrimitiveSpec = z.infer<typeof PrimitiveSpecSchema>;
