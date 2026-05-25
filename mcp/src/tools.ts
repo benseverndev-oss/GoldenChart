@@ -25,6 +25,7 @@ import { primitiveTools } from './primitiveTools';
 import { orchestrationTools } from './orchestrationTools';
 import { exportTools } from './exportTools';
 import { visualizeTools } from './visualizeTool';
+import { dslTools } from './dslTools';
 import {
   AnnotationSchema,
   baseChartShape,
@@ -322,6 +323,7 @@ export const tools: ToolDef[] = [
   ...chartTools,
   ...extraChartTools,
   ...diagramTools,
+  ...dslTools,
   ...vibeTools,
   ...calcTools,
   ...primitiveTools,

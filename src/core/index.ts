@@ -10,6 +10,7 @@ export * from './architecture';
 export * from './sequence';
 export * from './er';
 export * from './timeline';
+export * from './spec';
 export * from './sankey';
 export * from './treemap';
 export * from './polar';

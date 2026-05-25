@@ -26,6 +26,8 @@ export { ERDiagram } from './ERDiagram';
 export type { ERDiagramProps } from './ERDiagram';
 export { Timeline } from './Timeline';
 export type { TimelineProps } from './Timeline';
+export { renderDiagram } from './renderDiagram';
+export type { DiagramRenderOptions } from './renderDiagram';
 export { SankeyChart } from './SankeyChart';
 export type { SankeyChartProps } from './SankeyChart';
 export { TreemapChart } from './TreemapChart';

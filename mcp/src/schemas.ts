@@ -162,6 +162,50 @@ export const TimelineEventSchema = z.object({
   detail: z.string().optional(),
 });
 
+/** A high-level diagram spec — one entry per diagram type, keyed by `kind`. */
+export const DiagramSpecSchema = z.discriminatedUnion('kind', [
+  z.object({
+    kind: z.literal('flowchart'),
+    nodes: z.array(FlowNodeSchema).min(1),
+    edges: z.array(FlowEdgeSchema).optional(),
+    direction: FlowDirectionSchema.optional(),
+    routing: EdgeRoutingSchema.optional(),
+  }),
+  z.object({
+    kind: z.literal('sequence'),
+    actors: z.array(SequenceActorSchema).min(1),
+    messages: z.array(SequenceMessageSchema),
+  }),
+  z.object({
+    kind: z.literal('mindmap'),
+    nodes: z.array(FlowNodeSchema).min(1),
+    edges: z.array(FlowEdgeSchema).optional(),
+  }),
+  z.object({
+    kind: z.literal('arch'),
+    nodes: z.array(FlowNodeSchema).min(1),
+    edges: z.array(FlowEdgeSchema).optional(),
+    direction: FlowDirectionSchema.optional(),
+  }),
+  z.object({
+    kind: z.literal('er'),
+    entities: z.array(EREntitySchema).min(1),
+    relationships: z.array(ERRelationshipSchema).optional(),
+    direction: FlowDirectionSchema.optional(),
+  }),
+  z.object({
+    kind: z.literal('timeline'),
+    events: z.array(TimelineEventSchema).min(1),
+    orientation: z.enum(['horizontal', 'vertical']).optional(),
+  }),
+  z.object({
+    kind: z.literal('org'),
+    nodes: z.array(FlowNodeSchema).min(1),
+    edges: z.array(FlowEdgeSchema).optional(),
+    direction: FlowDirectionSchema.optional(),
+  }),
+]);
+
 export const TreemapDatumSchema = z.object({
   id: z.string(),
   parent: z.string().optional(),
