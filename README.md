@@ -42,6 +42,63 @@ export function Sales() {
 }
 ```
 
+## Gallery
+
+Every image below is rendered headlessly to SVG/PNG by the library itself (see
+[`mcp/scripts/generate-gallery.ts`](./mcp/scripts/generate-gallery.ts)) — no browser, no canvas.
+
+### Charts
+
+<table>
+<tr>
+<td align="center"><img src="assets/gallery/bar-chart.png" width="240" alt="Bar chart"><br><sub>Bar</sub></td>
+<td align="center"><img src="assets/gallery/line-chart.png" width="240" alt="Line chart"><br><sub>Line</sub></td>
+<td align="center"><img src="assets/gallery/area-chart.png" width="240" alt="Area chart"><br><sub>Area</sub></td>
+</tr>
+<tr>
+<td align="center"><img src="assets/gallery/scatter-plot.png" width="240" alt="Scatter plot"><br><sub>Scatter</sub></td>
+<td align="center"><img src="assets/gallery/pie-chart.png" width="240" alt="Pie chart"><br><sub>Pie / donut</sub></td>
+<td align="center"><img src="assets/gallery/radar.png" width="240" alt="Radar chart"><br><sub>Radar</sub></td>
+</tr>
+<tr>
+<td align="center"><img src="assets/gallery/sankey.png" width="240" alt="Sankey diagram"><br><sub>Sankey</sub></td>
+<td align="center"><img src="assets/gallery/treemap.png" width="240" alt="Treemap"><br><sub>Treemap</sub></td>
+<td align="center"><img src="assets/gallery/heatmap.png" width="240" alt="Heatmap"><br><sub>Heatmap</sub></td>
+</tr>
+</table>
+
+### Diagrams
+
+<table>
+<tr>
+<td align="center"><img src="assets/gallery/flowchart.png" width="240" alt="Flowchart"><br><sub>Flowchart</sub></td>
+<td align="center"><img src="assets/gallery/sequence.png" width="240" alt="Sequence diagram"><br><sub>Sequence</sub></td>
+<td align="center"><img src="assets/gallery/mindmap.png" width="240" alt="Mind map"><br><sub>Mind map</sub></td>
+</tr>
+<tr>
+<td align="center"><img src="assets/gallery/architecture.png" width="240" alt="Architecture diagram"><br><sub>Architecture</sub></td>
+<td align="center"><img src="assets/gallery/er-diagram.png" width="240" alt="ER diagram"><br><sub>ER</sub></td>
+<td align="center"><img src="assets/gallery/org-chart.png" width="240" alt="Org chart"><br><sub>Org chart</sub></td>
+</tr>
+<tr>
+<td align="center"><img src="assets/gallery/timeline.png" width="240" alt="Timeline"><br><sub>Timeline</sub></td>
+<td align="center"><img src="assets/gallery/mermaid.png" width="240" alt="Diagram from Mermaid"><br><sub>From Mermaid</sub></td>
+<td></td>
+</tr>
+</table>
+
+### One chart, three vibes
+
+<table>
+<tr>
+<td align="center"><img src="assets/gallery/vibe-messy_sketch.png" width="240" alt="messy_sketch vibe"><br><sub><code>messy_sketch</code></sub></td>
+<td align="center"><img src="assets/gallery/vibe-clean_blueprint.png" width="240" alt="clean_blueprint vibe"><br><sub><code>clean_blueprint</code></sub></td>
+<td align="center"><img src="assets/gallery/vibe-chaotic_notebook.png" width="240" alt="chaotic_notebook vibe"><br><sub><code>chaotic_notebook</code></sub></td>
+</tr>
+</table>
+
+Crisp SVG versions of every image live alongside the PNGs in [`assets/gallery/`](./assets/gallery).
+
 ## Compose your own
 
 Every chart is built from reusable primitives, so you can draw arbitrary diagrams.
@@ -73,15 +130,26 @@ Built-in presets: `messy_sketch`, `clean_blueprint`, `chaotic_notebook`, `pencil
 ## Components
 
 - **Charts:** `BarChart` (single/grouped/stacked), `LineChart`, `AreaChart` (+ stacked),
-  `ScatterPlot`, `PieChart` (+ donut), `Flowchart`, `SankeyChart`, `TreemapChart`,
-  `HeatmapChart`, `RadarChart`
+  `ScatterPlot`, `PieChart` (+ donut), `SankeyChart`, `TreemapChart`, `HeatmapChart`, `RadarChart`
+- **Diagrams:** `Flowchart`, `SequenceDiagram`, `MindMap`, `ArchitectureDiagram`, `ERDiagram`,
+  `Timeline`, `OrgChart` — all on a shared `Diagram` model + pluggable `LayoutEngine`
 - **Chart furniture:** `Axis`, `Grid`, `Legend`, `Annotations` (reference lines/bands, callouts)
 - **Primitives:** `RoughPath`, `RoughLine`, `RoughRectangle`, `RoughCircle`, `RoughText`
 - **Container:** `Surface` (Tailwind wrapper + `VibeProvider`)
 
 `Flowchart` supports four layout directions (`TB`/`BT`/`LR`/`RL`), `rect`/`ellipse`/`diamond`
 node shapes, edge labels, arrowheads, `curved`/`orthogonal` routing, and general DAG layout
-(merges, multiple roots). Charts accept `description` / `ariaLabel` / `dataTable` for accessibility.
+(merges, multiple roots). The architecture diagram adds zone containers and a hand-rolled
+orthogonal obstacle router. Charts accept `description` / `ariaLabel` / `dataTable` for accessibility.
+
+## Auto-visualization & diagram DSL
+
+- **`visualize(data)` / `<AutoChart>`** profile raw records, pick the best-fit chart, and render it —
+  zero manual prop wiring. `critiqueChart` flags common dataviz mistakes (too many categories,
+  label collisions, misleading pies, …) for an agentic refine loop.
+- **`renderDiagram(spec)`** dispatches a high-level `{ kind, … }` spec to any diagram type, and
+  **`parseMermaid(source)`** turns a Mermaid subset (`flowchart`, `sequenceDiagram`, `mindmap`) into
+  that spec — "hand-drawn Mermaid".
 
 ## Architecture
 
