@@ -57,6 +57,23 @@ const FLOW_EDGES = [
   { from: 'c', to: 'e', label: 'yes' },
 ];
 
+// A non-tree graph: two entry points fan into a shared "Merge" node, which the
+// layered DAG layout handles (d3's tree layout can't — it needs a single root).
+const DAG_NODES: FlowNode[] = [
+  { id: 'api', label: 'API', shape: 'ellipse' },
+  { id: 'cache', label: 'Cache', shape: 'ellipse' },
+  { id: 'merge', label: 'Merge' },
+  { id: 'render', label: 'Render?', shape: 'diamond' },
+  { id: 'out', label: 'Output', shape: 'ellipse' },
+];
+
+const DAG_EDGES = [
+  { from: 'api', to: 'merge' },
+  { from: 'cache', to: 'merge' },
+  { from: 'merge', to: 'render' },
+  { from: 'render', to: 'out', label: 'ok' },
+];
+
 const SPARK_POINTS = [3, 7, 4, 9, 6, 11, 8, 14].map((v, i) => ({ x: i * 50, y: 120 - v * 7 }));
 
 export function App() {
@@ -150,6 +167,18 @@ export function App() {
             vibe={vibe}
             nodes={FLOW_NODES}
             edges={FLOW_EDGES}
+            direction="TB"
+            routing="orthogonal"
+          />
+        </Panel>
+
+        <Panel title="Flowchart (DAG merge — two roots into one node)">
+          <Flowchart
+            width={460}
+            height={320}
+            vibe={vibe}
+            nodes={DAG_NODES}
+            edges={DAG_EDGES}
             direction="TB"
             routing="orthogonal"
           />

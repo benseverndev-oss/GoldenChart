@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import type { BaseChartProps, EdgeRouting, FlowDirection, FlowEdge, FlowNode } from '../types/charts';
 import { getPlotArea } from '../core/geometry';
-import { layoutTree } from '../core/hierarchy';
+import { layoutFlow } from '../core/dag';
 import type { LaidOutEdge, LaidOutNode } from '../core/hierarchy';
 import { arrowHeadPath, diamondPath, ellipsePath, linkPath, orthogonalPath, orthogonalPoints } from '../core/shapes';
 import { Surface } from './Surface';
@@ -19,8 +19,9 @@ export interface FlowchartProps extends BaseChartProps {
 }
 
 /**
- * Tree-layout flowchart. d3-hierarchy positions nodes (in any of four
- * directions), `<RoughPath>` draws edges/arrowheads and the per-shape node
+ * Flowchart with automatic layout: a tidy d3-hierarchy tree for single-root
+ * trees, a layered DAG layout for merges/multiple-roots/cycles (in any of four
+ * directions). `<RoughPath>` draws edges/arrowheads and the per-shape node
  * outline, `<RoughText>` labels everything. Proof the primitives compose into
  * arbitrary diagrams, not just cartesian charts.
  */
@@ -43,7 +44,7 @@ export function Flowchart({
   const orientation = direction === 'LR' || direction === 'RL' ? 'horizontal' : 'vertical';
 
   const layout = useMemo(
-    () => layoutTree(nodes, [plot.width, plot.height], edges, direction),
+    () => layoutFlow(nodes, [plot.width, plot.height], edges, direction),
     [nodes, edges, direction, plot.width, plot.height],
   );
 

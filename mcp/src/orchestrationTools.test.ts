@@ -55,6 +55,27 @@ describe('build_flowchart_from_spec', () => {
     expect(svg).toContain('<path');
   });
 
+  it('renders a merge (DAG) spec with multiple parents', async () => {
+    const res = await byName('build_flowchart_from_spec').handler({
+      width: 360,
+      height: 260,
+      direction: 'TB',
+      nodes: [
+        { id: 'a', label: 'Plan' },
+        { id: 'b', label: 'Build' },
+        { id: 'c', label: 'Review' },
+      ],
+      edges: [
+        { from: 'a', to: 'c' },
+        { from: 'b', to: 'c' },
+      ],
+    });
+    const svg = res.content[0].text;
+    expect(svg.startsWith('<svg')).toBe(true);
+    expect(svg).toContain('Review');
+    expect(svg).toContain('<path');
+  });
+
   it('accepts orthogonal edge routing', async () => {
     const res = await byName('build_flowchart_from_spec').handler({
       width: 360,
