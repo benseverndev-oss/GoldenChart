@@ -3,6 +3,7 @@ export * from './scales';
 export * from './shapes';
 export * from './hierarchy';
 export * from './dag';
+export * from './diagram';
 export * from './sankey';
 export * from './treemap';
 export * from './polar';

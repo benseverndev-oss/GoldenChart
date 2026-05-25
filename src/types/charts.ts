@@ -73,6 +73,8 @@ export interface FlowNode {
   width?: number;
   height?: number;
   shape?: FlowNodeShape;
+  /** Optional container/subgraph this node belongs to (for grouped diagrams). */
+  group?: string;
   vibe?: VibeConfig;
 }
 
