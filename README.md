@@ -68,16 +68,32 @@ A `VibeConfig` is either a preset name or a preset plus targeted overrides:
 
 Built-in presets: `messy_sketch`, `clean_blueprint`, `chaotic_notebook`.
 
+## Components
+
+- **Charts:** `BarChart`, `LineChart`, `AreaChart`, `ScatterPlot`, `PieChart` (+ donut), `Flowchart`
+- **Chart furniture:** `Axis`, `Grid`, `Legend`
+- **Primitives:** `RoughPath`, `RoughLine`, `RoughRectangle`, `RoughCircle`, `RoughText`
+- **Container:** `Surface` (Tailwind wrapper + `VibeProvider`)
+
+`Flowchart` supports four layout directions (`TB`/`BT`/`LR`/`RL`), `rect`/`ellipse`/`diamond`
+node shapes, edge labels, and arrowheads.
+
 ## Architecture
 
 ```
 src/
 ├── types/        # VibeConfig, base props, geometry, chart data shapes
 ├── vibe/         # presets + resolver (semantic string -> Rough.js options) + React context
-├── core/         # D3 calculation layer — scales, shapes, hierarchy, geometry (no DOM)
+├── core/         # D3 calculation layer — scales, shapes, ticks, arc, hierarchy, palette (no DOM)
 ├── render/       # shared Rough.js generator (DOM-free)
-├── primitives/   # RoughPath / RoughLine / RoughRectangle / RoughCircle
-└── components/   # Surface (Tailwind wrapper) + BarChart + Flowchart
+├── primitives/   # RoughPath / RoughLine / RoughRectangle / RoughCircle / RoughText
+└── components/   # Surface, BarChart, LineChart, AreaChart, ScatterPlot, PieChart, Flowchart, Axis, Grid, Legend
+```
+
+## Playground
+
+```bash
+npm run playground        # interactive Vite demo of every chart + vibe
 ```
 
 ## Scripts

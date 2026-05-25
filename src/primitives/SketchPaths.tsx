@@ -5,7 +5,7 @@ interface SketchPathsProps {
   paths: RoughPathInfo[];
   className?: string;
   style?: CSSProperties;
-  onClick?: (event: MouseEvent<SVGGElement>) => void;
+  onClick?: (event: MouseEvent<SVGElement>) => void;
   children?: ReactNode;
 }
 

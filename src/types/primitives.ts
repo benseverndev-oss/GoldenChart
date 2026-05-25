@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, MouseEvent, ReactNode } from 'react';
 import type { VibeConfig } from './vibe';
 
 /**
@@ -12,8 +12,8 @@ export interface RoughPrimitiveProps {
   seed?: number;
   className?: string;
   style?: CSSProperties;
-  /** Forwarded to the rendered `<g>` so primitives stay composable/clickable. */
-  onClick?: (event: React.MouseEvent<SVGGElement>) => void;
+  /** Forwarded to the rendered element so primitives stay composable/clickable. */
+  onClick?: (event: MouseEvent<SVGElement>) => void;
   children?: ReactNode;
 }
 
@@ -49,4 +49,18 @@ export interface RoughCircleProps extends RoughPrimitiveProps {
   diameter: number;
   stroke?: string;
   fill?: string | null;
+}
+
+export interface RoughTextProps extends RoughPrimitiveProps {
+  x: number;
+  y: number;
+  children: string;
+  /** Maps to SVG `text-anchor`. */
+  anchor?: 'start' | 'middle' | 'end';
+  /** Maps to SVG `dominant-baseline`. */
+  baseline?: 'auto' | 'middle' | 'hanging';
+  /** Rotation in degrees about (x, y). */
+  rotate?: number;
+  /** Overrides the vibe stroke as the text fill color. */
+  fill?: string;
 }

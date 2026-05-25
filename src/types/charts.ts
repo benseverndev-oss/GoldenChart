@@ -41,6 +41,8 @@ export interface BaseChartProps {
   children?: ReactNode;
 }
 
+export type FlowNodeShape = 'rect' | 'ellipse' | 'diamond';
+
 /** A flowchart node prior to layout. */
 export interface FlowNode {
   id: string;
@@ -49,6 +51,7 @@ export interface FlowNode {
   parent?: string;
   width?: number;
   height?: number;
+  shape?: FlowNodeShape;
   vibe?: VibeConfig;
 }
 
@@ -57,3 +60,6 @@ export interface FlowEdge {
   to: string;
   label?: string;
 }
+
+/** Tree layout direction: Top-Bottom, Bottom-Top, Left-Right, Right-Left. */
+export type FlowDirection = 'TB' | 'BT' | 'LR' | 'RL';

@@ -1,5 +1,5 @@
-import { scaleBand, scaleLinear, scalePoint } from 'd3-scale';
-import type { ScaleBand, ScaleLinear, ScalePoint } from 'd3-scale';
+import { scaleBand, scaleLinear, scalePoint, scaleSqrt } from 'd3-scale';
+import type { ScaleBand, ScaleLinear, ScalePoint, ScalePower } from 'd3-scale';
 
 /**
  * Thin wrappers over d3-scale. Pure math: given a domain and a pixel range they
@@ -16,6 +16,11 @@ export function bandScale(domain: string[], range: [number, number], padding = 0
 
 export function pointScale(domain: string[], range: [number, number], padding = 0.5): ScalePoint<string> {
   return scalePoint().domain(domain).range(range).padding(padding);
+}
+
+/** Square-root scale — the correct mapping for bubble *radii* (area ∝ value). */
+export function sqrtScale(domain: [number, number], range: [number, number]): ScalePower<number, number> {
+  return scaleSqrt().domain(domain).range(range);
 }
 
 /** Convenience: nice min/max for a numeric series, with optional zero baseline. */
