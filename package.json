@@ -1,0 +1,73 @@
+{
+  "name": "goldenchart",
+  "version": "0.0.1",
+  "description": "Hand-drawn, sketchy React charts and flowcharts. D3 does the math, Rough.js does the drawing, and a Vibe engine dials in the aesthetic.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js",
+      "require": "./dist/server.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "playground": "vite --config playground/vite.config.ts",
+    "playground:build": "vite build --config playground/vite.config.ts"
+  },
+  "keywords": [
+    "react",
+    "charts",
+    "flowchart",
+    "d3",
+    "roughjs",
+    "sketch",
+    "hand-drawn",
+    "svg",
+    "dataviz"
+  ],
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "dependencies": {
+    "d3-hierarchy": "^3.1.2",
+    "d3-scale": "^4.0.2",
+    "d3-shape": "^3.2.0",
+    "roughjs": "^4.6.6"
+  },
+  "devDependencies": {
+    "@types/d3-hierarchy": "^3.1.7",
+    "@types/d3-scale": "^4.0.8",
+    "@types/d3-shape": "^3.1.6",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwindcss": "^3.4.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0",
+    "vite": "^5.4.0",
+    "vitest": "^1.6.0"
+  }
+}
