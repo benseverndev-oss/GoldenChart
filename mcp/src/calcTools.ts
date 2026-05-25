@@ -8,11 +8,15 @@ import {
   areaPath,
   computePie,
   layoutTree,
+  colorRamp,
+  divergingColor,
+  sequentialColor,
 } from 'goldenchart';
-import type { ChartDatum, FlowDirection, FlowEdge, FlowNode } from 'goldenchart';
+import type { ChartDatum, ColorScaleName, FlowDirection, FlowEdge, FlowNode } from 'goldenchart';
 import type { ToolDef } from './registry';
 import {
   ChartDatumSchema,
+  ColorScaleNameSchema,
   CurveSchema,
   FlowDirectionSchema,
   FlowEdgeSchema,
@@ -172,6 +176,37 @@ export const calcTools: ToolDef[] = [
         content: [{ type: 'text', text: JSON.stringify(layout, null, 2) }],
         structuredContent: layout as unknown as Record<string, unknown>,
       };
+    },
+  },
+  {
+    name: 'compute_color_scale',
+    config: {
+      title: 'Compute Color Scale',
+      description:
+        'Map a numeric domain onto a named color scale: sample colors, plus the color for a specific value.',
+      inputSchema: {
+        scale: ColorScaleNameSchema,
+        domain: z.tuple([z.number(), z.number()]),
+        steps: z.number().int().positive().optional(),
+        diverging: z.boolean().optional(),
+        value: z.number().optional(),
+      },
+      outputSchema: {
+        ramp: z.array(z.string()),
+        valueColor: z.string().optional(),
+      },
+    },
+    handler: async (args) => {
+      const scale = args.scale as ColorScaleName;
+      const [min, max] = args.domain as [number, number];
+      const steps = (args.steps as number | undefined) ?? 7;
+      const color = (args.diverging as boolean | undefined)
+        ? divergingColor(scale, [min, (min + max) / 2, max])
+        : sequentialColor(scale, [min, max]);
+      const ramp = colorRamp(scale, steps);
+      const valueColor = args.value !== undefined ? color(args.value as number) : undefined;
+      const payload = { ramp, valueColor };
+      return { content: [{ type: 'text', text: JSON.stringify(payload, null, 2) }], structuredContent: payload };
     },
   },
 ];

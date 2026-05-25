@@ -7,13 +7,15 @@ interface SketchPathsProps {
   style?: CSSProperties;
   onClick?: (event: MouseEvent<SVGElement>) => void;
   children?: ReactNode;
+  /** Normalize path length to 1 so the draw-on reveal animation can dash it. */
+  animate?: boolean;
 }
 
 /**
  * Internal: renders Rough.js path descriptors as real SVG `<path>` elements so
  * React—not Rough.js—owns the DOM. Shared by every primitive.
  */
-export function SketchPaths({ paths, className, style, onClick, children }: SketchPathsProps) {
+export function SketchPaths({ paths, className, style, onClick, children, animate }: SketchPathsProps) {
   return (
     <g className={className} style={style} onClick={onClick}>
       {paths.map((p, i) => (
@@ -25,7 +27,7 @@ export function SketchPaths({ paths, className, style, onClick, children }: Sket
           fill={p.fill}
           strokeLinecap="round"
           strokeLinejoin="round"
-          pathLength={1}
+          pathLength={animate ? 1 : undefined}
         />
       ))}
       {children}
