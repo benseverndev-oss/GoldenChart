@@ -8,6 +8,7 @@ import {
   Flowchart,
   MindMap,
   OrgChart,
+  ArchitectureDiagram,
   SankeyChart,
   TreemapChart,
   HeatmapChart,
@@ -154,6 +155,25 @@ const ORG_NODES: FlowNode[] = [
   { id: 'fin', label: 'Finance', parent: 'cfo' },
 ];
 
+const ARCH_NODES: FlowNode[] = [
+  { id: 'web', label: 'Web App', group: 'Frontend' },
+  { id: 'mobile', label: 'Mobile', group: 'Frontend' },
+  { id: 'gateway', label: 'API Gateway', group: 'Backend' },
+  { id: 'auth', label: 'Auth', group: 'Backend' },
+  { id: 'worker', label: 'Worker', group: 'Backend' },
+  { id: 'db', label: 'Postgres', group: 'Data' },
+  { id: 'cache', label: 'Redis', group: 'Data' },
+];
+
+const ARCH_EDGES = [
+  { from: 'web', to: 'gateway' },
+  { from: 'mobile', to: 'gateway' },
+  { from: 'gateway', to: 'auth' },
+  { from: 'gateway', to: 'worker' },
+  { from: 'auth', to: 'cache' },
+  { from: 'worker', to: 'db' },
+];
+
 const SPARK_POINTS = [3, 7, 4, 9, 6, 11, 8, 14].map((v, i) => ({ x: i * 50, y: 120 - v * 7 }));
 
 export function App() {
@@ -270,6 +290,10 @@ export function App() {
 
         <Panel title="OrgChart (hierarchy of boxes)">
           <OrgChart width={460} height={300} vibe={vibe} nodes={ORG_NODES} />
+        </Panel>
+
+        <Panel title="ArchitectureDiagram (zones + routed links)">
+          <ArchitectureDiagram width={460} height={360} vibe={vibe} nodes={ARCH_NODES} edges={ARCH_EDGES} />
         </Panel>
 
         <Panel title="Sankey (weighted flow)">

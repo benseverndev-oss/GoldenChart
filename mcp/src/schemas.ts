@@ -79,6 +79,7 @@ export const FlowNodeSchema = z.object({
   width: z.number().optional(),
   height: z.number().optional(),
   shape: z.enum(['rect', 'ellipse', 'diamond']).optional(),
+  group: z.string().optional(),
   vibe: VibeConfigSchema.optional(),
 });
 

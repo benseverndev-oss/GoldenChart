@@ -25,11 +25,29 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
     ],
     direction: 'TB',
   },
+  render_architecture: {
+    width: 480,
+    height: 320,
+    vibe: 'clean_blueprint',
+    nodes: [
+      { id: 'web', label: 'Web', group: 'Frontend' },
+      { id: 'api', label: 'API', group: 'Backend' },
+      { id: 'worker', label: 'Worker', group: 'Backend' },
+      { id: 'db', label: 'Database', group: 'Data' },
+    ],
+    edges: [
+      { from: 'web', to: 'api' },
+      { from: 'api', to: 'db' },
+      { from: 'worker', to: 'db' },
+    ],
+  },
 };
 
 describe('diagram render tools', () => {
   it('registers the Roadmap 1 diagram types', () => {
-    expect(tools.map((t) => t.name).sort()).toEqual(['render_mind_map', 'render_org_chart'].sort());
+    expect(tools.map((t) => t.name).sort()).toEqual(
+      ['render_architecture', 'render_mind_map', 'render_org_chart'].sort(),
+    );
   });
 
   for (const tool of tools) {

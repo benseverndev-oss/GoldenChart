@@ -18,6 +18,8 @@ export { MindMap } from './MindMap';
 export type { MindMapProps } from './MindMap';
 export { OrgChart } from './OrgChart';
 export type { OrgChartProps } from './OrgChart';
+export { ArchitectureDiagram } from './ArchitectureDiagram';
+export type { ArchitectureDiagramProps } from './ArchitectureDiagram';
 export { SankeyChart } from './SankeyChart';
 export type { SankeyChartProps } from './SankeyChart';
 export { TreemapChart } from './TreemapChart';

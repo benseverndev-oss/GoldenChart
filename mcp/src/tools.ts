@@ -3,6 +3,7 @@ import {
   AreaChart,
   BarChart,
   Flowchart,
+  ArchitectureDiagram,
   HeatmapChart,
   LineChart,
   MindMap,
@@ -248,6 +249,21 @@ export const diagramTools: ToolDef[] = [
       nodes: z.array(FlowNodeSchema).min(1),
       edges: z.array(FlowEdgeSchema).optional(),
       direction: FlowDirectionSchema.optional(),
+    },
+  }),
+  makeRenderTool({
+    name: 'render_architecture',
+    title: 'Render Architecture Diagram',
+    description:
+      'Render a hand-drawn architecture / network diagram: components (optionally grouped into zone containers via each node’s group) joined by connectors that route orthogonally around the other boxes.',
+    kind: 'architecture',
+    component: ArchitectureDiagram,
+    inputShape: {
+      ...baseChartShape,
+      nodes: z.array(FlowNodeSchema).min(1),
+      edges: z.array(FlowEdgeSchema).optional(),
+      direction: FlowDirectionSchema.optional(),
+      showArrowheads: z.boolean().optional(),
     },
   }),
 ];
