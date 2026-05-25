@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.18.0",
+    "@resvg/resvg-js": "^2.6.2",
     "goldenchart": "file:..",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

@@ -169,3 +169,18 @@ export const PrimitiveSpecSchema = z.discriminatedUnion('kind', [
 ]);
 
 export type PrimitiveSpec = z.infer<typeof PrimitiveSpecSchema>;
+
+/** A chart placed within a composed scene (offset by `at`, own dimensions). */
+export const ChartNodeSchema = z.object({
+  kind: z.literal('chart'),
+  chart: z.enum(['bar', 'line', 'area', 'scatter', 'pie', 'flow']),
+  at: z.object({ x: z.number(), y: z.number() }).optional(),
+  width: z.number().positive(),
+  height: z.number().positive(),
+  /** Chart-specific props (data/series/nodes, options) passed straight through. */
+  props: z.record(z.unknown()).optional(),
+});
+
+/** A node in a composed scene: a primitive or a positioned chart. */
+export const SceneNodeSchema = z.union([PrimitiveSpecSchema, ChartNodeSchema]);
+export type SceneNode = z.infer<typeof SceneNodeSchema>;
