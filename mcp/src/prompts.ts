@@ -23,11 +23,11 @@ export function registerPrompts(server: McpServer): void {
               mood
                 ? `2. Desired mood: "${mood}". Call list_vibe_presets, pick the closest preset, and (optionally) call resolve_vibe to fine-tune it.`
                 : '2. Call list_vibe_presets and pick a preset that suits the data (default: messy_sketch).',
-              '3. Choose the right chart: bar (categories), line/area (trends over a numeric x), scatter (correlation), pie (parts of a whole), flow (process/decisions).',
-              '4. Call the matching render tool (render_bar_chart, render_line_chart, render_area_chart, render_scatter_plot, render_pie_chart, or render_flowchart) with the data and chosen vibe.',
+              '3. Fastest path: if you have the data as records, call visualize_data with the data (and an optional intent like "trend"/"composition") and the chosen vibe — it profiles the data, picks the best-fit chart, and returns the SVG plus the rationale and alternatives.',
+              '4. Manual path: if you want a specific chart, call the matching render tool (render_bar_chart, render_line_chart, render_area_chart, render_scatter_plot, render_pie_chart, render_flowchart, render_sankey, render_treemap, render_heatmap, render_radar) with the data and vibe.',
               '5. If a raster image is needed, pass the returned SVG to export_png.',
               '',
-              'Return the final SVG (or PNG) to the user.',
+              'Return the final SVG (or PNG) to the user, and mention which chart was chosen and why if you used visualize_data.',
             ].join('\n'),
           },
         },
