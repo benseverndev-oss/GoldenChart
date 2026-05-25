@@ -6,6 +6,12 @@ import {
   ScatterPlot,
   PieChart,
   Flowchart,
+  MindMap,
+  OrgChart,
+  ArchitectureDiagram,
+  SequenceDiagram,
+  ERDiagram,
+  Timeline,
   SankeyChart,
   TreemapChart,
   HeatmapChart,
@@ -23,6 +29,11 @@ import type {
   MultiSeriesDatum,
   Series,
   ScatterDatum,
+  SequenceActorInput,
+  SequenceMessageInput,
+  EREntityInput,
+  ERRelationshipInput,
+  TimelineEventInput,
   VibeConfig,
   VibePreset,
 } from 'goldenchart';
@@ -129,6 +140,106 @@ const DAG_EDGES = [
   { from: 'cache', to: 'merge' },
   { from: 'merge', to: 'render' },
   { from: 'render', to: 'out', label: 'ok' },
+];
+
+const MIND_NODES: FlowNode[] = [
+  { id: 'root', label: 'Launch' },
+  { id: 'mkt', label: 'Marketing', parent: 'root' },
+  { id: 'eng', label: 'Engineering', parent: 'root' },
+  { id: 'ops', label: 'Ops', parent: 'root' },
+  { id: 'mkt1', label: 'Campaign', parent: 'mkt' },
+  { id: 'mkt2', label: 'Launch event', parent: 'mkt' },
+  { id: 'eng1', label: 'API', parent: 'eng' },
+  { id: 'eng2', label: 'Web app', parent: 'eng' },
+  { id: 'ops1', label: 'Support', parent: 'ops' },
+];
+
+const ORG_NODES: FlowNode[] = [
+  { id: 'ceo', label: 'CEO' },
+  { id: 'cto', label: 'CTO', parent: 'ceo' },
+  { id: 'cfo', label: 'CFO', parent: 'ceo' },
+  { id: 'eng', label: 'Eng Lead', parent: 'cto' },
+  { id: 'data', label: 'Data Lead', parent: 'cto' },
+  { id: 'fin', label: 'Finance', parent: 'cfo' },
+];
+
+const ARCH_NODES: FlowNode[] = [
+  { id: 'web', label: 'Web App', group: 'Frontend' },
+  { id: 'mobile', label: 'Mobile', group: 'Frontend' },
+  { id: 'gateway', label: 'API Gateway', group: 'Backend' },
+  { id: 'auth', label: 'Auth', group: 'Backend' },
+  { id: 'worker', label: 'Worker', group: 'Backend' },
+  { id: 'db', label: 'Postgres', group: 'Data' },
+  { id: 'cache', label: 'Redis', group: 'Data' },
+];
+
+const ARCH_EDGES = [
+  { from: 'web', to: 'gateway' },
+  { from: 'mobile', to: 'gateway' },
+  { from: 'gateway', to: 'auth' },
+  { from: 'gateway', to: 'worker' },
+  { from: 'auth', to: 'cache' },
+  { from: 'worker', to: 'db' },
+];
+
+const SEQ_ACTORS: SequenceActorInput[] = [
+  { id: 'user', label: 'User' },
+  { id: 'web', label: 'Web App' },
+  { id: 'api', label: 'API' },
+  { id: 'db', label: 'Database' },
+];
+
+const SEQ_MESSAGES: SequenceMessageInput[] = [
+  { from: 'user', to: 'web', label: 'submit form' },
+  { from: 'web', to: 'api', label: 'POST /order' },
+  { from: 'api', to: 'api', label: 'validate' },
+  { from: 'api', to: 'db', label: 'INSERT' },
+  { from: 'db', to: 'api', label: 'ok', kind: 'reply' },
+  { from: 'api', to: 'web', label: '201 Created', kind: 'reply' },
+  { from: 'web', to: 'user', label: 'confirmation', kind: 'reply' },
+];
+
+const ER_ENTITIES: EREntityInput[] = [
+  {
+    id: 'user',
+    label: 'User',
+    fields: [
+      { name: 'id', type: 'uuid', key: 'PK' },
+      { name: 'email', type: 'text' },
+      { name: 'name', type: 'text' },
+    ],
+  },
+  {
+    id: 'order',
+    label: 'Order',
+    fields: [
+      { name: 'id', type: 'uuid', key: 'PK' },
+      { name: 'user_id', type: 'uuid', key: 'FK' },
+      { name: 'total', type: 'numeric' },
+    ],
+  },
+  {
+    id: 'item',
+    label: 'LineItem',
+    fields: [
+      { name: 'id', type: 'uuid', key: 'PK' },
+      { name: 'order_id', type: 'uuid', key: 'FK' },
+      { name: 'qty', type: 'int' },
+    ],
+  },
+];
+
+const ER_RELS: ERRelationshipInput[] = [
+  { from: 'user', to: 'order', fromCardinality: '1', toCardinality: 'N' },
+  { from: 'order', to: 'item', fromCardinality: '1', toCardinality: 'N' },
+];
+
+const TIMELINE_EVENTS: TimelineEventInput[] = [
+  { date: '2021', label: 'Founded', detail: 'Two people, one idea' },
+  { date: '2022', label: 'Seed round' },
+  { date: '2023', label: 'Public launch', detail: 'First 10k users' },
+  { date: '2024', label: 'Series A' },
+  { date: '2025', label: 'Profitable' },
 ];
 
 const SPARK_POINTS = [3, 7, 4, 9, 6, 11, 8, 14].map((v, i) => ({ x: i * 50, y: 120 - v * 7 }));
@@ -239,6 +350,30 @@ export function App() {
             direction="TB"
             routing="orthogonal"
           />
+        </Panel>
+
+        <Panel title="MindMap (radial tree)">
+          <MindMap width={460} height={360} vibe={vibe} nodes={MIND_NODES} />
+        </Panel>
+
+        <Panel title="OrgChart (hierarchy of boxes)">
+          <OrgChart width={460} height={300} vibe={vibe} nodes={ORG_NODES} />
+        </Panel>
+
+        <Panel title="ArchitectureDiagram (zones + routed links)">
+          <ArchitectureDiagram width={460} height={360} vibe={vibe} nodes={ARCH_NODES} edges={ARCH_EDGES} />
+        </Panel>
+
+        <Panel title="SequenceDiagram (actors + messages)">
+          <SequenceDiagram width={460} height={360} vibe={vibe} actors={SEQ_ACTORS} messages={SEQ_MESSAGES} />
+        </Panel>
+
+        <Panel title="ERDiagram (entities + cardinality)">
+          <ERDiagram width={460} height={340} vibe={vibe} entities={ER_ENTITIES} relationships={ER_RELS} />
+        </Panel>
+
+        <Panel title="Timeline (events along an axis)">
+          <Timeline width={460} height={240} vibe={vibe} events={TIMELINE_EVENTS} />
         </Panel>
 
         <Panel title="Sankey (weighted flow)">

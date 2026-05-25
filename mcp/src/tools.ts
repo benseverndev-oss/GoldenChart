@@ -3,12 +3,18 @@ import {
   AreaChart,
   BarChart,
   Flowchart,
+  ArchitectureDiagram,
+  ERDiagram,
   HeatmapChart,
   LineChart,
+  MindMap,
+  OrgChart,
   PieChart,
   RadarChart,
   SankeyChart,
   ScatterPlot,
+  SequenceDiagram,
+  Timeline,
   TreemapChart,
 } from 'goldenchart';
 import { makeRenderTool } from './registry';
@@ -27,6 +33,8 @@ import {
   ColorScaleNameSchema,
   CurveSchema,
   EdgeRoutingSchema,
+  EREntitySchema,
+  ERRelationshipSchema,
   FlowDirectionSchema,
   FlowEdgeSchema,
   FlowNodeSchema,
@@ -35,6 +43,9 @@ import {
   RadarSeriesSchema,
   SankeyLinkSchema,
   SankeyNodeSchema,
+  SequenceActorSchema,
+  SequenceMessageSchema,
+  TimelineEventSchema,
   ScatterDatumSchema,
   SeriesSchema,
   TreemapDatumSchema,
@@ -216,10 +227,101 @@ export const extraChartTools: ToolDef[] = [
   }),
 ];
 
+/**
+ * Roadmap 1 diagram types — each a layout engine plus the shared diagram
+ * renderer. Kept in their own array so the chart catalog/tests stay stable.
+ */
+export const diagramTools: ToolDef[] = [
+  makeRenderTool({
+    name: 'render_mind_map',
+    title: 'Render Mind Map',
+    description:
+      'Render a hand-drawn mind map: a radial tree fanning out from a central root node, with straight spokes.',
+    kind: 'mindmap',
+    component: MindMap,
+    inputShape: {
+      ...baseChartShape,
+      nodes: z.array(FlowNodeSchema).min(1),
+      edges: z.array(FlowEdgeSchema).optional(),
+    },
+  }),
+  makeRenderTool({
+    name: 'render_org_chart',
+    title: 'Render Org Chart',
+    description:
+      'Render a hand-drawn organisation chart: a tidy hierarchy of rectangular boxes joined by plain elbow connectors.',
+    kind: 'org',
+    component: OrgChart,
+    inputShape: {
+      ...baseChartShape,
+      nodes: z.array(FlowNodeSchema).min(1),
+      edges: z.array(FlowEdgeSchema).optional(),
+      direction: FlowDirectionSchema.optional(),
+    },
+  }),
+  makeRenderTool({
+    name: 'render_architecture',
+    title: 'Render Architecture Diagram',
+    description:
+      'Render a hand-drawn architecture / network diagram: components (optionally grouped into zone containers via each node’s group) joined by connectors that route orthogonally around the other boxes.',
+    kind: 'architecture',
+    component: ArchitectureDiagram,
+    inputShape: {
+      ...baseChartShape,
+      nodes: z.array(FlowNodeSchema).min(1),
+      edges: z.array(FlowEdgeSchema).optional(),
+      direction: FlowDirectionSchema.optional(),
+      showArrowheads: z.boolean().optional(),
+    },
+  }),
+  makeRenderTool({
+    name: 'render_sequence',
+    title: 'Render Sequence Diagram',
+    description:
+      'Render a hand-drawn sequence / interaction diagram: actors with lifelines and ordered messages between them (reply messages dashed, self-messages loop back).',
+    kind: 'sequence',
+    component: SequenceDiagram,
+    inputShape: {
+      ...baseChartShape,
+      actors: z.array(SequenceActorSchema).min(1),
+      messages: z.array(SequenceMessageSchema),
+      actorHeight: z.number().optional(),
+    },
+  }),
+  makeRenderTool({
+    name: 'render_er_diagram',
+    title: 'Render ER Diagram',
+    description:
+      'Render a hand-drawn entity-relationship diagram: titled entity boxes with field rows (PK/FK markers), joined by orthogonally routed connectors carrying cardinality markers.',
+    kind: 'er',
+    component: ERDiagram,
+    inputShape: {
+      ...baseChartShape,
+      entities: z.array(EREntitySchema).min(1),
+      relationships: z.array(ERRelationshipSchema).optional(),
+      direction: FlowDirectionSchema.optional(),
+    },
+  }),
+  makeRenderTool({
+    name: 'render_timeline',
+    title: 'Render Timeline',
+    description:
+      'Render a hand-drawn timeline: ordered events along a central axis (horizontal or vertical), labels alternating to either side.',
+    kind: 'timeline',
+    component: Timeline,
+    inputShape: {
+      ...baseChartShape,
+      events: z.array(TimelineEventSchema).min(1),
+      orientation: z.enum(['horizontal', 'vertical']).optional(),
+    },
+  }),
+];
+
 /** The full catalog the server registers across every level. */
 export const tools: ToolDef[] = [
   ...chartTools,
   ...extraChartTools,
+  ...diagramTools,
   ...vibeTools,
   ...calcTools,
   ...primitiveTools,
