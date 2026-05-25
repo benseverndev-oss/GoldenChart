@@ -17,7 +17,12 @@ describe('compose_surface', () => {
           at: { x: 0, y: 30 },
           width: 200,
           height: 180,
-          props: { data: [{ label: 'a', value: 3 }, { label: 'b', value: 6 }] },
+          props: {
+            data: [
+              { label: 'a', value: 3 },
+              { label: 'b', value: 6 },
+            ],
+          },
         },
         {
           kind: 'chart',
@@ -25,7 +30,12 @@ describe('compose_surface', () => {
           at: { x: 210, y: 30 },
           width: 180,
           height: 180,
-          props: { data: [{ label: 'x', value: 2 }, { label: 'y', value: 1 }] },
+          props: {
+            data: [
+              { label: 'x', value: 2 },
+              { label: 'y', value: 1 },
+            ],
+          },
         },
       ],
     });

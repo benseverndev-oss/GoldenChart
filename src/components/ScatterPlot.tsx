@@ -46,8 +46,20 @@ export function ScatterPlot({
   const plot = getPlotArea(width, height, margin);
 
   const { x, y, points } = useMemo(() => {
-    const xScale = linearScale(extentOf(data.map((d) => d.x), false), [plot.x, plot.x + plot.width]);
-    const yScale = linearScale(extentOf(data.map((d) => d.y), false), [plot.y + plot.height, plot.y]);
+    const xScale = linearScale(
+      extentOf(
+        data.map((d) => d.x),
+        false,
+      ),
+      [plot.x, plot.x + plot.width],
+    );
+    const yScale = linearScale(
+      extentOf(
+        data.map((d) => d.y),
+        false,
+      ),
+      [plot.y + plot.height, plot.y],
+    );
     const rValues = data.map((d) => d.r).filter((r): r is number => r !== undefined);
     const rScale = rValues.length ? sqrtScale([0, Math.max(...rValues)], [2, maxRadius]) : null;
 
@@ -62,7 +74,15 @@ export function ScatterPlot({
   }, [data, radius, maxRadius, plot.x, plot.y, plot.width, plot.height]);
 
   return (
-    <Surface width={width} height={height} vibe={vibe} title={title} className={className} style={style} bare={bare}>
+    <Surface
+      width={width}
+      height={height}
+      vibe={vibe}
+      title={title}
+      className={className}
+      style={style}
+      bare={bare}
+    >
       {showGrid && <Grid plot={plot} xScale={x} yScale={y} />}
       {points.map((p, i) => (
         <ScatterDot key={i} point={p} index={i} />

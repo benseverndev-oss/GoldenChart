@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { exportTools } from './exportTools';
 
 const byName = (name: string) => exportTools.find((t) => t.name === name)!;
-const SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect width="20" height="20" fill="red"/></svg>';
+const SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect width="20" height="20" fill="red"/></svg>';
 
 describe('export_svg', () => {
   it('returns a data URI when no path is given', async () => {

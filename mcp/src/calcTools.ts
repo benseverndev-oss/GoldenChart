@@ -78,7 +78,10 @@ export const calcTools: ToolDef[] = [
     handler: async (args) => {
       const { ticks, bandwidth } = buildScaleTicks(args);
       const payload = { kind: args.type as string, ticks, bandwidth, range: args.range as [number, number] };
-      return { content: [{ type: 'text', text: JSON.stringify(payload, null, 2) }], structuredContent: payload };
+      return {
+        content: [{ type: 'text', text: JSON.stringify(payload, null, 2) }],
+        structuredContent: payload,
+      };
     },
   },
   {
@@ -91,7 +94,10 @@ export const calcTools: ToolDef[] = [
     },
     handler: async (args) => {
       const { ticks } = buildScaleTicks(args);
-      return { content: [{ type: 'text', text: JSON.stringify({ ticks }, null, 2) }], structuredContent: { ticks } };
+      return {
+        content: [{ type: 'text', text: JSON.stringify({ ticks }, null, 2) }],
+        structuredContent: { ticks },
+      };
     },
   },
   {
@@ -120,7 +126,11 @@ export const calcTools: ToolDef[] = [
       outputSchema: { d: z.string() },
     },
     handler: async (args) => {
-      const d = areaPath(args.points as { x: number; y: number }[], args.baselineY as number, args.curve as never);
+      const d = areaPath(
+        args.points as { x: number; y: number }[],
+        args.baselineY as number,
+        args.curve as never,
+      );
       return { content: [{ type: 'text', text: d }], structuredContent: { d } };
     },
   },
@@ -144,14 +154,18 @@ export const calcTools: ToolDef[] = [
         args.innerRadius as number | undefined,
         args.padAngle as number | undefined,
       );
-      return { content: [{ type: 'text', text: JSON.stringify({ slices }, null, 2) }], structuredContent: { slices } };
+      return {
+        content: [{ type: 'text', text: JSON.stringify({ slices }, null, 2) }],
+        structuredContent: { slices },
+      };
     },
   },
   {
     name: 'layout_tree',
     config: {
       title: 'Layout Tree',
-      description: 'Lay out flowchart nodes into a tidy tree (any direction); returns node + edge coordinates.',
+      description:
+        'Lay out flowchart nodes into a tidy tree (any direction); returns node + edge coordinates.',
       inputSchema: {
         nodes: z.array(FlowNodeSchema).min(1),
         width: z.number().positive(),

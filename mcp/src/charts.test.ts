@@ -17,13 +17,31 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
     width: 200,
     height: 140,
     vibe: 'clean_blueprint',
-    series: [{ id: 's1', points: [{ x: 0, y: 1 }, { x: 1, y: 4 }, { x: 2, y: 2 }] }],
+    series: [
+      {
+        id: 's1',
+        points: [
+          { x: 0, y: 1 },
+          { x: 1, y: 4 },
+          { x: 2, y: 2 },
+        ],
+      },
+    ],
   },
   render_area_chart: {
     width: 200,
     height: 140,
     vibe: 'clean_blueprint',
-    series: [{ id: 's1', points: [{ x: 0, y: 1 }, { x: 1, y: 4 }, { x: 2, y: 2 }] }],
+    series: [
+      {
+        id: 's1',
+        points: [
+          { x: 0, y: 1 },
+          { x: 1, y: 4 },
+          { x: 2, y: 2 },
+        ],
+      },
+    ],
   },
   render_scatter_plot: {
     width: 200,

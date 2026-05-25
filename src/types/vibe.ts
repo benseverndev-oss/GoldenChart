@@ -7,14 +7,7 @@ import type { Options as RoughOptions } from 'roughjs/bin/core';
 export type VibePreset = 'messy_sketch' | 'clean_blueprint' | 'chaotic_notebook';
 
 /** Rough.js fill hatching styles, surfaced verbatim so power users keep full control. */
-export type FillStyle =
-  | 'hachure'
-  | 'solid'
-  | 'zigzag'
-  | 'cross-hatch'
-  | 'dots'
-  | 'dashed'
-  | 'zigzag-line';
+export type FillStyle = 'hachure' | 'solid' | 'zigzag' | 'cross-hatch' | 'dots' | 'dashed' | 'zigzag-line';
 
 /**
  * The individual aesthetic knobs. Every field is optional so overrides can be

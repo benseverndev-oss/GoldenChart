@@ -44,7 +44,13 @@ export function AreaChart({
 
   const { x, y, areas } = useMemo(() => {
     const allPoints = series.flatMap((s) => s.points);
-    const xScale = linearScale(extentOf(allPoints.map((p) => p.x), false), [plot.x, plot.x + plot.width]);
+    const xScale = linearScale(
+      extentOf(
+        allPoints.map((p) => p.x),
+        false,
+      ),
+      [plot.x, plot.x + plot.width],
+    );
     const yScale = linearScale(extentOf([...allPoints.map((p) => p.y), baseline]), [
       plot.y + plot.height,
       plot.y,
@@ -65,7 +71,15 @@ export function AreaChart({
   }, [series, curve, baseline, plot.x, plot.y, plot.width, plot.height]);
 
   return (
-    <Surface width={width} height={height} vibe={vibe} title={title} className={className} style={style} bare={bare}>
+    <Surface
+      width={width}
+      height={height}
+      vibe={vibe}
+      title={title}
+      className={className}
+      style={style}
+      bare={bare}
+    >
       {showGrid && <Grid plot={plot} xScale={x} yScale={y} />}
       {areas.map((a, i) => (
         <g key={a.id}>

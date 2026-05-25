@@ -6,7 +6,9 @@ const byName = (name: string) => vibeTools.find((t) => t.name === name)!;
 describe('vibe tools', () => {
   it('list_vibe_presets returns all built-in presets with resolved knobs', async () => {
     const result = await byName('list_vibe_presets').handler({});
-    const payload = result.structuredContent as { presets: { name: string; resolved: { roughness: number } }[] };
+    const payload = result.structuredContent as {
+      presets: { name: string; resolved: { roughness: number } }[];
+    };
     expect(payload.presets.map((p) => p.name)).toEqual(
       expect.arrayContaining(['messy_sketch', 'clean_blueprint', 'chaotic_notebook']),
     );

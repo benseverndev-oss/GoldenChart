@@ -13,7 +13,12 @@ function renderPrimitive(args: Record<string, unknown>, spec: PrimitiveSpec): To
   const svg = renderToSVGString(
     createElement(
       Surface,
-      { width: viewport.width, height: viewport.height, vibe: args.vibe as VibeConfig | undefined, bare: true },
+      {
+        width: viewport.width,
+        height: viewport.height,
+        vibe: args.vibe as VibeConfig | undefined,
+        bare: true,
+      },
       primitiveToElement(spec, 'p'),
     ),
   );

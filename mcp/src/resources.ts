@@ -41,7 +41,11 @@ export function registerResources(server: McpServer): void {
     },
     async (uri) => {
       const presets = Object.entries(VIBE_PRESETS).map(([name, resolved]) => ({ name, resolved }));
-      return { contents: [{ uri: uri.href, mimeType: 'application/json', text: JSON.stringify({ presets }, null, 2) }] };
+      return {
+        contents: [
+          { uri: uri.href, mimeType: 'application/json', text: JSON.stringify({ presets }, null, 2) },
+        ],
+      };
     },
   );
 
@@ -69,7 +73,11 @@ export function registerResources(server: McpServer): void {
         throw new Error(`Unknown chart type: ${type}`);
       }
       const jsonSchema = zodToJsonSchema(z.object(tool.config.inputSchema), `${type}_chart_input`);
-      return { contents: [{ uri: uri.href, mimeType: 'application/json', text: JSON.stringify(jsonSchema, null, 2) }] };
+      return {
+        contents: [
+          { uri: uri.href, mimeType: 'application/json', text: JSON.stringify(jsonSchema, null, 2) },
+        ],
+      };
     },
   );
 

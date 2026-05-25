@@ -3,7 +3,10 @@ import { arrowHeadPath, diamondPath, ellipsePath, linePath, linkPath } from './s
 
 describe('shape path generators', () => {
   it('linePath builds a path through points', () => {
-    const d = linePath([{ x: 0, y: 0 }, { x: 10, y: 10 }]);
+    const d = linePath([
+      { x: 0, y: 0 },
+      { x: 10, y: 10 },
+    ]);
     expect(d.startsWith('M')).toBe(true);
   });
 

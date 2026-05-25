@@ -6,18 +6,7 @@ import { getRoughGenerator, drawableToPaths } from '../render/roughGenerator';
 import { SketchPaths } from './SketchPaths';
 
 /** A sketchy straight line between two D3-computed coordinates. */
-export function RoughLine({
-  x1,
-  y1,
-  x2,
-  y2,
-  vibe,
-  seed,
-  stroke,
-  className,
-  style,
-  onClick,
-}: RoughLineProps) {
+export function RoughLine({ x1, y1, x2, y2, vibe, seed, stroke, className, style, onClick }: RoughLineProps) {
   const resolved = useResolvedVibe(vibe, seed);
 
   const paths = useMemo(() => {

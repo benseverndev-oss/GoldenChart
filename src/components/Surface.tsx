@@ -54,7 +54,9 @@ export function Surface({
 
   return (
     <VibeProvider vibe={vibe}>
-      {bare ? svg : (
+      {bare ? (
+        svg
+      ) : (
         <div className={className} style={style}>
           {svg}
         </div>

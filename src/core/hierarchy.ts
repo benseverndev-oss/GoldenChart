@@ -92,8 +92,8 @@ export function layoutTree(
     return node;
   });
 
-  const edgeSource: FlowEdge[] = explicitEdges ??
-    positioned.links().map((l) => ({ from: l.source.data.id, to: l.target.data.id }));
+  const edgeSource: FlowEdge[] =
+    explicitEdges ?? positioned.links().map((l) => ({ from: l.source.data.id, to: l.target.data.id }));
 
   const laidOutEdges: LaidOutEdge[] = edgeSource.flatMap((e) => {
     const s = byId.get(e.from);

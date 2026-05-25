@@ -30,7 +30,10 @@ export const vibeTools: ToolDef[] = [
     handler: async () => {
       const presets = Object.entries(VIBE_PRESETS).map(([name, resolved]) => ({ name, resolved }));
       const payload = { presets };
-      return { content: [{ type: 'text', text: JSON.stringify(payload, null, 2) }], structuredContent: payload };
+      return {
+        content: [{ type: 'text', text: JSON.stringify(payload, null, 2) }],
+        structuredContent: payload,
+      };
     },
   },
   {
@@ -46,7 +49,10 @@ export const vibeTools: ToolDef[] = [
       const resolved = resolveVibe(args.vibe as VibeConfig);
       const roughOptions = vibeToRoughOptions(resolved);
       const payload = { resolved, roughOptions } as Record<string, unknown>;
-      return { content: [{ type: 'text', text: JSON.stringify(payload, null, 2) }], structuredContent: payload };
+      return {
+        content: [{ type: 'text', text: JSON.stringify(payload, null, 2) }],
+        structuredContent: payload,
+      };
     },
   },
   {
@@ -71,7 +77,13 @@ export const vibeTools: ToolDef[] = [
           createElement(RoughRectangle, { key: 'r', x: 14, y: 24, width: 72, height: 56 }),
           createElement(RoughLine, { key: 'l', x1: 104, y1: 78, x2: 160, y2: 26 }),
           createElement(RoughCircle, { key: 'c', cx: 196, cy: 44, diameter: 40 }),
-          createElement(RoughText, { key: 't', x: width / 2, y: height - 10, anchor: 'middle', children: 'GoldenChart' }),
+          createElement(RoughText, {
+            key: 't',
+            x: width / 2,
+            y: height - 10,
+            anchor: 'middle',
+            children: 'GoldenChart',
+          }),
         ),
       );
       const structuredContent = { svg, meta: { kind: 'vibe-preview', width, height } };

@@ -18,4 +18,4 @@ export interface BoundingBox {
 }
 
 /** Inner plotting area after margins are subtracted from the outer surface. */
-export interface PlotArea extends BoundingBox {}
+export type PlotArea = BoundingBox;

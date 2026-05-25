@@ -39,7 +39,13 @@ export function LineChart({
 
   const { x, y, lines } = useMemo(() => {
     const allPoints = series.flatMap((s) => s.points);
-    const xScale = linearScale(extentOf(allPoints.map((p) => p.x), false), [plot.x, plot.x + plot.width]);
+    const xScale = linearScale(
+      extentOf(
+        allPoints.map((p) => p.x),
+        false,
+      ),
+      [plot.x, plot.x + plot.width],
+    );
     const yScale = linearScale(extentOf(allPoints.map((p) => p.y)), [plot.y + plot.height, plot.y]);
 
     const computed = series.map((s, i) => {
@@ -56,7 +62,15 @@ export function LineChart({
   }, [series, curve, plot.x, plot.y, plot.width, plot.height]);
 
   return (
-    <Surface width={width} height={height} vibe={vibe} title={title} className={className} style={style} bare={bare}>
+    <Surface
+      width={width}
+      height={height}
+      vibe={vibe}
+      title={title}
+      className={className}
+      style={style}
+      bare={bare}
+    >
       {showGrid && <Grid plot={plot} xScale={x} yScale={y} />}
       {lines.map((line, i) => (
         <g key={line.id}>

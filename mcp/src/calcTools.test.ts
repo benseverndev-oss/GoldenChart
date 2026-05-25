@@ -28,14 +28,20 @@ describe('calculation tools', () => {
 
   it('compute_line_path returns a path string', async () => {
     const res = await byName('compute_line_path').handler({
-      points: [{ x: 0, y: 0 }, { x: 10, y: 10 }],
+      points: [
+        { x: 0, y: 0 },
+        { x: 10, y: 10 },
+      ],
     });
     expect((res.structuredContent as { d: string }).d.startsWith('M')).toBe(true);
   });
 
   it('compute_pie covers a full circle', async () => {
     const res = await byName('compute_pie').handler({
-      data: [{ label: 'a', value: 1 }, { label: 'b', value: 1 }],
+      data: [
+        { label: 'a', value: 1 },
+        { label: 'b', value: 1 },
+      ],
       outerRadius: 50,
     });
     const { slices } = res.structuredContent as { slices: { startAngle: number; endAngle: number }[] };

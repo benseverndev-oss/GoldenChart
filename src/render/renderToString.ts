@@ -11,9 +11,7 @@ import type { ReactElement } from 'react';
 export function renderToSVGString(element: ReactElement): string {
   const markup = renderToStaticMarkup(element);
   if (!markup.startsWith('<svg')) {
-    throw new Error(
-      'renderToSVGString expected a bare <svg> root. Pass `bare` to the chart or Surface.',
-    );
+    throw new Error('renderToSVGString expected a bare <svg> root. Pass `bare` to the chart or Surface.');
   }
   return markup;
 }

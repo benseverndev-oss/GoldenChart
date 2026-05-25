@@ -36,13 +36,13 @@ Or add it to a client config manually:
 
 ## Tool catalog
 
-| Level | Tools |
-|-------|-------|
-| Charts | `render_bar_chart`, `render_line_chart`, `render_area_chart`, `render_scatter_plot`, `render_pie_chart`, `render_flowchart` |
-| Vibe | `list_vibe_presets`, `resolve_vibe`, `preview_vibe` |
-| Calculation | `compute_scale`, `compute_ticks`, `compute_line_path`, `compute_area_path`, `compute_pie`, `layout_tree` |
-| Primitives | `render_rough_path`, `render_rough_rect`, `render_rough_circle`, `render_rough_line`, `render_rough_text` |
-| Orchestration / export | `compose_surface`, `build_flowchart_from_spec`, `export_svg`, `export_png` |
+| Level                  | Tools                                                                                                                       |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Charts                 | `render_bar_chart`, `render_line_chart`, `render_area_chart`, `render_scatter_plot`, `render_pie_chart`, `render_flowchart` |
+| Vibe                   | `list_vibe_presets`, `resolve_vibe`, `preview_vibe`                                                                         |
+| Calculation            | `compute_scale`, `compute_ticks`, `compute_line_path`, `compute_area_path`, `compute_pie`, `layout_tree`                    |
+| Primitives             | `render_rough_path`, `render_rough_rect`, `render_rough_circle`, `render_rough_line`, `render_rough_text`                   |
+| Orchestration / export | `compose_surface`, `build_flowchart_from_spec`, `export_svg`, `export_png`                                                  |
 
 ## Resources & prompts
 

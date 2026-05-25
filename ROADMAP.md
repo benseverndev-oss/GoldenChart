@@ -44,47 +44,52 @@ We need a headless `renderToSVGString`.
 ## Levels & tool inventory
 
 ### Level 0 — Vibe (`src/vibe`)
-| Tool | Wraps | Returns |
-|------|-------|---------|
-| `list_vibe_presets` | `VIBE_PRESETS` | preset names + resolved knobs |
-| `resolve_vibe` | `resolveVibe` + `vibeToRoughOptions` | `ResolvedVibe` and the Rough.js options it maps to |
-| `preview_vibe` | a few primitives on a `Surface` | small SVG sample of the look |
+
+| Tool                | Wraps                                | Returns                                            |
+| ------------------- | ------------------------------------ | -------------------------------------------------- |
+| `list_vibe_presets` | `VIBE_PRESETS`                       | preset names + resolved knobs                      |
+| `resolve_vibe`      | `resolveVibe` + `vibeToRoughOptions` | `ResolvedVibe` and the Rough.js options it maps to |
+| `preview_vibe`      | a few primitives on a `Surface`      | small SVG sample of the look                       |
 
 ### Level 1 — Calculation (`src/core`, pure / DOM-free)
-| Tool | Wraps |
-|------|-------|
-| `compute_scale` | `linearScale` / `bandScale` / `pointScale` / `sqrtScale` |
-| `compute_ticks` | `ticksForScale` |
-| `compute_line_path` / `compute_area_path` | `linePath` / `areaPath` |
-| `compute_pie` | `computePie` |
-| `layout_tree` | `layoutTree` (returns node + edge coordinates) |
+
+| Tool                                      | Wraps                                                    |
+| ----------------------------------------- | -------------------------------------------------------- |
+| `compute_scale`                           | `linearScale` / `bandScale` / `pointScale` / `sqrtScale` |
+| `compute_ticks`                           | `ticksForScale`                                          |
+| `compute_line_path` / `compute_area_path` | `linePath` / `areaPath`                                  |
+| `compute_pie`                             | `computePie`                                             |
+| `layout_tree`                             | `layoutTree` (returns node + edge coordinates)           |
 
 These return raw geometry so an agent can reason about coordinates or feed them
 straight into Level 2.
 
 ### Level 2 — Primitives (`src/primitives`)
-| Tool | Wraps |
-|------|-------|
-| `render_rough_path` | `RoughPath` (d + vibe → `<g>`) |
-| `render_rough_rect` | `RoughRectangle` |
-| `render_rough_circle` | `RoughCircle` |
-| `render_rough_line` | `RoughLine` |
-| `render_rough_text` | `RoughText` |
+
+| Tool                  | Wraps                          |
+| --------------------- | ------------------------------ |
+| `render_rough_path`   | `RoughPath` (d + vibe → `<g>`) |
+| `render_rough_rect`   | `RoughRectangle`               |
+| `render_rough_circle` | `RoughCircle`                  |
+| `render_rough_line`   | `RoughLine`                    |
+| `render_rough_text`   | `RoughText`                    |
 
 Composable: an agent concatenates these into a custom drawing inside one surface.
 
 ### Level 3 — Charts (`src/components`)
+
 `render_bar_chart`, `render_line_chart`, `render_area_chart`,
 `render_scatter_plot`, `render_pie_chart`, `render_flowchart`.
 Input = the component props (data + vibe + size + options); output = a complete
 SVG document plus bbox/metadata.
 
 ### Level 4 — Composition & orchestration
-| Tool | Purpose |
-|------|---------|
-| `compose_surface` | wrap an arbitrary list of primitive/chart fragments into one SVG with a shared vibe |
-| `build_flowchart_from_spec` | accept nodes/edges + intent, auto-pick shapes/direction |
-| `export_svg` / `export_png` | return a data URI or write a file (PNG via a rasterizer) |
+
+| Tool                        | Purpose                                                                             |
+| --------------------------- | ----------------------------------------------------------------------------------- |
+| `compose_surface`           | wrap an arbitrary list of primitive/chart fragments into one SVG with a shared vibe |
+| `build_flowchart_from_spec` | accept nodes/edges + intent, auto-pick shapes/direction                             |
+| `export_svg` / `export_png` | return a data URI or write a file (PNG via a rasterizer)                            |
 
 ## MCP resources & prompts (later)
 
@@ -101,14 +106,14 @@ SVG document plus bbox/metadata.
 
 ## Milestones
 
-| Milestone | Scope | Done when |
-|-----------|-------|-----------|
-| **M0 Foundation** | headless render, server scaffold, `render_bar_chart` proof | one tool returns valid SVG over stdio |
-| **M1 Charts** | all 6 chart render tools + zod schemas + snapshot tests | every chart renders via a tool call |
-| **M2 Vibe** | `list_vibe_presets`, `resolve_vibe`, `preview_vibe` | agent can discover and preview every preset |
-| **M3 Primitives + Calc** | Level 1 & 2 tools | agent composes a custom diagram from low-level tools |
-| **M4 Orchestration + Export** | `compose_surface`, `build_flowchart_from_spec`, `export_png` | agent produces a multi-part figure and a raster file |
-| **M5 Resources/Prompts + Packaging** | MCP resources, guided prompt, publish | server installable + documented |
+| Milestone                            | Scope                                                        | Done when                                            |
+| ------------------------------------ | ------------------------------------------------------------ | ---------------------------------------------------- |
+| **M0 Foundation**                    | headless render, server scaffold, `render_bar_chart` proof   | one tool returns valid SVG over stdio                |
+| **M1 Charts**                        | all 6 chart render tools + zod schemas + snapshot tests      | every chart renders via a tool call                  |
+| **M2 Vibe**                          | `list_vibe_presets`, `resolve_vibe`, `preview_vibe`          | agent can discover and preview every preset          |
+| **M3 Primitives + Calc**             | Level 1 & 2 tools                                            | agent composes a custom diagram from low-level tools |
+| **M4 Orchestration + Export**        | `compose_surface`, `build_flowchart_from_spec`, `export_png` | agent produces a multi-part figure and a raster file |
+| **M5 Resources/Prompts + Packaging** | MCP resources, guided prompt, publish                        | server installable + documented                      |
 
 ## Open decisions
 

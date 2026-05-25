@@ -12,14 +12,7 @@ import {
   linePath,
   VIBE_PRESETS,
 } from 'goldenchart';
-import type {
-  ChartDatum,
-  FlowNode,
-  Series,
-  ScatterDatum,
-  VibeConfig,
-  VibePreset,
-} from 'goldenchart';
+import type { ChartDatum, FlowNode, Series, ScatterDatum, VibeConfig, VibePreset } from 'goldenchart';
 
 const PRESETS = Object.keys(VIBE_PRESETS) as VibePreset[];
 
@@ -156,7 +149,14 @@ export function App() {
           <div className="flex flex-wrap gap-2">
             {PRESETS.map((p) => (
               <div key={p} className="text-center">
-                <BarChart width={150} height={110} vibe={p} data={BAR_DATA} showAxes={false} showGrid={false} />
+                <BarChart
+                  width={150}
+                  height={110}
+                  vibe={p}
+                  data={BAR_DATA}
+                  showAxes={false}
+                  showGrid={false}
+                />
                 <div className="mt-1 text-xs text-gray-500">{p}</div>
               </div>
             ))}

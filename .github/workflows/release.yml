@@ -1,0 +1,71 @@
+name: Release
+
+# Tag a release to publish both packages to npm and cut a GitHub Release:
+#   npm version <x.y.z> && git push --follow-tags
+# Requires an NPM_TOKEN repository secret with publish rights.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write # create the GitHub Release
+  id-token: write # npm provenance / OIDC
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Resolve version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - run: npm ci
+
+      # --- Library ---
+      - name: Set library version
+        run: npm version "${{ steps.version.outputs.version }}" --no-git-tag-version --allow-same-version
+      - run: npm run build
+      - name: Pack library
+        run: npm pack
+      - name: Publish library
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # --- MCP server ---
+      - name: Install mcp deps
+        working-directory: mcp
+        run: npm install
+      - name: Set mcp version and pin published library dependency
+        working-directory: mcp
+        run: |
+          npm version "${{ steps.version.outputs.version }}" --no-git-tag-version --allow-same-version
+          npm pkg set "dependencies.goldenchart=^${{ steps.version.outputs.version }}"
+      - name: Build mcp
+        working-directory: mcp
+        run: npm run build
+      - name: Pack mcp
+        working-directory: mcp
+        run: npm pack
+      - name: Publish mcp
+        working-directory: mcp
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            *.tgz
+            mcp/*.tgz

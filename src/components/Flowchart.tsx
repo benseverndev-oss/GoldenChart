@@ -45,10 +45,23 @@ export function Flowchart({
   );
 
   return (
-    <Surface width={width} height={height} vibe={vibe} title={title} className={className} style={style} bare={bare}>
+    <Surface
+      width={width}
+      height={height}
+      vibe={vibe}
+      title={title}
+      className={className}
+      style={style}
+      bare={bare}
+    >
       <g transform={`translate(${plot.x}, ${plot.y})`}>
         {layout.edges.map((e) => (
-          <FlowchartEdge key={`${e.from}->${e.to}`} edge={e} orientation={orientation} showArrowhead={showArrowheads} />
+          <FlowchartEdge
+            key={`${e.from}->${e.to}`}
+            edge={e}
+            orientation={orientation}
+            showArrowhead={showArrowheads}
+          />
         ))}
         {layout.nodes.map((n, i) => (
           <FlowchartNode key={n.id} node={n} index={i} />
@@ -89,10 +102,22 @@ function FlowchartNode({ node, index }: { node: LaidOutNode; index: number }) {
 
   let outline;
   if (node.shape === 'diamond') {
-    outline = <RoughPath d={diamondPath(node.x, node.y, node.width, node.height)} fill={fill} vibe={vibe} seed={seed} />;
+    outline = (
+      <RoughPath
+        d={diamondPath(node.x, node.y, node.width, node.height)}
+        fill={fill}
+        vibe={vibe}
+        seed={seed}
+      />
+    );
   } else if (node.shape === 'ellipse') {
     outline = (
-      <RoughPath d={ellipsePath(node.x, node.y, node.width / 2, node.height / 2)} fill={fill} vibe={vibe} seed={seed} />
+      <RoughPath
+        d={ellipsePath(node.x, node.y, node.width / 2, node.height / 2)}
+        fill={fill}
+        vibe={vibe}
+        seed={seed}
+      />
     );
   } else {
     outline = (

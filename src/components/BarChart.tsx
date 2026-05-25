@@ -35,7 +35,10 @@ export function BarChart({
   const plot = getPlotArea(width, height, margin);
 
   const { x, y, bars } = useMemo(() => {
-    const xScale = bandScale(data.map((d) => d.label), [plot.x, plot.x + plot.width]);
+    const xScale = bandScale(
+      data.map((d) => d.label),
+      [plot.x, plot.x + plot.width],
+    );
     const yScale = linearScale(extentOf(data.map((d) => d.value)), [plot.y + plot.height, plot.y]);
     const baseline = yScale(0);
 
@@ -55,7 +58,15 @@ export function BarChart({
   }, [data, plot.x, plot.y, plot.width, plot.height]);
 
   return (
-    <Surface width={width} height={height} vibe={vibe} title={title} className={className} style={style} bare={bare}>
+    <Surface
+      width={width}
+      height={height}
+      vibe={vibe}
+      title={title}
+      className={className}
+      style={style}
+      bare={bare}
+    >
       {showGrid && <Grid plot={plot} yScale={y} />}
       {bars.map((bar, i) => (
         <BarChartBar key={bar.label} bar={bar} index={i} />

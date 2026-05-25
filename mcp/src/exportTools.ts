@@ -51,7 +51,10 @@ export const exportTools: ToolDef[] = [
         return {
           isError: true,
           content: [
-            { type: 'text', text: 'PNG export needs the @resvg/resvg-js dependency, which is not available here.' },
+            {
+              type: 'text',
+              text: 'PNG export needs the @resvg/resvg-js dependency, which is not available here.',
+            },
           ],
         };
       }

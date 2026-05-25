@@ -1,15 +1,7 @@
 import { createElement } from 'react';
 import type { ComponentType, ReactElement } from 'react';
 import { z } from 'zod';
-import {
-  Surface,
-  BarChart,
-  LineChart,
-  AreaChart,
-  ScatterPlot,
-  PieChart,
-  Flowchart,
-} from 'goldenchart';
+import { Surface, BarChart, LineChart, AreaChart, ScatterPlot, PieChart, Flowchart } from 'goldenchart';
 import type { FlowEdge, FlowNode, FlowNodeShape, VibeConfig } from 'goldenchart';
 import { renderToSVGString } from 'goldenchart/server';
 import type { ToolDef } from './registry';
@@ -112,7 +104,10 @@ export const orchestrationTools: ToolDef[] = [
       }
 
       const shaped = autoShape
-        ? nodes.map((node) => ({ ...node, shape: node.shape ?? pickShape(node, outDegree.get(node.id) ?? 0) }))
+        ? nodes.map((node) => ({
+            ...node,
+            shape: node.shape ?? pickShape(node, outDegree.get(node.id) ?? 0),
+          }))
         : nodes;
 
       const width = args.width as number;

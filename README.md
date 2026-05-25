@@ -4,7 +4,7 @@ Hand-drawn, sketchy React charts and flowcharts.
 
 **D3 does the math. Rough.js does the drawing. A Vibe engine dials in the aesthetic.**
 
-GoldenChart cleanly separates *where* things go from *how* they look:
+GoldenChart cleanly separates _where_ things go from _how_ they look:
 
 - **Calculation layer** (`d3-scale`, `d3-shape`, `d3-hierarchy`) computes coordinates,
   path strings, and layouts. It **never touches the DOM**.
@@ -53,8 +53,18 @@ import { linePath } from 'goldenchart';
 
 <Surface width={400} height={200} vibe={{ preset: 'clean_blueprint', roughness: 1.2 }}>
   <RoughRectangle x={20} y={20} width={120} height={60} fill="#fde68a" />
-  <RoughPath d={linePath([{ x: 0, y: 100 }, { x: 200, y: 40 }, { x: 400, y: 120 }], 'basis')} fill={null} />
-</Surface>
+  <RoughPath
+    d={linePath(
+      [
+        { x: 0, y: 100 },
+        { x: 200, y: 40 },
+        { x: 400, y: 120 },
+      ],
+      'basis',
+    )}
+    fill={null}
+  />
+</Surface>;
 ```
 
 ## The Vibe engine

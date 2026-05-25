@@ -11,7 +11,14 @@ import type { PrimitiveSpec } from './schemas';
 export function primitiveToElement(spec: PrimitiveSpec, key: string | number): ReactElement {
   switch (spec.kind) {
     case 'path':
-      return createElement(RoughPath, { key, d: spec.d, stroke: spec.stroke, fill: spec.fill, seed: spec.seed, vibe: spec.vibe });
+      return createElement(RoughPath, {
+        key,
+        d: spec.d,
+        stroke: spec.stroke,
+        fill: spec.fill,
+        seed: spec.seed,
+        vibe: spec.vibe,
+      });
     case 'rect':
       return createElement(RoughRectangle, {
         key,
