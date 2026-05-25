@@ -9,6 +9,7 @@ import {
   MindMap,
   OrgChart,
   ArchitectureDiagram,
+  SequenceDiagram,
   SankeyChart,
   TreemapChart,
   HeatmapChart,
@@ -26,6 +27,8 @@ import type {
   MultiSeriesDatum,
   Series,
   ScatterDatum,
+  SequenceActorInput,
+  SequenceMessageInput,
   VibeConfig,
   VibePreset,
 } from 'goldenchart';
@@ -174,6 +177,23 @@ const ARCH_EDGES = [
   { from: 'worker', to: 'db' },
 ];
 
+const SEQ_ACTORS: SequenceActorInput[] = [
+  { id: 'user', label: 'User' },
+  { id: 'web', label: 'Web App' },
+  { id: 'api', label: 'API' },
+  { id: 'db', label: 'Database' },
+];
+
+const SEQ_MESSAGES: SequenceMessageInput[] = [
+  { from: 'user', to: 'web', label: 'submit form' },
+  { from: 'web', to: 'api', label: 'POST /order' },
+  { from: 'api', to: 'api', label: 'validate' },
+  { from: 'api', to: 'db', label: 'INSERT' },
+  { from: 'db', to: 'api', label: 'ok', kind: 'reply' },
+  { from: 'api', to: 'web', label: '201 Created', kind: 'reply' },
+  { from: 'web', to: 'user', label: 'confirmation', kind: 'reply' },
+];
+
 const SPARK_POINTS = [3, 7, 4, 9, 6, 11, 8, 14].map((v, i) => ({ x: i * 50, y: 120 - v * 7 }));
 
 export function App() {
@@ -294,6 +314,10 @@ export function App() {
 
         <Panel title="ArchitectureDiagram (zones + routed links)">
           <ArchitectureDiagram width={460} height={360} vibe={vibe} nodes={ARCH_NODES} edges={ARCH_EDGES} />
+        </Panel>
+
+        <Panel title="SequenceDiagram (actors + messages)">
+          <SequenceDiagram width={460} height={360} vibe={vibe} actors={SEQ_ACTORS} messages={SEQ_MESSAGES} />
         </Panel>
 
         <Panel title="Sankey (weighted flow)">

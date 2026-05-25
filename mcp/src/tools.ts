@@ -12,6 +12,7 @@ import {
   RadarChart,
   SankeyChart,
   ScatterPlot,
+  SequenceDiagram,
   TreemapChart,
 } from 'goldenchart';
 import { makeRenderTool } from './registry';
@@ -38,6 +39,8 @@ import {
   RadarSeriesSchema,
   SankeyLinkSchema,
   SankeyNodeSchema,
+  SequenceActorSchema,
+  SequenceMessageSchema,
   ScatterDatumSchema,
   SeriesSchema,
   TreemapDatumSchema,
@@ -264,6 +267,20 @@ export const diagramTools: ToolDef[] = [
       edges: z.array(FlowEdgeSchema).optional(),
       direction: FlowDirectionSchema.optional(),
       showArrowheads: z.boolean().optional(),
+    },
+  }),
+  makeRenderTool({
+    name: 'render_sequence',
+    title: 'Render Sequence Diagram',
+    description:
+      'Render a hand-drawn sequence / interaction diagram: actors with lifelines and ordered messages between them (reply messages dashed, self-messages loop back).',
+    kind: 'sequence',
+    component: SequenceDiagram,
+    inputShape: {
+      ...baseChartShape,
+      actors: z.array(SequenceActorSchema).min(1),
+      messages: z.array(SequenceMessageSchema),
+      actorHeight: z.number().optional(),
     },
   }),
 ];

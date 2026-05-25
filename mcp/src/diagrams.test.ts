@@ -41,12 +41,28 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
       { from: 'worker', to: 'db' },
     ],
   },
+  render_sequence: {
+    width: 480,
+    height: 320,
+    vibe: 'clean_blueprint',
+    actors: [
+      { id: 'user', label: 'User' },
+      { id: 'app', label: 'App' },
+      { id: 'db', label: 'DB' },
+    ],
+    messages: [
+      { from: 'user', to: 'app', label: 'click' },
+      { from: 'app', to: 'db', label: 'query' },
+      { from: 'app', to: 'app', label: 'validate' },
+      { from: 'db', to: 'app', label: 'rows', kind: 'reply' },
+    ],
+  },
 };
 
 describe('diagram render tools', () => {
   it('registers the Roadmap 1 diagram types', () => {
     expect(tools.map((t) => t.name).sort()).toEqual(
-      ['render_architecture', 'render_mind_map', 'render_org_chart'].sort(),
+      ['render_architecture', 'render_mind_map', 'render_org_chart', 'render_sequence'].sort(),
     );
   });
 

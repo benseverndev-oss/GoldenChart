@@ -7,6 +7,7 @@ export * from './diagram';
 export * from './radial';
 export * from './routing';
 export * from './architecture';
+export * from './sequence';
 export * from './sankey';
 export * from './treemap';
 export * from './polar';

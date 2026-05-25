@@ -20,6 +20,8 @@ export { OrgChart } from './OrgChart';
 export type { OrgChartProps } from './OrgChart';
 export { ArchitectureDiagram } from './ArchitectureDiagram';
 export type { ArchitectureDiagramProps } from './ArchitectureDiagram';
+export { SequenceDiagram } from './SequenceDiagram';
+export type { SequenceDiagramProps } from './SequenceDiagram';
 export { SankeyChart } from './SankeyChart';
 export type { SankeyChartProps } from './SankeyChart';
 export { TreemapChart } from './TreemapChart';

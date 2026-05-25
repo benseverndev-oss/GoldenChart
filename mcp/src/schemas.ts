@@ -124,6 +124,18 @@ export const SankeyLinkSchema = z.object({
   value: z.number(),
 });
 
+export const SequenceActorSchema = z.object({
+  id: z.string(),
+  label: z.string().optional(),
+});
+
+export const SequenceMessageSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  label: z.string().optional(),
+  kind: z.enum(['sync', 'async', 'reply']).optional(),
+});
+
 export const TreemapDatumSchema = z.object({
   id: z.string(),
   parent: z.string().optional(),
