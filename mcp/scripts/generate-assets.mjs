@@ -13,7 +13,23 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Resvg } from '@resvg/resvg-js';
-import { BarChart, LineChart, PieChart, Flowchart, TreemapChart, FONT_TTF_BASE64 } from 'goldenchart';
+import {
+  BarChart,
+  LineChart,
+  PieChart,
+  Flowchart,
+  TreemapChart,
+  FONT_TTF_BASE64,
+  Surface,
+  RoughPath,
+  RoughText,
+  regularPolygonPath,
+  starPath,
+  wedgePath,
+  ellipsePath,
+  arrowHeadPath,
+  connectorPath,
+} from 'goldenchart';
 import { renderToSVGString } from 'goldenchart/server';
 
 const OUT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'assets');
@@ -258,10 +274,53 @@ function drawOn() {
   console.log('  quality-draw-on-{before,after}.svg');
 }
 
+// === COMPOSE-YOUR-OWN (shape primitives + arrow) =============================
+function compose() {
+  const W = 480;
+  const H = 300;
+  const rad = (d) => (d * Math.PI) / 180;
+  const vibe = { preset: 'crayon', background: '#fffdf6' };
+  // `h` above is 2-arg (no children); this scene needs children, so use createElement directly.
+  const e = React.createElement;
+  const arrow = connectorPath({ x: 138, y: 96 }, { x: 300, y: 96 }, { routing: 'straight' });
+
+  const scene = renderToSVGString(
+    e(
+      Surface,
+      { width: W, height: H, vibe, bare: true },
+      // hexagon "input" node -> arrow -> ellipse "output"
+      e(RoughPath, { key: 'hex', d: regularPolygonPath(86, 96, 46, 6, 0), fill: '#fca5a5' }),
+      e(RoughText, { key: 'hexL', x: 86, y: 96, children: 'input' }),
+      e(RoughPath, { key: 'arrow', d: arrow.d, fill: null }),
+      e(RoughPath, { key: 'arrowHead', d: arrowHeadPath(arrow.endHeadTail, { x: 300, y: 96 }, 13, true), fill: '#1f2937' }),
+      e(RoughText, { key: 'arrowL', x: arrow.labelAt.x, y: arrow.labelAt.y - 12, children: 'process' }),
+      e(RoughPath, { key: 'ell', d: ellipsePath(366, 96, 62, 38), fill: '#a5f3fc' }),
+      e(RoughText, { key: 'ellL', x: 366, y: 96, children: 'output' }),
+      // a star highlight, a pie-wedge gauge, and a triangle
+      e(RoughPath, { key: 'star', d: starPath(410, 222, 30, 14, 5, 0), fill: '#fcd34d' }),
+      e(RoughPath, { key: 'wedge', d: wedgePath(96, 222, 50, rad(-90), rad(-90 + 252), 26), fill: '#86efac' }),
+      e(RoughText, { key: 'wedgeL', x: 96, y: 226, children: '70%' }),
+      e(RoughPath, { key: 'tri', d: regularPolygonPath(248, 224, 44, 3, 0), fill: '#c4b5fd' }),
+      e(RoughText, { key: 'triL', x: 248, y: 234, children: 'build' }),
+    ),
+  );
+
+  const capH = 30;
+  const pad = 20;
+  const totalW = W + pad * 2;
+  const totalH = H + capH + pad * 2;
+  const body =
+    card(pad, pad, W, H) +
+    embed(scene, pad, pad) +
+    cap('Composed from primitives: regular-polygon, arrow, ellipse, star, wedge', totalW / 2, pad + H + 20, 14, '#78716c', 600);
+  rasterize(doc(totalW, totalH, body), 'compose.png', 2);
+}
+
 console.log('Generating assets ->', OUT);
 hero();
 vibeGallery();
 qualityHalo();
 qualityClip();
 drawOn();
+compose();
 console.log('done.');
