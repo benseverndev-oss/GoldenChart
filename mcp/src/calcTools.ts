@@ -260,7 +260,7 @@ export const calcTools: ToolDef[] = [
     config: {
       title: 'Compute Regular Polygon Path',
       description:
-        'Build a closed SVG path `d` for a regular n-gon centered at (cx,cy) with radius r. `rotation` is in degrees (0 = first vertex east, clockwise).',
+        'Build a closed SVG path `d` for a regular n-gon centered at (cx,cy) with radius r. `rotation` is in degrees; 0 points the first vertex up (12 o’clock), positive rotates clockwise.',
       inputSchema: {
         cx: z.number(),
         cy: z.number(),
@@ -286,7 +286,7 @@ export const calcTools: ToolDef[] = [
     config: {
       title: 'Compute Star Path',
       description:
-        'Build a closed SVG path `d` for a star with `points` tips, alternating outerRadius/innerRadius around (cx,cy). `rotation` in degrees (0 = first tip east).',
+        'Build a closed SVG path `d` for a star with `points` tips, alternating outerRadius/innerRadius around (cx,cy). `rotation` in degrees; 0 points the first tip up (12 o’clock), positive rotates clockwise.',
       inputSchema: {
         cx: z.number(),
         cy: z.number(),
