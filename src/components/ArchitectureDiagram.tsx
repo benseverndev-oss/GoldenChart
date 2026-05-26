@@ -1,4 +1,4 @@
-import type { BaseChartProps, FlowDirection, FlowEdge, FlowNode } from '../types/charts';
+import type { BaseChartProps, FlowDirection, FlowEdge, FlowNode, LayoutOptions } from '../types/charts';
 import { architectureLayout } from '../core/architecture';
 import { Diagram } from './Diagram';
 
@@ -7,6 +7,8 @@ export interface ArchitectureDiagramProps extends BaseChartProps {
   edges?: FlowEdge[];
   direction?: FlowDirection;
   showArrowheads?: boolean;
+  /** Density/spacing/lane-gutter knobs for the swimlane layout. */
+  layoutOptions?: LayoutOptions;
 }
 
 /**
@@ -20,13 +22,14 @@ export function ArchitectureDiagram({
   edges,
   direction = 'TB',
   showArrowheads = true,
+  layoutOptions,
   ...rest
 }: ArchitectureDiagramProps) {
   return (
     <Diagram
       nodes={nodes}
       edges={edges}
-      layout={architectureLayout(direction)}
+      layout={architectureLayout(direction, layoutOptions)}
       showArrowheads={showArrowheads}
       {...rest}
     />

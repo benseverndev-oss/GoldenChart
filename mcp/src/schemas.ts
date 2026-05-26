@@ -34,10 +34,49 @@ export const VibeOverridesSchema = z.object({
   seed: z.number().optional(),
   fontFamily: z.string().optional(),
   fontSize: z.number().optional(),
+  background: z.string().optional(),
 });
 
 /** A bare preset name or a preset + targeted overrides. */
 export const VibeConfigSchema = z.union([z.enum(VIBE_PRESET_NAMES), VibeOverridesSchema]);
+
+/** Data-shaping transform ops; mirrors `Transform` in goldenchart core. */
+export const TransformSchema = z.discriminatedUnion('op', [
+  z.object({ op: z.literal('sort'), by: z.string(), dir: z.enum(['asc', 'desc']).optional() }),
+  z.object({
+    op: z.literal('filter'),
+    field: z.string(),
+    cmp: z.enum(['==', '!=', '>', '>=', '<', '<=', 'in']),
+    value: z.unknown(),
+  }),
+  z.object({
+    op: z.literal('topN'),
+    by: z.string(),
+    n: z.number().int(),
+    rest: z.enum(['drop', 'group-other']).optional(),
+    labelField: z.string().optional(),
+    otherLabel: z.string().optional(),
+  }),
+  z.object({
+    op: z.literal('aggregate'),
+    groupBy: z.array(z.string()),
+    field: z.string(),
+    reducer: z.enum(['sum', 'mean', 'count', 'min', 'max', 'median']),
+    as: z.string().optional(),
+  }),
+  z.object({ op: z.literal('bin'), field: z.string(), bins: z.number().int().positive(), as: z.string().optional(), countAs: z.string().optional() }),
+  z.object({ op: z.literal('rolling'), field: z.string(), window: z.number().int().positive(), reducer: z.enum(['mean', 'sum']), as: z.string().optional() }),
+  z.object({ op: z.literal('pivot'), index: z.string(), column: z.string(), value: z.string() }),
+]);
+
+/** Per-axis scale + formatting; mirrors `AxisFormat` in goldenchart. */
+export const AxisFormatSchema = z.object({
+  scale: z.enum(['linear', 'log', 'time']).optional(),
+  domain: z.union([z.tuple([z.number(), z.number()]), z.enum(['nice', 'zero'])]).optional(),
+  tickCount: z.number().int().positive().optional(),
+  format: z.string().optional(),
+  unit: z.string().optional(),
+});
 
 export const MarginSchema = z
   .object({
@@ -87,6 +126,16 @@ export const FlowEdgeSchema = z.object({
   from: z.string(),
   to: z.string(),
   label: z.string().optional(),
+  routing: z.enum(['curved', 'orthogonal']).optional(),
+});
+
+/** Structural layout dials; mirrors `LayoutOptions` in goldenchart. */
+export const LayoutOptionsSchema = z.object({
+  density: z.enum(['compact', 'cozy', 'comfortable']).optional(),
+  nodeSpacing: z.number().positive().optional(),
+  rankSpacing: z.number().positive().optional(),
+  engine: z.enum(['auto', 'tree', 'dag']).optional(),
+  laneGutter: z.number().nonnegative().optional(),
 });
 
 export const FlowDirectionSchema = z.enum(['TB', 'BT', 'LR', 'RL']);
@@ -261,6 +310,28 @@ export const AnnotationSchema = z.discriminatedUnion('kind', [
     label: z.string().optional(),
     color: z.string().optional(),
   }),
+  z.object({
+    kind: z.literal('segment'),
+    x1: z.number(),
+    y1: z.number(),
+    x2: z.number(),
+    y2: z.number(),
+    label: z.string().optional(),
+    color: z.string().optional(),
+  }),
+]);
+
+/** Data-relative emphasis; mirrors `EmphasisSpec` in goldenchart core. */
+export const EmphasisSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('trend'), series: z.string().optional(), method: z.enum(['linear', 'mean']).optional(), color: z.string().optional() }),
+  z.object({
+    kind: z.literal('auto-callout'),
+    pick: z.enum(['max', 'min', 'first', 'last', 'peak']),
+    series: z.string().optional(),
+    template: z.string().optional(),
+    color: z.string().optional(),
+  }),
+  z.object({ kind: z.literal('highlight-series'), id: z.string(), mode: z.enum(['emphasize', 'mute-others']).optional() }),
 ]);
 
 /** Common chart dimension/vibe/a11y fields shared by every render tool. */

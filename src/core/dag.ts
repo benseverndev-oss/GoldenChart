@@ -199,11 +199,16 @@ export function layoutFlow(
   size: [number, number],
   edges?: FlowEdge[],
   direction: FlowDirection = 'TB',
+  engine: 'auto' | 'tree' | 'dag' = 'auto',
 ): FlowLayout {
   if (nodes.length === 0) return { nodes: [], edges: [] };
 
   const eff = effectiveEdges(nodes, edges);
-  if (isTreeLike(nodes, eff)) {
+  // `dag` forces the layered engine; `tree`/`auto` use the tidy tree only when
+  // the graph is actually stratifiable (single root, no merges/cycles), else
+  // fall back to the DAG engine rather than crash d3 `stratify`.
+  const useTree = engine !== 'dag' && isTreeLike(nodes, eff);
+  if (useTree) {
     // Ensure `parent` is set so d3 `stratify` can build the hierarchy even when
     // the structure was supplied purely as explicit edges.
     const parentOf = new Map<string, string>(eff.map((e) => [e.to, e.from]));

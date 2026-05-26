@@ -1,4 +1,4 @@
-import type { BaseChartProps, EdgeRouting, FlowDirection, FlowEdge, FlowNode } from '../types/charts';
+import type { BaseChartProps, EdgeRouting, FlowDirection, FlowEdge, FlowNode, LayoutOptions } from '../types/charts';
 import { flowLayout } from '../core/diagram';
 import { Diagram } from './Diagram';
 
@@ -9,6 +9,8 @@ export interface FlowchartProps extends BaseChartProps {
   showArrowheads?: boolean;
   /** Edge connector style. `curved` (default) or `orthogonal` elbow links. */
   routing?: EdgeRouting;
+  /** Layout knobs; `engine` forces tree vs DAG. */
+  layoutOptions?: LayoutOptions;
 }
 
 /**
@@ -22,13 +24,14 @@ export function Flowchart({
   direction = 'TB',
   showArrowheads = true,
   routing = 'curved',
+  layoutOptions,
   ...rest
 }: FlowchartProps) {
   return (
     <Diagram
       nodes={nodes}
       edges={edges}
-      layout={flowLayout(direction)}
+      layout={flowLayout(direction, layoutOptions)}
       routing={routing}
       showArrowheads={showArrowheads}
       {...rest}

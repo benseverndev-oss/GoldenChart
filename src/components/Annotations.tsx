@@ -1,4 +1,5 @@
 import type { PlotArea } from '../types/geometry';
+import type { Annotation } from '../core/annotations';
 import { arrowHeadPath } from '../core/shapes';
 import { RoughLine } from '../primitives/RoughLine';
 import { RoughRectangle } from '../primitives/RoughRectangle';
@@ -6,11 +7,7 @@ import { RoughCircle } from '../primitives/RoughCircle';
 import { RoughPath } from '../primitives/RoughPath';
 import { RoughText } from '../primitives/RoughText';
 
-export type Annotation =
-  | { kind: 'x-line' | 'y-line'; value: number; label?: string; color?: string }
-  | { kind: 'x-band' | 'y-band'; from: number; to: number; label?: string; color?: string }
-  | { kind: 'point-callout'; x: number; y: number; text: string; dx?: number; dy?: number; color?: string }
-  | { kind: 'circle'; x: number; y: number; r: number; label?: string; color?: string };
+export type { Annotation };
 
 export interface AnnotationsProps {
   annotations: Annotation[];
@@ -105,6 +102,23 @@ export function Annotations({ annotations, plot, xScale, yScale }: AnnotationsPr
               <RoughCircle cx={cx} cy={cy} diameter={a.r * 2} fill={null} stroke={color} seed={seed} />
               {a.label && (
                 <RoughText x={cx} y={cy - a.r - 4} anchor="middle" baseline="auto" fill={color}>
+                  {a.label}
+                </RoughText>
+              )}
+            </g>
+          );
+        }
+
+        if (a.kind === 'segment' && xScale && yScale) {
+          const x1 = xScale(a.x1);
+          const y1 = yScale(a.y1);
+          const x2 = xScale(a.x2);
+          const y2 = yScale(a.y2);
+          return (
+            <g key={i}>
+              <RoughLine x1={x1} y1={y1} x2={x2} y2={y2} stroke={color} seed={seed} />
+              {a.label && (
+                <RoughText x={x2} y={y2 - 4} anchor="end" baseline="auto" fill={color}>
                   {a.label}
                 </RoughText>
               )}
