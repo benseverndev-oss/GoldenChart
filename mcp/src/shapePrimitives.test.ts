@@ -93,3 +93,34 @@ describe('shape scene kinds (compose_surface)', () => {
     expect(svg).not.toContain('<clipPath'); // fill suppressed => no fill path to clip
   });
 });
+
+describe('arrow scene kind (compose_surface)', () => {
+  const arrow = (extra: Record<string, unknown>) =>
+    renderScene({ kind: 'arrow', from: { x: 20, y: 100 }, to: { x: 160, y: 100 }, ...extra });
+  const paths = (svg: string) => (svg.match(/<path/g) ?? []).length;
+
+  it('renders a shaft, an end head, and a label', async () => {
+    const svg = await arrow({ label: 'flows to' });
+    expect(paths(svg)).toBeGreaterThan(1); // shaft + head
+    expect(svg).toContain('flows to');
+  });
+
+  it('endHead:false omits the end head', async () => {
+    expect(paths(await arrow({ endHead: false }))).toBeLessThan(paths(await arrow({})));
+  });
+
+  it('startHead adds a second head (double-headed)', async () => {
+    expect(paths(await arrow({ startHead: true }))).toBeGreaterThan(paths(await arrow({})));
+  });
+
+  it('a filled head fills (clipped); an open head does not', async () => {
+    expect(await arrow({ filled: true, fill: '#ff0000' })).toContain('<clipPath');
+    expect(await arrow({})).not.toContain('<clipPath');
+  });
+
+  it('orthogonal routing differs from straight', async () => {
+    const s = await renderScene({ kind: 'arrow', from: { x: 20, y: 40 }, to: { x: 160, y: 140 }, routing: 'straight' });
+    const o = await renderScene({ kind: 'arrow', from: { x: 20, y: 40 }, to: { x: 160, y: 140 }, routing: 'orthogonal' });
+    expect(s).not.toBe(o);
+  });
+});

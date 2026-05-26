@@ -78,6 +78,50 @@ export function ellipsePath(cx: number, cy: number, rx: number, ry: number): str
   return `M${cx - rx},${cy} a${rx},${ry} 0 1,0 ${rx * 2},0 a${rx},${ry} 0 1,0 ${-rx * 2},0 Z`;
 }
 
+export type ConnectorRouting = 'straight' | 'curved' | 'orthogonal';
+
+/** Geometry for an arrow connecting two points: shaft `d`, head tails, label spot. */
+export interface Connector {
+  /** SVG path `d` for the shaft. */
+  d: string;
+  /** Tail the end head (at `to`) points away from: `arrowHeadPath(endHeadTail, to)`. */
+  endHeadTail: Point;
+  /** Tail the start head (at `from`) points away from: `arrowHeadPath(startHeadTail, from)`. */
+  startHeadTail: Point;
+  /** Where a midpoint label sits. */
+  labelAt: Point;
+}
+
+/**
+ * Build the geometry for an arrow connecting `from` to `to`. The shaft is a
+ * straight line, a smooth `linkPath` cubic, or an `orthogonalPath` elbow.
+ * Orientation defaults to the dominant axis (ties -> horizontal). DOM-free.
+ */
+export function connectorPath(
+  from: Point,
+  to: Point,
+  opts: { routing?: ConnectorRouting; orientation?: LinkOrientation } = {},
+): Connector {
+  const routing = opts.routing ?? 'straight';
+  const orientation =
+    opts.orientation ?? (Math.abs(to.x - from.x) >= Math.abs(to.y - from.y) ? 'horizontal' : 'vertical');
+  const midpoint = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 };
+
+  if (routing === 'orthogonal') {
+    const points = orthogonalPoints(from, to, orientation);
+    return {
+      d: orthogonalPath(from, to, orientation),
+      endHeadTail: points[points.length - 2],
+      startHeadTail: points[1],
+      labelAt: points[Math.floor((points.length - 1) / 2)],
+    };
+  }
+  if (routing === 'curved') {
+    return { d: linkPath(from, to, orientation), endHeadTail: from, startHeadTail: to, labelAt: midpoint };
+  }
+  return { d: `M${from.x},${from.y} L${to.x},${to.y}`, endHeadTail: from, startHeadTail: to, labelAt: midpoint };
+}
+
 /**
  * Arrowhead at `to`, pointing along the `from -> to` direction. By default an
  * open two-stroke head (`left -> tip -> right`); when `filled` is true the path

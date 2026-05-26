@@ -13,6 +13,7 @@ import {
   wedgePath,
   ellipsePath,
   arrowHeadPath,
+  connectorPath,
 } from 'goldenchart';
 import type { PrimitiveSpec } from './schemas';
 
@@ -141,5 +142,48 @@ export function primitiveToElement(spec: PrimitiveSpec, key: string | number): R
         seed: spec.seed,
         vibe: spec.vibe,
       });
+    case 'arrow': {
+      const connector = connectorPath(spec.from, spec.to, { routing: spec.routing, orientation: spec.orientation });
+      const headFill = spec.filled ? spec.fill : null; // open heads suppress fill, like `arrowhead`
+      const common = { stroke: spec.stroke, seed: spec.seed, vibe: spec.vibe };
+      const children: ReactElement[] = [
+        createElement(RoughPath, { key: `${key}-shaft`, d: connector.d, fill: null, ...common }),
+      ];
+      if (spec.endHead !== false) {
+        children.push(
+          createElement(RoughPath, {
+            key: `${key}-end`,
+            d: arrowHeadPath(connector.endHeadTail, spec.to, spec.size, spec.filled ?? false),
+            fill: headFill,
+            ...common,
+          }),
+        );
+      }
+      if (spec.startHead) {
+        children.push(
+          createElement(RoughPath, {
+            key: `${key}-start`,
+            d: arrowHeadPath(connector.startHeadTail, spec.from, spec.size, spec.filled ?? false),
+            fill: headFill,
+            ...common,
+          }),
+        );
+      }
+      if (spec.label) {
+        children.push(
+          createElement(RoughText, {
+            key: `${key}-label`,
+            x: connector.labelAt.x,
+            y: connector.labelAt.y,
+            anchor: 'middle',
+            baseline: 'middle',
+            vibe: spec.vibe,
+            seed: spec.seed,
+            children: spec.label,
+          }),
+        );
+      }
+      return createElement('g', { key }, children);
+    }
   }
 }
