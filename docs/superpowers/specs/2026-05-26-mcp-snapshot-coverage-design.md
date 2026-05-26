@@ -22,7 +22,9 @@ Add a golden snapshot for **every SVG-emitting MCP tool not already covered**. P
 | `mcp/src/dslTools.test.ts` | `render_diagram` (snapshot each diagram kind it already loops over), `build_diagram_from_mermaid` |
 | `mcp/src/chartFeatures.test.ts` | `visualize_data` |
 
-Note: `suggest_improvements` (also in `visualizeTool.ts`) returns a critique/analysis payload, not SVG — out of scope. If the executor finds it emits SVG, snapshot it too; otherwise leave it.
+Note: `suggest_improvements` (also in `visualizeTool.ts`) is out of scope. It *does* produce SVG, but routes it to `structuredContent.svg`; its `content[0].text` is a JSON critique list, not SVG. This task locks the agent-visible SVG text contract (`content[0].text`), so `suggest_improvements` is not covered. Do not snapshot its `structuredContent.svg` — that would expand scope.
+
+Sample inputs: most tools already have a deterministic sample call (or `SAMPLES`/`SPECS` map) in their test file to reuse. Two exceptions need a trivial new minimal input written from the schema: `render_rough_circle` and `render_rough_line` (no existing sample call). `render_diagram` iterates a `SPECS` map of **7 diagram kinds** (flowchart, sequence, mindmap, arch, er, timeline, org), so expect 7 snapshot entries for that tool alone.
 
 ## Approach
 
