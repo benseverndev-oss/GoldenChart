@@ -85,10 +85,12 @@ describe('connectorPath', () => {
     expect(c.d).toContain('C');
   });
 
-  it('orthogonal: multi-segment d, end tail axis-aligned with to', () => {
+  it('orthogonal: multi-segment d, end tail axis-aligned with to, label on the mid-segment', () => {
     const c = connectorPath({ x: 0, y: 0 }, { x: 40, y: 100 }, { routing: 'orthogonal' });
     expect(c.d.split('L').length).toBeGreaterThan(2);
     expect(c.endHeadTail.x === 40 || c.endHeadTail.y === 100).toBe(true);
+    // points = [{0,0},{0,50},{40,50},{40,100}] => mid-segment midpoint is {20,50}, not the elbow
+    expect(c.labelAt).toEqual({ x: 20, y: 50 });
   });
 
   it('infers horizontal orientation from a wide-but-short delta', () => {
