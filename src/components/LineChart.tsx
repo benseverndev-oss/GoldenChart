@@ -12,6 +12,8 @@ import { Axis } from './Axis';
 import { Grid } from './Grid';
 import { Annotations } from './Annotations';
 import type { Annotation } from './Annotations';
+import type { EmphasisSpec } from '../core/annotations';
+import { resolveEmphasis } from '../core/emphasis';
 import { RoughPath } from '../primitives/RoughPath';
 import { RoughCircle } from '../primitives/RoughCircle';
 
@@ -22,6 +24,8 @@ export interface LineChartProps extends BaseChartProps {
   showAxes?: boolean;
   showGrid?: boolean;
   annotations?: Annotation[];
+  /** Data-relative emphasis: trend lines, auto-callouts, series highlighting. */
+  emphasis?: EmphasisSpec[];
   xAxis?: AxisFormat;
   yAxis?: AxisFormat;
 }
@@ -45,10 +49,13 @@ export function LineChart({
   showAxes = true,
   showGrid = true,
   annotations,
+  emphasis,
   xAxis,
   yAxis,
 }: LineChartProps) {
   const plot = getPlotArea(width, height, margin);
+  const resolved = useMemo(() => resolveEmphasis(series, emphasis ?? []), [series, emphasis]);
+  const overlay = emphasis ? [...(annotations ?? []), ...resolved.annotations] : annotations;
 
   const { x, y, lines } = useMemo(() => {
     const allPoints = series.flatMap((s) => s.points);
@@ -85,7 +92,7 @@ export function LineChart({
     >
       {showGrid && <Grid plot={plot} xScale={x} yScale={y} />}
       {lines.map((line, i) => (
-        <g key={line.id}>
+        <g key={line.id} style={resolved.muted.has(line.id) ? { opacity: 0.22 } : undefined}>
           <RoughPath d={line.d} stroke={line.color} fill={null} seed={i + 1} />
           {showPoints &&
             line.pixels.map((p, j) => (
@@ -93,7 +100,7 @@ export function LineChart({
             ))}
         </g>
       ))}
-      {annotations && <Annotations annotations={annotations} plot={plot} xScale={x} yScale={y} />}
+      {overlay && <Annotations annotations={overlay} plot={plot} xScale={x} yScale={y} />}
       {showAxes && (
         <>
           <Axis scale={x} orientation="bottom" plot={plot} tickFormat={tickFormatter(xAxis)} ticks={xAxis?.tickCount} />

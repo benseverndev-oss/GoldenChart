@@ -8,6 +8,8 @@ import { Axis } from './Axis';
 import { Grid } from './Grid';
 import { Annotations } from './Annotations';
 import type { Annotation } from './Annotations';
+import type { EmphasisSpec } from '../core/annotations';
+import { resolveEmphasis } from '../core/emphasis';
 import { RoughCircle } from '../primitives/RoughCircle';
 import { useVibeContext } from '../vibe/VibeProvider';
 
@@ -29,6 +31,8 @@ export interface ScatterPlotProps extends BaseChartProps {
   showAxes?: boolean;
   showGrid?: boolean;
   annotations?: Annotation[];
+  /** Data-relative emphasis: a regression/mean trend line, auto-callouts. */
+  emphasis?: EmphasisSpec[];
   xAxis?: AxisFormat;
   yAxis?: AxisFormat;
 }
@@ -52,10 +56,16 @@ export function ScatterPlot({
   showAxes = true,
   showGrid = true,
   annotations,
+  emphasis,
   xAxis,
   yAxis,
 }: ScatterPlotProps) {
   const plot = getPlotArea(width, height, margin);
+  const overlay = useMemo(() => {
+    if (!emphasis) return annotations;
+    const synthetic = [{ id: 'data', points: data.map((d) => ({ x: d.x, y: d.y })) }];
+    return [...(annotations ?? []), ...resolveEmphasis(synthetic, emphasis).annotations];
+  }, [annotations, emphasis, data]);
 
   const { x, y, points } = useMemo(() => {
     const xs = data.map((d) => d.x);
@@ -96,7 +106,7 @@ export function ScatterPlot({
       {points.map((p, i) => (
         <ScatterDot key={i} point={p} index={i} />
       ))}
-      {annotations && <Annotations annotations={annotations} plot={plot} xScale={x} yScale={y} />}
+      {overlay && <Annotations annotations={overlay} plot={plot} xScale={x} yScale={y} />}
       {showAxes && (
         <>
           <Axis scale={x} orientation="bottom" plot={plot} tickFormat={tickFormatter(xAxis)} ticks={xAxis?.tickCount} />

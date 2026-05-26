@@ -28,6 +28,8 @@ import { visualizeTools } from './visualizeTool';
 import { dslTools } from './dslTools';
 import {
   AnnotationSchema,
+  AxisFormatSchema,
+  EmphasisSchema,
   baseChartShape,
   BarModeSchema,
   ChartDatumSchema,
@@ -61,6 +63,15 @@ const annotationsShape = {
   annotations: z.array(AnnotationSchema).optional(),
 };
 
+const emphasisShape = {
+  emphasis: z.array(EmphasisSchema).optional(),
+};
+
+const cartesianAxesShape = {
+  xAxis: AxisFormatSchema.optional(),
+  yAxis: AxisFormatSchema.optional(),
+};
+
 /**
  * The MCP tool catalog. Each chart is one `makeRenderTool` entry; the server
  * iterates this array to register tools and route calls. Adding a chart is one
@@ -77,6 +88,7 @@ export const chartTools: ToolDef[] = [
       ...baseChartShape,
       ...axesShape,
       ...annotationsShape,
+      ...cartesianAxesShape,
       data: z.union([z.array(ChartDatumSchema).min(1), z.array(MultiSeriesDatumSchema).min(1)]),
       mode: BarModeSchema.optional(),
       seriesKeys: z.array(z.string()).optional(),
@@ -93,6 +105,8 @@ export const chartTools: ToolDef[] = [
       ...baseChartShape,
       ...axesShape,
       ...annotationsShape,
+      ...emphasisShape,
+      ...cartesianAxesShape,
       series: z.array(SeriesSchema).min(1),
       curve: CurveSchema.optional(),
       showPoints: z.boolean().optional(),
@@ -108,6 +122,7 @@ export const chartTools: ToolDef[] = [
       ...baseChartShape,
       ...axesShape,
       ...annotationsShape,
+      ...cartesianAxesShape,
       series: z.array(SeriesSchema).min(1),
       curve: CurveSchema.optional(),
       baseline: z.number().optional(),
@@ -125,6 +140,8 @@ export const chartTools: ToolDef[] = [
       ...baseChartShape,
       ...axesShape,
       ...annotationsShape,
+      ...emphasisShape,
+      ...cartesianAxesShape,
       data: z.array(ScatterDatumSchema).min(1),
       radius: z.number().optional(),
       maxRadius: z.number().optional(),

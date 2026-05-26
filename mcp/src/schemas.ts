@@ -300,6 +300,28 @@ export const AnnotationSchema = z.discriminatedUnion('kind', [
     label: z.string().optional(),
     color: z.string().optional(),
   }),
+  z.object({
+    kind: z.literal('segment'),
+    x1: z.number(),
+    y1: z.number(),
+    x2: z.number(),
+    y2: z.number(),
+    label: z.string().optional(),
+    color: z.string().optional(),
+  }),
+]);
+
+/** Data-relative emphasis; mirrors `EmphasisSpec` in goldenchart core. */
+export const EmphasisSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('trend'), series: z.string().optional(), method: z.enum(['linear', 'mean']).optional(), color: z.string().optional() }),
+  z.object({
+    kind: z.literal('auto-callout'),
+    pick: z.enum(['max', 'min', 'first', 'last', 'peak']),
+    series: z.string().optional(),
+    template: z.string().optional(),
+    color: z.string().optional(),
+  }),
+  z.object({ kind: z.literal('highlight-series'), id: z.string(), mode: z.enum(['emphasize', 'mute-others']).optional() }),
 ]);
 
 /** Common chart dimension/vibe/a11y fields shared by every render tool. */
