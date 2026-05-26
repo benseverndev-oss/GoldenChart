@@ -1,4 +1,5 @@
 import type { FlowDirection, FlowEdge, FlowNode } from '../types/charts';
+import type { Point } from '../types/geometry';
 import { layoutFlow } from './dag';
 import type { FlowLayout, LaidOutNode } from './hierarchy';
 
@@ -21,6 +22,13 @@ export interface LaidGroup {
   y: number;
   width: number;
   height: number;
+  /**
+   * Where to draw the label, when the layout wants it somewhere other than the
+   * default top-left-on-the-border spot — e.g. swimlane titles sat in a gutter
+   * clear of the connector flow. `labelAnchor` is the text anchor at that point.
+   */
+  labelPoint?: Point;
+  labelAnchor?: 'start' | 'middle';
 }
 
 export interface DiagramScene extends FlowLayout {

@@ -83,23 +83,26 @@ export function Diagram({
 function DiagramGroup({ group }: { group: LaidGroup }) {
   const resolved = useResolvedVibe();
   const m = group.label ? measureText(group.label, resolved.fontSize, resolved.fontFamily) : null;
+  const anchor = group.labelAnchor ?? 'start';
+  const at = group.labelPoint ?? { x: group.x + 8, y: group.y };
   const padX = 4;
   const padY = 1;
+  const tabX = anchor === 'middle' && m ? at.x - m.width / 2 - padX : at.x - padX;
   return (
     <g>
       <RoughRectangle x={group.x} y={group.y} width={group.width} height={group.height} fill={null} />
       {group.label && m && (
         <>
-          {/* A page-coloured tab punches a gap in the border behind the label,
-              so the zone name stays legible instead of being struck through. */}
+          {/* A page-coloured tab sits behind the title so it stays legible even
+              where a border or connector passes close by. */}
           <rect
-            x={group.x + 8 - padX}
-            y={group.y - m.height / 2 - padY}
+            x={tabX}
+            y={at.y - m.height / 2 - padY}
             width={m.width + padX * 2}
             height={m.height + padY * 2}
             fill={resolved.background ?? '#ffffff'}
           />
-          <RoughText x={group.x + 8} y={group.y} anchor="start" baseline="middle">
+          <RoughText x={at.x} y={at.y} anchor={anchor} baseline="middle">
             {group.label}
           </RoughText>
         </>
