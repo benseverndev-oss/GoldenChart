@@ -11,7 +11,8 @@ export type VibePreset =
   | 'pencil'
   | 'marker'
   | 'ink'
-  | 'crayon';
+  | 'crayon'
+  | 'davinci_journal';
 
 /** Optional "draw-on" reveal: strokes animate as if being sketched. */
 export interface VibeAnimate {

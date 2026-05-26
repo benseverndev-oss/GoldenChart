@@ -131,6 +131,27 @@ export const VIBE_PRESETS: Record<VibePreset, ResolvedVibe> = {
     fontFamily: '"Comic Sans MS", "Chalkboard", cursive',
     fontSize: 15,
   },
+  // Leonardo's notebooks: fine, confident iron-gall (sepia) pen on a warm
+  // sienna cross-hatch. The negative hachure angle mimics his left-handed
+  // shading, which slants top-left → bottom-right. Seed = his birth year.
+  davinci_journal: {
+    preset: 'davinci_journal',
+    roughness: 1.1,
+    bowing: 0.9,
+    strokeWidth: 1.1,
+    stroke: '#5c4326',
+    fill: '#a9824f',
+    fillStyle: 'cross-hatch',
+    fillWeight: 0.6,
+    hachureAngle: -52,
+    hachureGap: 4.5,
+    curveStepCount: 12,
+    curveTightness: 0,
+    disableMultiStroke: false,
+    seed: 1452,
+    fontFamily: '"Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif',
+    fontSize: 14,
+  },
 };
 
 export const DEFAULT_VIBE: VibePreset = 'messy_sketch';

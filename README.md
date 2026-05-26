@@ -67,7 +67,7 @@ A `VibeConfig` is either a preset name or a preset plus targeted overrides:
 ```
 
 Built-in presets: `messy_sketch`, `clean_blueprint`, `chaotic_notebook`, `pencil`, `marker`,
-`ink`, `crayon`. Add `animate: { drawOn: true }` for a hand-drawn reveal (honors
+`ink`, `crayon`, `davinci_journal`. Add `animate: { drawOn: true }` for a hand-drawn reveal (honors
 `prefers-reduced-motion`).
 
 ## Components
