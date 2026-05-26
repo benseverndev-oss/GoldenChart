@@ -19,7 +19,13 @@ export type VibePreset =
   | 'comic_book'
   | 'terminal'
   | 'watercolor'
-  | 'newsprint';
+  | 'newsprint'
+  | 'whiteboard'
+  | 'typewriter'
+  | 'midnight'
+  | 'art_deco'
+  | 'manga'
+  | 'highlighter';
 
 /** Optional "draw-on" reveal: strokes animate as if being sketched. */
 export interface VibeAnimate {

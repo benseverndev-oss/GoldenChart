@@ -68,8 +68,9 @@ A `VibeConfig` is either a preset name or a preset plus targeted overrides:
 
 Built-in presets: `messy_sketch`, `clean_blueprint`, `chaotic_notebook`, `pencil`, `marker`,
 `ink`, `crayon`, `davinci_journal`, `blueprint_dark`, `chalkboard`, `neon`, `comic_book`,
-`terminal`, `watercolor`, `newsprint`. Add `animate: { drawOn: true }` for a hand-drawn reveal
-(honors `prefers-reduced-motion`).
+`terminal`, `watercolor`, `newsprint`, `whiteboard`, `typewriter`, `midnight`, `art_deco`, `manga`,
+`highlighter`. Add `animate: { drawOn: true }` for a hand-drawn reveal (honors
+`prefers-reduced-motion`).
 
 Each preset ships with a matching open-source font, subsetted and embedded as
 `@font-face` in the SVG, so a vibe's typography renders identically in a browser

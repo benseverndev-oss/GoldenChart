@@ -23,6 +23,12 @@ installed font.
 | `terminal` | VT323 | SIL OFL 1.1 | fonts.google.com/specimen/VT323 |
 | `watercolor` | Quicksand | SIL OFL 1.1 | fonts.google.com/specimen/Quicksand |
 | `newsprint` | Playfair Display | SIL OFL 1.1 | fonts.google.com/specimen/Playfair+Display |
+| `whiteboard` | Comic Neue | SIL OFL 1.1 | fonts.google.com/specimen/Comic+Neue |
+| `typewriter` | Special Elite | Apache-2.0 | fonts.google.com/specimen/Special+Elite |
+| `midnight` | IBM Plex Sans | SIL OFL 1.1 | fonts.google.com/specimen/IBM+Plex+Sans |
+| `art_deco` | Cinzel | SIL OFL 1.1 | fonts.google.com/specimen/Cinzel |
+| `manga` | Bangers | SIL OFL 1.1 | fonts.google.com/specimen/Bangers |
+| `highlighter` | Caveat | SIL OFL 1.1 | fonts.google.com/specimen/Caveat |
 
 The SIL Open Font License 1.1 and Apache License 2.0 permit redistribution and
 embedding. Full licence texts: https://openfontlicense.org and
