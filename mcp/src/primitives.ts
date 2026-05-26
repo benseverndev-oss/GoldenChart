@@ -54,6 +54,8 @@ export function primitiveToElement(spec: PrimitiveSpec, key: string | number): R
         anchor: spec.anchor,
         baseline: spec.baseline,
         rotate: spec.rotate,
+        fill: spec.fill,
+        maxWidth: spec.maxWidth,
         seed: spec.seed,
         vibe: spec.vibe,
         children: spec.text,

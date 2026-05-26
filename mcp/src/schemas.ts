@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { VIBE_PRESETS } from 'goldenchart';
+import type { VibePreset } from 'goldenchart';
 
 /**
  * Shared Zod fragments for the MCP tool inputs. These mirror the GoldenChart
@@ -15,7 +17,14 @@ export const FILL_STYLES = [
   'zigzag-line',
 ] as const;
 
-export const VIBE_PRESET_NAMES = ['messy_sketch', 'clean_blueprint', 'chaotic_notebook'] as const;
+/**
+ * Every built-in vibe preset, derived at runtime from the library's
+ * `VIBE_PRESETS` record so the MCP surface can never drift behind it — a new
+ * preset added to the library appears here automatically (ROADMAP principle 4).
+ * Cast to the `VibePreset` tuple so `z.enum` still infers the literal union
+ * (keeping `VibeConfig` assignability) while sourcing the values at runtime.
+ */
+export const VIBE_PRESET_NAMES = Object.keys(VIBE_PRESETS) as [VibePreset, ...VibePreset[]];
 
 export const VibeOverridesSchema = z.object({
   preset: z.enum(VIBE_PRESET_NAMES).optional(),
@@ -35,6 +44,8 @@ export const VibeOverridesSchema = z.object({
   fontFamily: z.string().optional(),
   fontSize: z.number().optional(),
   background: z.string().optional(),
+  /** Hand-drawn "draw-on" reveal. A client/runtime concern — has no effect on static render-tool SVG. */
+  animate: z.object({ drawOn: z.boolean().optional(), durationMs: z.number().optional() }).optional(),
 });
 
 /** A bare preset name or a preset + targeted overrides. */
@@ -410,6 +421,8 @@ export const PrimitiveSpecSchema = z.discriminatedUnion('kind', [
     anchor: z.enum(['start', 'middle', 'end']).optional(),
     baseline: z.enum(['auto', 'middle', 'hanging']).optional(),
     rotate: z.number().optional(),
+    fill: z.string().optional(),
+    maxWidth: z.number().positive().optional(),
     seed: z.number().optional(),
     vibe: VibeConfigSchema.optional(),
   }),

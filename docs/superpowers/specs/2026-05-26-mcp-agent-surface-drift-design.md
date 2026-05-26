@@ -64,12 +64,13 @@ The preset list should be sourced from a single source of truth so it cannot
 drift again. Three options were considered:
 
 - **A. Runtime-derive (chosen).** Build the enum from the library at runtime:
-  `z.enum(Object.keys(VIBE_PRESETS) as [string, ...string[]])`. New presets
-  added to the library appear in the MCP surface automatically. The schema loses
-  its TypeScript literal-union type, but the tool handlers already cast
-  `args.vibe as VibeConfig`, so there is no practical loss; runtime validation
-  (what the agent actually hits) is preserved, and the JSON schema the agent
-  sees lists all 27 names.
+  `z.enum(Object.keys(VIBE_PRESETS) as [VibePreset, ...VibePreset[]])`. New
+  presets added to the library appear in the MCP surface automatically.
+  **Implementation note:** casting the runtime key array to the `VibePreset`
+  tuple (rather than `[string, ...string[]]`) preserves the schema's literal-union
+  type, so `VibeConfig` assignability is kept and `primitiveToElement` typechecks
+  without a cast — better than the originally-accepted trade-off of losing the
+  literal type. The JSON schema the agent sees lists all 27 names.
 - B. Explicit `as const` tuple + a compile-time guard that it equals
   `keyof typeof VIBE_PRESETS`. Keeps literal types but still a manual list.
 - C. Hardcode all 27. Rejected — drifts again on preset #28.
@@ -104,6 +105,12 @@ All changes are in `mcp/`. No library (`src/`) changes.
   `compose_surface` (via `orchestrationTools.ts`), so this one edit also lights
   up `fill`/`maxWidth` for composed-scene text — a free win, not a regression,
   since `RoughText` genuinely consumes both.
+
+### `mcp/src/resources.ts`
+- The `docs://architecture` resource prose listed exactly the old three presets
+  as if representative. Updated to name a broader sample and point agents at
+  `list_vibe_presets` / `vibe://presets` for the full set. (Not a schema/code
+  change — keeps the agent-readable docs consistent with the widened surface.)
 
 ## Testing
 
