@@ -88,4 +88,24 @@ describe('GoldenChart MCP server', () => {
     const { prompts } = await client.listPrompts();
     expect(prompts.map((p) => p.name)).toContain('make-me-a-diagram');
   });
+
+  it('exposes the compose-spec doc and compose-a-figure prompt', async () => {
+    const client = await connectedClient();
+    const read = await client.readResource({ uri: 'docs://compose-spec' });
+    const doc = (read.contents[0] as { text: string }).text;
+    expect(doc).toContain('compose_surface');
+    // catalogs the new shape scene kinds
+    for (const kind of ['regular-polygon', 'wedge', 'arrow']) expect(doc).toContain(kind);
+
+    const { prompts } = await client.listPrompts();
+    expect(prompts.map((p) => p.name)).toContain('compose-a-figure');
+    const prompt = await client.getPrompt({
+      name: 'compose-a-figure',
+      arguments: { figureDescription: 'a labelled pipeline', mood: 'playful' },
+    });
+    const text = (prompt.messages[0].content as { text: string }).text;
+    expect(text).toContain('compose_surface');
+    expect(text).toContain('docs://compose-spec');
+    expect(text).toContain('a labelled pipeline');
+  });
 });
