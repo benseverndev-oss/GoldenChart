@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import type { CSSProperties, MouseEvent, ReactNode } from 'react';
 import type { RoughPathInfo } from '../render/roughGenerator';
 
@@ -9,27 +10,49 @@ interface SketchPathsProps {
   children?: ReactNode;
   /** Normalize path length to 1 so the draw-on reveal animation can dash it. */
   animate?: boolean;
+  /**
+   * Geometric (un-roughened) outline `d` for the shape. When set, fill/hachure
+   * paths are clipped to it so the hatching can't bleed past the shape edge.
+   * The sketch outline stays unclipped, preserving the loose hand-drawn look.
+   */
+  clip?: string | null;
 }
 
 /**
  * Internal: renders Rough.js path descriptors as real SVG `<path>` elements so
- * React—not Rough.js—owns the DOM. Shared by every primitive.
+ * React—not Rough.js—owns the DOM. Shared by every primitive. Clips fill paths
+ * to the shape (when a `clip` outline is supplied) and, during the draw-on
+ * reveal, dashes only the outline while the fill fades in.
  */
-export function SketchPaths({ paths, className, style, onClick, children, animate }: SketchPathsProps) {
+export function SketchPaths({ paths, className, style, onClick, children, animate, clip }: SketchPathsProps) {
+  const rawId = useId();
+  const hasFill = paths.some((p) => p.kind === 'fill');
+  const clipId = clip && hasFill ? `gc-clip-${rawId.replace(/:/g, '')}` : null;
+
   return (
     <g className={className} style={style} onClick={onClick}>
-      {paths.map((p, i) => (
-        <path
-          key={i}
-          d={p.d}
-          stroke={p.stroke}
-          strokeWidth={p.strokeWidth}
-          fill={p.fill}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          pathLength={animate ? 1 : undefined}
-        />
-      ))}
+      {clipId ? (
+        <clipPath id={clipId}>
+          <path d={clip!} />
+        </clipPath>
+      ) : null}
+      {paths.map((p, i) => {
+        const isStroke = p.kind === 'stroke';
+        return (
+          <path
+            key={i}
+            d={p.d}
+            stroke={p.stroke}
+            strokeWidth={p.strokeWidth}
+            fill={p.fill}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            clipPath={!isStroke && clipId ? `url(#${clipId})` : undefined}
+            className={animate ? (isStroke ? 'gc-draw-stroke' : 'gc-draw-fill') : undefined}
+            pathLength={animate && isStroke ? 1 : undefined}
+          />
+        );
+      })}
       {children}
     </g>
   );

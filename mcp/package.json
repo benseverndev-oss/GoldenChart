@@ -14,7 +14,8 @@
     "dev": "tsx src/index.ts",
     "build": "tsup",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "assets": "node scripts/generate-assets.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.18.0",

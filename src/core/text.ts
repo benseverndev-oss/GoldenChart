@@ -8,19 +8,30 @@ import type { Margin } from '../types/geometry';
  * headless build.
  */
 
-const NARROW = new Set("iIl|.,:;'!ij".split(''));
-const THIN = new Set("ftr()[]{}/\\-".split(''));
-const WIDE = new Set('mwMW@'.split(''));
-const UPPER = /[A-Z]/;
+/**
+ * Per-glyph advance widths for Helvetica (Adobe AFM, 1000 units/em). Treating
+ * every proportional sans-serif as Helvetica-metric is a far better analytic
+ * estimate than coarse width buckets, and stays deterministic and DOM-free —
+ * the headless build has no canvas to measure with.
+ */
+const HELVETICA_1000: Record<string, number> = {
+  ' ': 278, '!': 278, '"': 355, '#': 556, $: 556, '%': 889, '&': 667, "'": 191,
+  '(': 333, ')': 333, '*': 389, '+': 584, ',': 278, '-': 333, '.': 278, '/': 278,
+  '0': 556, '1': 556, '2': 556, '3': 556, '4': 556, '5': 556, '6': 556, '7': 556, '8': 556, '9': 556,
+  ':': 278, ';': 278, '<': 584, '=': 584, '>': 584, '?': 556, '@': 1015,
+  A: 667, B: 667, C: 722, D: 722, E: 667, F: 611, G: 778, H: 722, I: 278, J: 500,
+  K: 667, L: 556, M: 833, N: 722, O: 778, P: 667, Q: 778, R: 722, S: 667, T: 611,
+  U: 722, V: 667, W: 944, X: 667, Y: 667, Z: 611,
+  '[': 278, '\\': 278, ']': 278, '^': 469, _: 556, '`': 333,
+  a: 556, b: 556, c: 500, d: 556, e: 556, f: 278, g: 556, h: 556, i: 222, j: 222,
+  k: 500, l: 222, m: 833, n: 556, o: 556, p: 556, q: 556, r: 333, s: 500, t: 278,
+  u: 556, v: 500, w: 722, x: 500, y: 500, z: 500,
+  '{': 334, '|': 260, '}': 334, '~': 584,
+};
 
-/** Approximate advance width of a single character, in em (relative to fontSize). */
+/** Advance width of a single character, in em (relative to fontSize). */
 function charEm(ch: string): number {
-  if (ch === ' ') return 0.3;
-  if (NARROW.has(ch)) return 0.28;
-  if (THIN.has(ch)) return 0.36;
-  if (WIDE.has(ch)) return 0.85;
-  if (UPPER.test(ch)) return 0.66;
-  return 0.5;
+  return (HELVETICA_1000[ch] ?? 556) / 1000;
 }
 
 function familyFactor(fontFamily: string): { fixed: number | null; scale: number } {

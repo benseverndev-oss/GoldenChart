@@ -2,6 +2,8 @@
 
 Hand-drawn, sketchy React charts and flowcharts.
 
+![GoldenChart — hand-drawn charts and diagrams rendered across several vibes](assets/hero.png)
+
 **D3 does the math. Rough.js does the drawing. A Vibe engine dials in the aesthetic.**
 
 GoldenChart cleanly separates *where* things go from *how* they look:
@@ -72,6 +74,10 @@ Built-in presets: `messy_sketch`, `clean_blueprint`, `chaotic_notebook`, `pencil
 `highlighter`, `kraft`, `synthwave`, `botanical`, `risograph`, `sticky_note`, `amber_crt`. Add
 `animate: { drawOn: true }` for a hand-drawn reveal (honors `prefers-reduced-motion`).
 
+The same chart, six different vibes:
+
+![One bar chart rendered in the pencil, ink, chalkboard, neon, watercolor and synthwave vibes](assets/vibes.png)
+
 Each preset ships with a matching open-source font, subsetted and embedded as
 `@font-face` in the SVG, so a vibe's typography renders identically in a browser
 or a headless rasterizer with no installed/network fonts. Headless rasterizers
@@ -90,6 +96,25 @@ See `src/assets/fonts/ATTRIBUTION.md` for sources and licences.
 `Flowchart` supports four layout directions (`TB`/`BT`/`LR`/`RL`), `rect`/`ellipse`/`diamond`
 node shapes, edge labels, arrowheads, `curved`/`orthogonal` routing, and general DAG layout
 (merges, multiple roots). Charts accept `description` / `ariaLabel` / `dataTable` for accessibility.
+
+## Rendering quality
+
+The sketchy look never gets in the way of reading the chart:
+
+- **Legible labels** — text gets a page-colour halo (`paint-order: stroke`) so labels stay
+  sharp on dark or textured vibes and even when they sit on top of a hachure fill.
+
+  ![Treemap labels over a cross-hatch fill, before and after the halo](assets/quality-text-halo.png)
+
+- **Clean fills** — hachure is clipped to each shape, so the fill never bleeds past the edge
+  while the sketch outline stays loose and hand-drawn.
+
+  ![Bar chart hachure clipped to the bars, before and after](assets/quality-clipped-fills.png)
+
+- **Intentional reveal** — the optional `drawOn` animation sketches the outline first, then
+  settles the fill in, instead of dashing the hatching. Open the
+  [before](assets/quality-draw-on-before.svg) and [after](assets/quality-draw-on-after.svg)
+  SVGs in a browser to compare.
 
 ## Architecture
 
@@ -123,6 +148,9 @@ npm run build       # bundle with tsup (ESM + CJS + types)
 npm run typecheck   # tsc --noEmit
 npm test            # vitest
 ```
+
+The README images live in [`assets/`](./assets) and are generated from the library itself —
+rebuild them with `npm run build` then `cd mcp && npm run assets`.
 
 ## License
 
