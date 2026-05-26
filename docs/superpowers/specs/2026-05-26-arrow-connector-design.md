@@ -24,24 +24,38 @@ SP2's `filled` option).
 
 ### Library — one geometry helper (`src/core/shapes.ts`)
 
-`connectorPath(from, to, { routing, orientation })` → `{ d, startTangent,
-endTangent, labelAt }`:
+`connectorPath(from, to, { routing, orientation })` → `{ d, endHeadTail,
+startHeadTail, labelAt }`:
 
 - `routing`: `'straight'` (`M…L…`), `'curved'` (`linkPath`), or `'orthogonal'`
   (`orthogonalPath`). Default `'straight'`.
 - `orientation`: `'horizontal' | 'vertical'`. Default inferred from the dominant
-  axis (`|to.x - from.x| >= |to.y - from.y|` → `'horizontal'`).
-- `endTangent` / `startTangent`: the point each arrowhead aligns against so the
-  head reads correctly.
-  - straight / curved: `endTangent = from`, `startTangent = to` (head points
-    along the straight from→to line — matches existing `DiagramEdge` behavior for
-    curved edges).
-  - orthogonal: `endTangent = points[len-2]`, `startTangent = points[1]` (the
+  axis (`|to.x - from.x| >= |to.y - from.y|` → `'horizontal'`; ties resolve to
+  `'horizontal'`).
+- `endHeadTail` / `startHeadTail`: the **tail** point each arrowhead points away
+  from. The end head is drawn `arrowHeadPath(endHeadTail, to)`; the start head is
+  drawn `arrowHeadPath(startHeadTail, from)`. (Field names match the head they
+  serve, so there's no chance of wiring a reversed head.)
+  - straight / curved: `endHeadTail = from`, `startHeadTail = to` — both heads
+    align to the straight from→to line. This matches `DiagramEdge`'s **arrowhead
+    alignment** (it likewise aligns curved-edge heads to the straight line); the
+    curved *shaft* may differ from a flowchart's because orientation is inferred
+    here, not taken from a layout.
+  - orthogonal: `endHeadTail = points[len-2]`, `startHeadTail = points[1]` (the
     axis-aligned end segments), where `points = orthogonalPoints(from, to,
     orientation)`.
-- `labelAt`: midpoint (straight/curved) or the middle vertex (orthogonal).
+- `labelAt`: the segment midpoint (straight/curved), or for orthogonal the
+  vertex `points[Math.floor((points.length - 1) / 2)]` — i.e. `points[1]` of the
+  4-point elbow, matching `DiagramEdge`'s label placement.
 
 Geometry only — DOM-free, like every other `shapes.ts` builder.
+
+**Degenerate inputs.** `from == to` does not throw: the shaft `d` is a
+zero-length `M x,y L x,y`, `endHeadTail`/`startHeadTail` collapse to that point,
+and `arrowHeadPath` (which is `atan2(0,0) = 0`) renders a small east-pointing
+dot. Orthogonal routing where `from` and `to` share an axis collapses the elbow
+to a straight segment; `points[len-2]` is still well-defined, so the head aligns
+along that axis. Both are tested.
 
 ### MCP — `arrow` scene kind (`mcp/src/schemas.ts`, `primitives.ts`)
 
@@ -60,18 +74,34 @@ New `PrimitiveSpec` discriminated-union member:
   stroke?, seed?, vibe? }
 ```
 
-`primitiveToElement`'s new `arrow` case returns a `<g key>` containing:
-- shaft: `<RoughPath d={connector.d} fill={null} …>` (always an open stroke),
-- end head (when `endHead !== false`): `<RoughPath d={arrowHeadPath(endTangent,
-  to, size, filled)} fill={filled ? undefined : null} …>`,
-- start head (when `startHead`): `<RoughPath d={arrowHeadPath(startTangent, from,
-  size, filled)} …>`,
-- label (when `label`): `<RoughText x/y={labelAt} anchor="middle"
-  baseline="middle">`.
+`arrow` joins the shared `PrimitiveSpecSchema` discriminated union, so
+`SceneNodeSchema` picks it up automatically and `compose_surface` accepts it in
+its `children`. Note the union is consumed at **two** call sites:
+`sceneNodeToElement` (`compose_surface`) and `renderPrimitive` (the Level-2
+`render_rough_*` tools). A `<g>`-returning case is valid in both, so `arrow`
+becomes implicitly renderable standalone too — acceptable and consistent with
+how the SP2 `arrowhead` kind already flows through the mapper. We add no
+dedicated `render_arrow` tool.
 
-`stroke`/`seed`/`vibe` propagate to each child. No fill on the shaft; filled
-heads fill (vibe/stroke colour), open heads suppress fill (`fill: null`), exactly
-like the SP2 `arrowhead` kind.
+`primitiveToElement`'s new `case 'arrow':` `return createElement('g', { key },
+[...])` — the outer `<g>` carries the `key` param passed into
+`primitiveToElement`, and every inner child gets its own stable key
+(`` `${key}-shaft` ``, `-end`, `-start`, `-label`) to avoid React keyless-child
+warnings. Children:
+- shaft: `RoughPath` with `d = connector.d`, `fill: null` (always an open stroke),
+- end head (when `endHead !== false`): `RoughPath` with
+  `d = arrowHeadPath(connector.endHeadTail, to, size, filled)`,
+- start head (when `startHead`): `RoughPath` with
+  `d = arrowHeadPath(connector.startHeadTail, from, size, filled)`,
+- label (when `label`): `RoughText` at `connector.labelAt`, `anchor="middle"`,
+  `baseline="middle"`.
+
+`stroke`/`seed`/`vibe` propagate to each child. The shaft never fills. **Both**
+heads use the identical fill rule — `fill: spec.filled ? spec.fill : null` —
+exactly like the SP2 `arrowhead` kind: an open head suppresses fill, a filled
+head fills with `spec.fill` or, when that's undefined, the resolved **vibe fill**
+(`RoughPath` uses `fill === undefined ? resolved.fill : fill`). This keeps a
+double-headed arrow's two heads consistent.
 
 **No calc tool** — an arrow is a composite of several paths, not a single `d`
 string, so it does not fit the Level-1 `compute_*_path` pattern. Scene kind only.
@@ -83,12 +113,16 @@ additive. A code comment notes `DiagramEdge` could adopt `connectorPath` later.
 ## Testing
 
 - **Core `connectorPath` (`src/core/shapes.test.ts`):**
-  - straight: `d` is `M…L…`; `endTangent` equals `from`; `labelAt` is the
-    midpoint.
-  - orthogonal: `d` has multiple `L` segments; `endTangent` is axis-aligned with
+  - straight: `d` is `M…L…`; `endHeadTail` equals `from`; `startHeadTail` equals
+    `to`; `labelAt` is the midpoint.
+  - orthogonal: `d` has multiple `L` segments; `endHeadTail` is axis-aligned with
     `to` (shares an x or y with it).
   - curved: `d` contains `C`.
   - orientation inference: a wide-but-short delta resolves to `'horizontal'`.
+  - degenerate `from == to`: does not throw; `d` is `M…L…` over the same point
+    and `endHeadTail`/`startHeadTail` equal that point.
+  - orthogonal with a shared axis (`from.x == to.x`): does not throw; `endHeadTail`
+    is well-defined.
 - **MCP arrow scene kind (`mcp/src/shapePrimitives.test.ts`):**
   - renders a `<g>` containing a shaft `<path>` and the label text.
   - `endHead` default on: more than one `<path>` (shaft + head); `startHead`
