@@ -19,9 +19,13 @@ Key facts about the existing code that shape this design:
   `areaPath`). Only the five base primitives (rect/circle/line/path/text) have
   dedicated React components calling native Rough.js generator methods. So new
   shapes follow the path-builder idiom — **no new React components**.
-- `src/core/polar.ts` already provides `polarToCartesian(cx, cy, r, angleRad)`,
-  `axisAngle` (convention: radians, `0` reference at top, clockwise), and
-  `polygonPath(points)` (arbitrary closed polygon).
+- `src/core/polar.ts` already provides `polarToCartesian(cx, cy, r, angleRad)`
+  (radians; `angleRad = 0` is east / 3 o'clock, increasing clockwise because SVG
+  y points down) and `polygonPath(points)` (arbitrary closed polygon). Note:
+  `axisAngle` starts its index 0 at the top, but that is just a local `-π/2`
+  offset layered on `polarToCartesian` — it is not a different module
+  convention. The new builders call `polarToCartesian` directly, so their
+  `0` = east.
 - `src/core/shapes.ts` provides `ellipsePath(cx, cy, rx, ry)`,
   `arrowHeadPath(from, to, size)` (an open two-stroke head), and `linePath`.
 - The MCP calc-tool `compute_line_path` already exposes `linePath`, so the
@@ -44,7 +48,7 @@ New builders, placed by responsibility:
 |---|---|---|---|
 | `regularPolygonPath` | `polar.ts` | `(cx, cy, r, sides, rotationRad?)` | n-gon vertices via `polarToCartesian`, delegated to `polygonPath` |
 | `starPath` | `polar.ts` | `(cx, cy, outerR, innerR, points, rotationRad?)` | alternating radii, delegated to `polygonPath` |
-| `arcStrokePath` | `polar.ts` | `(cx, cy, r, startRad, endRad)` | open arc stroke (SVG `A` command) |
+| `arcStrokePath` | `polar.ts` | `(cx, cy, r, startRad, endRad)` | open arc stroke (SVG `A` command); named for clarity vs `computePie`'s closed slices — no actual name collision exists |
 | `wedgePath` | `polar.ts` | `(cx, cy, r, startRad, endRad, innerR?)` | closed pie wedge, or annular wedge when `innerR` is set |
 | `arrowHeadPath` (extend) | `shapes.ts` | add `filled?: boolean` | existing open two-stroke head when `false`/omitted; closed solid triangle when `true` |
 
@@ -56,11 +60,11 @@ arrowhead extension stays in `shapes.ts` where `arrowHeadPath` already lives.
 clockwise (SVG y-axis points down). The MCP layer accepts **degrees** and
 converts at the tool boundary — one conversion point, agent-friendly inputs.
 
-**Name-collision check:** `src/core/arc.ts` already exists and is re-exported by
-the core barrel. New builder names (`arcStrokePath`, `wedgePath`,
-`regularPolygonPath`, `starPath`) must not collide with anything `arc.ts` or
-other core modules export. Verified during implementation before adding the
-`export *` symbols.
+**Name-collision check:** `src/core/arc.ts` exports only `PieSlice` and
+`computePie` — none of the new builder names collide with it or any other core
+module (verified). The `arcStrokePath` name is chosen for clarity (open stroke
+vs `computePie`'s closed slices), not to avoid a collision. Re-confirm during
+implementation before adding the `export *` symbols.
 
 ### MCP — calc tools (`mcp/src/calcTools.ts`)
 
@@ -88,10 +92,19 @@ New `PrimitiveSpec` discriminated-union members, each with the usual
 - `arrowhead` — `{ from, to, size?, filled? }` (standalone head; agent composes
   with a `line`/`polyline` for a full arrow)
 
-`primitiveToElement` maps each new kind to a `<RoughPath>` (or `<RoughLine>`
-where appropriate) using the matching builder's `d`. Because the mapper is
-shared, the new kinds work anywhere it is used. Angles are converted
-degrees→radians in the mapper / handlers, the single conversion boundary.
+**All seven new kinds map to `<RoughPath>`** using the matching builder's `d`
+— none are straight 2-point segments, so `RoughLine` is never used (the existing
+`line` kind already covers that). Because the mapper is shared, the new kinds
+work anywhere `primitiveToElement` is used. Angles are converted degrees→radians
+in the mapper / handlers, the single conversion boundary.
+
+**Fill semantics for open shapes.** `RoughPath` inherits the vibe fill unless
+`fill: null` is passed (`fill === undefined ? resolved.fill : fill`), which
+would smear a hachure fill across an open arc's chord or an open arrowhead's
+notch. The mapper therefore passes `fill: null` for inherently-open kinds —
+`arc`, and `arrowhead` when `filled` is not `true` — and only honors a caller's
+`fill` for the closed kinds (`polygon`, `regular-polygon`, `star`, `wedge`,
+`ellipse`, and filled `arrowhead`).
 
 ## Decisions (confirmed)
 
@@ -119,10 +132,13 @@ degrees→radians in the mapper / handlers, the single conversion boundary.
   `shapePrimitives.test.ts`.
   - Each calc tool returns a `d` string beginning with `M`.
   - Degree→radian boundary: `compute_arc_path` with `startAngle: 0,
-    endAngle: 90` produces endpoints matching east→south.
+    endAngle: 90` produces endpoints at east (`cx+r, cy`) and south
+    (`cx, cy+r`) — south is `cy+r` because SVG y points down, not a bug.
   - Each new scene kind renders inside `compose_surface` (output SVG contains a
     `<path>`); a `regular-polygon` scene node yields the expected vertex count
     in its `d`.
+  - Open `arc` scene node produces no fill path (fill suppressed), guarding the
+    open-shape fill rule above.
 - **Regression:** full `src/` and `mcp/` suites stay green; typecheck clean in
   both packages.
 
