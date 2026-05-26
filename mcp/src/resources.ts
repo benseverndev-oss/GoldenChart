@@ -64,6 +64,61 @@ messages \`A->>B: text\`, dashed \`A-->>B: text\`), and \`mindmap\` (indentation
 nodes). Unsupported headers (e.g. \`erDiagram\`, \`gantt\`) and constructs (notes,
 loops, activations) return a structured error.`;
 
+const COMPOSE_SPEC_DOC = `# GoldenChart compose_surface
+
+\`compose_surface\` renders a \`children\` array of **scene nodes** into one SVG,
+all sharing a single \`vibe\`. Inputs: \`width\`, \`height\`, \`vibe?\`, \`children\`.
+Each node is \`{ kind, ... }\`. The shape kinds below are first-class — pass them
+straight in \`children\`; you do **not** need a calc tool first (those are only
+for getting a raw \`d\` to feed a \`path\` node).
+
+## Primitive kinds
+- **path** — \`d\` (SVG path string), \`stroke?\`, \`fill?\`, \`seed?\`, \`vibe?\`.
+- **rect** — \`x, y, width, height\`, \`stroke?\`, \`fill?\`.
+- **circle** — \`cx, cy, diameter\`, \`stroke?\`, \`fill?\`.
+- **line** — \`x1, y1, x2, y2\`, \`stroke?\`.
+- **text** — \`x, y, text\`, \`anchor?\`, \`baseline?\`, \`rotate?\`, \`fill?\`, \`maxWidth?\`.
+
+## Shape kinds
+- **polygon** — \`points: { x, y }[]\` (closed), \`stroke?\`, \`fill?\`.
+- **regular-polygon** — \`cx, cy, r, sides\`, \`rotation?\`, \`stroke?\`, \`fill?\`.
+- **star** — \`cx, cy, outerRadius, innerRadius, points\`, \`rotation?\`, \`stroke?\`, \`fill?\`.
+- **ellipse** — \`cx, cy, rx, ry\`, \`stroke?\`, \`fill?\`.
+- **arc** — \`cx, cy, r, startAngle, endAngle\`, \`stroke?\` (open stroke; no fill).
+- **wedge** — \`cx, cy, r, startAngle, endAngle\`, \`innerRadius?\` (annular), \`stroke?\`, \`fill?\`.
+- **arrowhead** — \`from, to\`, \`size?\`, \`filled?\`, \`stroke?\`, \`fill?\` (a head only).
+- **arrow** — \`from, to\`, \`routing?: straight|curved|orthogonal\`, \`orientation?\`,
+  \`label?\`, \`endHead?\` (default true), \`startHead?\` (set both for double-headed),
+  \`filled?\`, \`size?\`, \`stroke?\`.
+
+**Angles** are in degrees. For \`regular-polygon\`/\`star\`, \`rotation\` 0 puts the
+first vertex at the top (12 o'clock), increasing clockwise. For \`arc\`/\`wedge\`,
+\`startAngle\`/\`endAngle\` are measured from east (3 o'clock), increasing clockwise.
+Open shapes (\`arc\`, and \`arrowhead\`/\`arrow\` heads when not \`filled\`) never fill.
+
+## Chart kinds
+- **chart** — \`chart: bar|line|area|scatter|pie|flow\`, \`width, height\`, \`at?: { x, y }\`
+  (offset), \`props?\` (the chart's own data/options).
+
+## Geometry calc tools (optional)
+For a raw \`d\` string (e.g. to build a custom \`path\` node or reason about points):
+\`compute_regular_polygon_path\`, \`compute_star_path\`, \`compute_arc_path\`,
+\`compute_wedge_path\`, \`compute_arrowhead_path\`, \`compute_line_path\`,
+\`compute_area_path\`.
+
+## Example
+\`\`\`json
+{
+  "width": 360, "height": 160, "vibe": "ink",
+  "children": [
+    { "kind": "regular-polygon", "cx": 60, "cy": 80, "r": 36, "sides": 6, "fill": "#fca5a5" },
+    { "kind": "arrow", "from": { "x": 100, "y": 80 }, "to": { "x": 240, "y": 80 },
+      "label": "process", "filled": true },
+    { "kind": "ellipse", "cx": 300, "cy": 80, "rx": 48, "ry": 30, "fill": "#a5f3fc" }
+  ]
+}
+\`\`\``;
+
 /** Register the read-only resources: vibe presets, per-chart schemas, docs. */
 export function registerResources(server: McpServer): void {
   server.registerResource(
@@ -142,5 +197,16 @@ export function registerResources(server: McpServer): void {
       mimeType: 'text/markdown',
     },
     async (uri) => ({ contents: [{ uri: uri.href, mimeType: 'text/markdown', text: DIAGRAM_SPEC_DOC }] }),
+  );
+
+  server.registerResource(
+    'compose-spec',
+    'docs://compose-spec',
+    {
+      title: 'GoldenChart compose_surface spec',
+      description: 'The compose_surface scene-node kinds (primitives, shapes, charts) and how to assemble a figure.',
+      mimeType: 'text/markdown',
+    },
+    async (uri) => ({ contents: [{ uri: uri.href, mimeType: 'text/markdown', text: COMPOSE_SPEC_DOC }] }),
   );
 }

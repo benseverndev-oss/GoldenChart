@@ -67,4 +67,38 @@ export function registerPrompts(server: McpServer): void {
       ],
     }),
   );
+
+  server.registerPrompt(
+    'compose-a-figure',
+    {
+      title: 'Compose a figure',
+      description:
+        'Guided flow: pick a vibe, then assemble a custom figure from scene-node primitives and shapes with compose_surface.',
+      argsSchema: { figureDescription: z.string(), mood: z.string().optional() },
+    },
+    ({ figureDescription, mood }) => ({
+      messages: [
+        {
+          role: 'user' as const,
+          content: {
+            type: 'text' as const,
+            text: [
+              'You are composing a custom hand-drawn figure with the GoldenChart MCP tools. Use this when the result is not a single standard chart or diagram, but an arbitrary arrangement of shapes, labels, arrows, and (optionally) embedded charts. Follow these steps:',
+              '',
+              `1. The figure to build: ${figureDescription}`,
+              mood
+                ? `2. Desired mood: "${mood}". Call list_vibe_presets, pick the closest preset, optionally fine-tune with resolve_vibe.`
+                : '2. Call list_vibe_presets and pick a preset (default: messy_sketch).',
+              '3. Read docs://compose-spec for the scene-node kinds (primitives, shapes like regular-polygon/star/arc/wedge/ellipse/arrowhead/arrow, and positioned charts) and their fields and angle conventions.',
+              '4. Lay out the figure: choose coordinates within your width/height and build a `children` array of scene nodes `{ kind, ... }`. Shape kinds go straight in `children`; only call the compute_* calc tools if you need a raw `d` for a custom `path` node.',
+              '5. Call compose_surface with `{ width, height, vibe, children }` to render the whole figure as one SVG.',
+              '6. If a raster image is needed, pass the returned SVG to export_png.',
+              '',
+              'Return the final SVG (or PNG).',
+            ].join('\n'),
+          },
+        },
+      ],
+    }),
+  );
 }
