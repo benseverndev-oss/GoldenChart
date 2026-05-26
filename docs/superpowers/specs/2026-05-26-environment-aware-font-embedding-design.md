@@ -69,7 +69,10 @@ Re-exports the moved symbols plus a convenience helper:
 - `fontFaceFor(vibe: VibeConfig): string | undefined` — resolves a vibe, looks up its
   bundled font, and returns the ready `@font-face` CSS string (or `undefined` for a
   system-font vibe). This is the same CSS the headless path builds, factored into one
-  shared function so both call sites agree.
+  shared function so both call sites agree. Implemented with `resolveVibe`
+  (`src/vibe/resolveVibe.ts`) and the `VibeConfig` type (`src/types/vibe.ts`) — both
+  already exist; this module is the first place outside a component to call
+  `resolveVibe`, so the plan should import it explicitly rather than assume scope.
 
 Browser users who want self-contained output import from this subpath and inject the
 returned CSS into their document. Opt-in: only they pay the bytes, and tree-shaking
@@ -89,9 +92,10 @@ After `renderToStaticMarkup(element)`:
 2. Map each through `primaryFamily` to its primary family name.
 3. For each distinct family that has bundled bytes (`bundledFontFor`), build one
    `@font-face` rule (reusing the shared `fontFaceFor` builder).
-4. Splice a single `<style>` containing those rules into the SVG (immediately after
-   the opening `<svg ...>` tag, or inside a `<defs>`), deduplicated and sorted by
-   family name for deterministic output.
+4. Splice a single `<style>` containing those rules into the SVG immediately after
+   the opening `<svg ...>` tag, deduplicated and sorted by family name for
+   deterministic output. (Placement is fixed here rather than left open so the
+   headless-parity snapshot pins one stable position.)
 
 Imports `bundledFontFor` here. Because `renderToString.ts` is reachable only from
 `src/server.ts` (`goldenchart/server`) and never from `src/index.ts`, the fonts module
@@ -131,9 +135,11 @@ subpath (browser opt-in) and the headless renderer.
 ## Testing
 
 - **Bundle guard (new test):** assert the built `dist/index.js` contains no
-  `data:font/ttf;base64` substring and stays under a size budget (~150 KB). This locks
-  the win against regression. Requires the build to run before the assertion (or a
-  dedicated script).
+  `data:font/ttf;base64` substring and stays under a size budget. The assertion
+  threshold is ~150 KB (a generous guard ceiling); actual is expected to land far
+  below it (tens of KB), so a much smaller number is success, not cause for concern.
+  This locks the win against regression. Requires the build to run before the
+  assertion (or a dedicated script).
 - **Headless parity:** regenerate the 3 MCP snapshot files (`charts.test.ts`,
   `diagrams.test.ts`, `extraCharts.test.ts`); add an assertion that a chart rendered
   via `renderToSVGString` still contains its `@font-face` rule. The embedded font *set*
