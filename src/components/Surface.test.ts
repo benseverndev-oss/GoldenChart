@@ -12,7 +12,8 @@ const bare = (vibe: unknown) =>
 
 describe('Surface', () => {
   it('does not embed @font-face (CSS-only by default)', () => {
-    expect(bare('messy_sketch')).not.toContain('@font-face');
+    expect(bare('messy_sketch')).not.toContain('@font-face'); // double-quoted family
+    expect(bare('pencil')).not.toContain('@font-face'); // single-quoted family
   });
 
   it('still references the vibe font-family', () => {
