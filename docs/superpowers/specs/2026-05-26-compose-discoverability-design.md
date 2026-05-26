@@ -48,6 +48,11 @@ A `text/markdown` resource (a `COMPOSE_SPEC_DOC` string, registered like
   reason about geometry or feed a `path` node.
 - Includes one short worked example: a `children` array (e.g. a labelled `arrow`
   between a `regular-polygon` and an `ellipse`) passed to `compose_surface`.
+- Makes crisp that the shape kinds are **first-class scene nodes** you pass
+  directly in `children` — the `compute_*` calc tools are only needed when you
+  want a raw `d` for a `path` node, not before every shape.
+- Spells out the few values an agent can't guess: `arrow.routing`
+  (`straight|curved|orthogonal`) and `chart.chart` (`bar|line|area|scatter|pie|flow`).
 
 The catalog is hand-authored markdown (matching `DIAGRAM_SPEC_DOC`), not derived
 from the schema — it adds the prose/examples the raw JSON schema lacks.
