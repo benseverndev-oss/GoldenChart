@@ -29,6 +29,7 @@ import {
   wedgePath,
   ellipsePath,
   arrowHeadPath,
+  connectorPath,
 } from 'goldenchart';
 import { renderToSVGString } from 'goldenchart/server';
 
@@ -173,7 +174,56 @@ function shapes() {
   );
 }
 
+// === SP3: arrow connector =====================================================
+// Connecting two nodes. Before: a plain headless line (the agent had to draw the
+// shaft and head separately, with no routing or label). After: a single `arrow`
+// — elbow-routed shaft + filled head + midpoint label.
+function arrows() {
+  const W = 380;
+  const H = 200;
+  const vibe = { preset: 'ink', background: '#fffdf5' };
+  const A = { x: 70, y: 64 };
+  const B = { x: 310, y: 150 };
+  const nodes = (extraKey) => [
+    h(RoughCircle, { key: `${extraKey}-a`, cx: A.x, cy: A.y, diameter: 56 }),
+    h(RoughText, { key: `${extraKey}-al`, x: A.x, y: A.y, children: 'A' }),
+    h(RoughCircle, { key: `${extraKey}-b`, cx: B.x, cy: B.y, diameter: 56 }),
+    h(RoughText, { key: `${extraKey}-bl`, x: B.x, y: B.y, children: 'B' }),
+  ];
+  const start = { x: 96, y: 78 };
+  const end = { x: 286, y: 138 };
+
+  const before = renderToSVGString(
+    h(Surface, { width: W, height: H, vibe, bare: true },
+      ...nodes('b'),
+      h(RoughLine, { key: 'edge', x1: start.x, y1: start.y, x2: end.x, y2: end.y }), // headless, no label
+    ),
+  );
+
+  const c = connectorPath(start, end, { routing: 'orthogonal' });
+  const after = renderToSVGString(
+    h(Surface, { width: W, height: H, vibe, bare: true },
+      ...nodes('a'),
+      h(RoughPath, { key: 'shaft', d: c.d, fill: null }),
+      h(RoughPath, { key: 'head', d: arrowHeadPath(c.endHeadTail, end, 12, true), fill: '#1f2937' }),
+      h(RoughText, { key: 'lbl', x: c.labelAt.x, y: c.labelAt.y - 10, children: 'depends on' }),
+    ),
+  );
+
+  compare(
+    'compare-sp3-arrow',
+    W,
+    H,
+    before,
+    after,
+    'plain line — no head, no routing, no label',
+    'one `arrow`: elbow shaft + filled head + label',
+    'SP3: the `arrow` connector draws shaft + arrowhead(s) + label between two points (straight/curved/orthogonal, single or double-headed).',
+  );
+}
+
 console.log('Generating comparisons ->', OUT);
 presets();
 shapes();
+arrows();
 console.log('done.');

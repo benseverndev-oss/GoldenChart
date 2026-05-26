@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   arrowHeadPath,
+  connectorPath,
   diamondPath,
   ellipsePath,
   linePath,
@@ -67,5 +68,47 @@ describe('shape path generators', () => {
     expect(open.endsWith('Z')).toBe(false);
     expect(filled.endsWith('Z')).toBe(true);
     expect(filled).toContain('L10,0'); // still passes through the tip
+  });
+});
+
+describe('connectorPath', () => {
+  it('straight: line d, end tail at from, start tail at to, label at midpoint', () => {
+    const c = connectorPath({ x: 0, y: 0 }, { x: 100, y: 0 });
+    expect(c.d).toBe('M0,0 L100,0');
+    expect(c.endHeadTail).toEqual({ x: 0, y: 0 });
+    expect(c.startHeadTail).toEqual({ x: 100, y: 0 });
+    expect(c.labelAt).toEqual({ x: 50, y: 0 });
+  });
+
+  it('curved: d contains a cubic', () => {
+    const c = connectorPath({ x: 0, y: 0 }, { x: 0, y: 100 }, { routing: 'curved' });
+    expect(c.d).toContain('C');
+  });
+
+  it('orthogonal: multi-segment d, end tail axis-aligned with to, label on the mid-segment', () => {
+    const c = connectorPath({ x: 0, y: 0 }, { x: 40, y: 100 }, { routing: 'orthogonal' });
+    expect(c.d.split('L').length).toBeGreaterThan(2);
+    expect(c.endHeadTail.x === 40 || c.endHeadTail.y === 100).toBe(true);
+    // points = [{0,0},{0,50},{40,50},{40,100}] => mid-segment midpoint is {20,50}, not the elbow
+    expect(c.labelAt).toEqual({ x: 20, y: 50 });
+  });
+
+  it('infers horizontal orientation from a wide-but-short delta', () => {
+    // |dx| >= |dy| => horizontal => orthogonal elbow departs along x (shares from.y)
+    const c = connectorPath({ x: 0, y: 0 }, { x: 100, y: 20 }, { routing: 'orthogonal' });
+    expect(c.startHeadTail.y).toBe(0);
+  });
+
+  it('handles from == to without throwing', () => {
+    const c = connectorPath({ x: 5, y: 5 }, { x: 5, y: 5 });
+    expect(c.d).toBe('M5,5 L5,5');
+    expect(c.endHeadTail).toEqual({ x: 5, y: 5 });
+  });
+
+  it('orthogonal with a shared axis does not throw and defines the tails', () => {
+    const c = connectorPath({ x: 10, y: 0 }, { x: 10, y: 80 }, { routing: 'orthogonal' });
+    expect(typeof c.d).toBe('string');
+    expect(c.endHeadTail).toBeDefined();
+    expect(c.startHeadTail).toBeDefined();
   });
 });

@@ -509,6 +509,22 @@ export const PrimitiveSpecSchema = z.discriminatedUnion('kind', [
     seed: z.number().optional(),
     vibe: VibeConfigSchema.optional(),
   }),
+  z.object({
+    kind: z.literal('arrow'),
+    from: SeriesPointSchema,
+    to: SeriesPointSchema,
+    routing: z.enum(['straight', 'curved', 'orthogonal']).optional(),
+    orientation: z.enum(['horizontal', 'vertical']).optional(),
+    label: z.string().optional(),
+    endHead: z.boolean().optional(),
+    startHead: z.boolean().optional(),
+    filled: z.boolean().optional(),
+    size: z.number().positive().optional(),
+    stroke: z.string().optional(),
+    fill: z.string().nullable().optional(),
+    seed: z.number().optional(),
+    vibe: VibeConfigSchema.optional(),
+  }),
 ]);
 
 export type PrimitiveSpec = z.infer<typeof PrimitiveSpecSchema>;
