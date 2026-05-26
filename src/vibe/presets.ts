@@ -20,7 +20,7 @@ export const VIBE_PRESETS: Record<VibePreset, ResolvedVibe> = {
     curveTightness: 0,
     disableMultiStroke: false,
     seed: 1,
-    fontFamily: '"Comic Sans MS", "Segoe Print", cursive',
+    fontFamily: '"Comic Neue", "Comic Sans MS", "Segoe Print", cursive',
     fontSize: 14,
   },
   clean_blueprint: {
@@ -38,7 +38,7 @@ export const VIBE_PRESETS: Record<VibePreset, ResolvedVibe> = {
     curveTightness: 0,
     disableMultiStroke: true,
     seed: 7,
-    fontFamily: '"Courier New", ui-monospace, monospace',
+    fontFamily: '"Cousine", "Courier New", ui-monospace, monospace',
     fontSize: 13,
   },
   chaotic_notebook: {
@@ -56,7 +56,7 @@ export const VIBE_PRESETS: Record<VibePreset, ResolvedVibe> = {
     curveTightness: 0.2,
     disableMultiStroke: false,
     seed: 13,
-    fontFamily: '"Comic Sans MS", "Segoe Print", cursive',
+    fontFamily: '"Gloria Hallelujah", "Comic Sans MS", "Segoe Print", cursive',
     fontSize: 15,
   },
   pencil: {
@@ -74,7 +74,7 @@ export const VIBE_PRESETS: Record<VibePreset, ResolvedVibe> = {
     curveTightness: 0,
     disableMultiStroke: false,
     seed: 3,
-    fontFamily: '"Segoe Print", "Bradley Hand", cursive',
+    fontFamily: '"Caveat", "Segoe Print", "Bradley Hand", cursive',
     fontSize: 13,
   },
   marker: {
@@ -92,7 +92,7 @@ export const VIBE_PRESETS: Record<VibePreset, ResolvedVibe> = {
     curveTightness: 0,
     disableMultiStroke: true,
     seed: 5,
-    fontFamily: '"Marker Felt", "Comic Sans MS", cursive',
+    fontFamily: '"Permanent Marker", "Marker Felt", cursive',
     fontSize: 15,
   },
   ink: {
@@ -110,7 +110,7 @@ export const VIBE_PRESETS: Record<VibePreset, ResolvedVibe> = {
     curveTightness: 0,
     disableMultiStroke: false,
     seed: 9,
-    fontFamily: '"Iowan Old Style", Georgia, serif',
+    fontFamily: '"Spectral", "Iowan Old Style", Georgia, serif',
     fontSize: 14,
   },
   crayon: {
@@ -128,7 +128,7 @@ export const VIBE_PRESETS: Record<VibePreset, ResolvedVibe> = {
     curveTightness: 0.15,
     disableMultiStroke: false,
     seed: 21,
-    fontFamily: '"Comic Sans MS", "Chalkboard", cursive',
+    fontFamily: '"Schoolbell", "Comic Sans MS", "Chalkboard", cursive',
     fontSize: 15,
   },
   // Leonardo's notebooks: fine, confident iron-gall (sepia) pen on a warm
@@ -151,7 +151,7 @@ export const VIBE_PRESETS: Record<VibePreset, ResolvedVibe> = {
     // rather than a doubled, scratchy one. (Fill hatching is unaffected.)
     disableMultiStroke: true,
     seed: 1452,
-    fontFamily: '"Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif',
+    fontFamily: '"EB Garamond", "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif',
     fontSize: 14,
     // Aged-parchment page so the ink has somewhere to sit; this also drives the
     // node fill and the gap behind zone labels, so no stark-white seams show.

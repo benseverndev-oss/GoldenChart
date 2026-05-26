@@ -70,6 +70,12 @@ Built-in presets: `messy_sketch`, `clean_blueprint`, `chaotic_notebook`, `pencil
 `ink`, `crayon`, `davinci_journal`. Add `animate: { drawOn: true }` for a hand-drawn reveal (honors
 `prefers-reduced-motion`).
 
+Each preset ships with a matching open-source font, subsetted and embedded as
+`@font-face` in the SVG, so a vibe's typography renders identically in a browser
+or a headless rasterizer with no installed/network fonts. Headless rasterizers
+that load fonts explicitly (e.g. resvg) can use the exported `FONT_TTF_BASE64`.
+See `src/assets/fonts/ATTRIBUTION.md` for sources and licences.
+
 ## Components
 
 - **Charts:** `BarChart` (single/grouped/stacked), `LineChart`, `AreaChart` (+ stacked),
