@@ -34,13 +34,23 @@ export interface SurfaceProps {
 
 const DRAW_ON_CLASS = 'gc-draw-on';
 
-/** CSS for the draw-on reveal, gated behind `prefers-reduced-motion`. */
+/**
+ * CSS for the draw-on reveal, gated behind `prefers-reduced-motion`. The outline
+ * dashes itself on like a pen stroke; fills fade in once the stroke is mostly
+ * drawn, so the hatching no longer dashes around and the reveal reads as
+ * intentional.
+ */
 function drawOnCss(durationMs: number): string {
+  const fillDelay = Math.round(durationMs * 0.6);
+  const fillDuration = Math.round(durationMs * 0.5);
   return (
     `@keyframes gc-draw-on{to{stroke-dashoffset:0}}` +
+    `@keyframes gc-fade-in{from{opacity:0}to{opacity:1}}` +
     `@media (prefers-reduced-motion: no-preference){` +
-    `.${DRAW_ON_CLASS} path{stroke-dasharray:1;stroke-dashoffset:1;` +
-    `animation:gc-draw-on ${durationMs}ms ease forwards}}`
+    `.${DRAW_ON_CLASS} .gc-draw-stroke{stroke-dasharray:1;stroke-dashoffset:1;` +
+    `animation:gc-draw-on ${durationMs}ms ease forwards}` +
+    `.${DRAW_ON_CLASS} .gc-draw-fill{opacity:0;` +
+    `animation:gc-fade-in ${fillDuration}ms ease ${fillDelay}ms forwards}}`
   );
 }
 

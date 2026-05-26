@@ -32,8 +32,11 @@ export function RoughCircle({
     return drawableToPaths(drawable);
   }, [cx, cy, diameter, resolved, stroke, fill]);
 
+  const r = diameter / 2;
+  const clip = `M${cx - r},${cy}a${r},${r} 0 1,0 ${diameter},0a${r},${r} 0 1,0 ${-diameter},0z`;
+
   return (
-    <SketchPaths paths={paths} className={className} style={style} onClick={onClick} animate={!!resolved.animate?.drawOn}>
+    <SketchPaths paths={paths} className={className} style={style} onClick={onClick} animate={!!resolved.animate?.drawOn} clip={clip}>
       {children}
     </SketchPaths>
   );

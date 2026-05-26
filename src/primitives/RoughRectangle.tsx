@@ -33,8 +33,10 @@ export function RoughRectangle({
     return drawableToPaths(drawable);
   }, [x, y, width, height, resolved, stroke, fill]);
 
+  const clip = `M${x},${y}h${width}v${height}h${-width}z`;
+
   return (
-    <SketchPaths paths={paths} className={className} style={style} onClick={onClick} animate={!!resolved.animate?.drawOn}>
+    <SketchPaths paths={paths} className={className} style={style} onClick={onClick} animate={!!resolved.animate?.drawOn} clip={clip}>
       {children}
     </SketchPaths>
   );
