@@ -126,6 +126,16 @@ export const FlowEdgeSchema = z.object({
   from: z.string(),
   to: z.string(),
   label: z.string().optional(),
+  routing: z.enum(['curved', 'orthogonal']).optional(),
+});
+
+/** Structural layout dials; mirrors `LayoutOptions` in goldenchart. */
+export const LayoutOptionsSchema = z.object({
+  density: z.enum(['compact', 'cozy', 'comfortable']).optional(),
+  nodeSpacing: z.number().positive().optional(),
+  rankSpacing: z.number().positive().optional(),
+  engine: z.enum(['auto', 'tree', 'dag']).optional(),
+  laneGutter: z.number().nonnegative().optional(),
 });
 
 export const FlowDirectionSchema = z.enum(['TB', 'BT', 'LR', 'RL']);

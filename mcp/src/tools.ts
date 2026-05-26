@@ -30,6 +30,7 @@ import {
   AnnotationSchema,
   AxisFormatSchema,
   EmphasisSchema,
+  LayoutOptionsSchema,
   baseChartShape,
   BarModeSchema,
   ChartDatumSchema,
@@ -175,6 +176,7 @@ export const chartTools: ToolDef[] = [
       direction: FlowDirectionSchema.optional(),
       routing: EdgeRoutingSchema.optional(),
       showArrowheads: z.boolean().optional(),
+      layoutOptions: LayoutOptionsSchema.optional(),
     },
   }),
 ];
@@ -290,6 +292,7 @@ export const diagramTools: ToolDef[] = [
       edges: z.array(FlowEdgeSchema).optional(),
       direction: FlowDirectionSchema.optional(),
       showArrowheads: z.boolean().optional(),
+      layoutOptions: LayoutOptionsSchema.optional(),
     },
   }),
   makeRenderTool({

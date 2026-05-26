@@ -1,4 +1,4 @@
-import type { FlowDirection } from '../types/charts';
+import type { FlowDirection, LayoutOptions } from '../types/charts';
 import type { Point } from '../types/geometry';
 import type { LaidGroup, LayoutEngine } from './diagram';
 import { layoutFlow } from './dag';
@@ -32,6 +32,12 @@ const MEMBER_GAP = 36;
 const BAND_GAP = 56;
 /** Padding between a lane's border and its member nodes. */
 const LANE_PAD = 14;
+
+const DENSITY_MUL: Record<NonNullable<LayoutOptions['density']>, number> = {
+  compact: 0.7,
+  cozy: 1,
+  comfortable: 1.4,
+};
 /** Breathing room on either side of a swimlane title within its gutter. */
 const LABEL_MARGIN = 10;
 // The layout runs before a vibe is resolved, so titles are sized with a
@@ -56,9 +62,18 @@ interface BandLayout {
  * existing crossing-reduction still informs the result. Ungrouped nodes each
  * occupy a singleton, container-less band.
  */
-function bandLayout(base: LaidOutNode[], direction: FlowDirection, size: [number, number]): BandLayout {
+function bandLayout(
+  base: LaidOutNode[],
+  direction: FlowDirection,
+  size: [number, number],
+  options?: LayoutOptions,
+): BandLayout {
   if (base.length === 0) return { placed: base, groups: [] };
   const horizontal = isHorizontal(direction);
+  const mul = DENSITY_MUL[options?.density ?? 'cozy'];
+  const memberGap = options?.nodeSpacing ?? MEMBER_GAP * mul;
+  const bandGap = options?.rankSpacing ?? BAND_GAP * mul;
+  const extraGutter = options?.laneGutter ?? 0;
   const flowKey = (n: LaidOutNode) => (horizontal ? n.x : n.y);
   const crossKey = (n: LaidOutNode) => (horizontal ? n.y : n.x);
   const flowExt = (n: LaidOutNode) => (horizontal ? n.width : n.height);
@@ -90,16 +105,17 @@ function bandLayout(base: LaidOutNode[], direction: FlowDirection, size: [number
   const gutter = (() => {
     const dims = titleDims.filter((d): d is { width: number; height: number } => d != null);
     if (dims.length === 0) return 0;
-    return horizontal
+    const base = horizontal
       ? Math.max(...dims.map((d) => d.height)) + LABEL_MARGIN * 2
       : Math.max(...dims.map((d) => d.width)) + LABEL_MARGIN * 2;
+    return base + extraGutter;
   })();
 
   const bandFlow = laidBands.map((b) => Math.max(...b.members.map(flowExt)));
   const bandCross = laidBands.map(
-    (b) => b.members.reduce((s, m) => s + crossExt(m), 0) + MEMBER_GAP * (b.members.length - 1),
+    (b) => b.members.reduce((s, m) => s + crossExt(m), 0) + memberGap * (b.members.length - 1),
   );
-  const contentFlow = bandFlow.reduce((s, v) => s + v, 0) + BAND_GAP * (laidBands.length - 1);
+  const contentFlow = bandFlow.reduce((s, v) => s + v, 0) + bandGap * (laidBands.length - 1);
   const contentCross = Math.max(...bandCross);
 
   const flowSpan = horizontal ? size[0] : size[1];
@@ -124,7 +140,7 @@ function bandLayout(base: LaidOutNode[], direction: FlowDirection, size: [number
       placed.push(
         horizontal ? { ...m, x: flowCenter, y: crossCenter } : { ...m, x: crossCenter, y: flowCenter },
       );
-      crossCursor += crossExt(m) + MEMBER_GAP;
+      crossCursor += crossExt(m) + memberGap;
     }
 
     if (band.group) {
@@ -148,7 +164,7 @@ function bandLayout(base: LaidOutNode[], direction: FlowDirection, size: [number
         labelAnchor: horizontal ? 'middle' : 'start',
       });
     }
-    flowCursor += bandFlow[i] + BAND_GAP;
+    flowCursor += bandFlow[i] + bandGap;
   });
   return { placed, groups };
 }
@@ -160,10 +176,10 @@ function bandLayout(base: LaidOutNode[], direction: FlowDirection, size: [number
  * facing the peer, and connectors leave and arrive square-on via perpendicular
  * stubs.
  */
-export function architectureLayout(direction: FlowDirection = 'TB'): LayoutEngine {
+export function architectureLayout(direction: FlowDirection = 'TB', options?: LayoutOptions): LayoutEngine {
   return (nodes, edges, size) => {
     const base = layoutFlow(nodes, size, edges, direction);
-    const { placed, groups } = bandLayout(base.nodes, direction, size);
+    const { placed, groups } = bandLayout(base.nodes, direction, size, options);
     const byId = new Map(placed.map((n) => [n.id, n]));
 
     // Keep connectors off the swimlane titles too, not just the boxes.

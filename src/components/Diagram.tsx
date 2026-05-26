@@ -49,6 +49,13 @@ export function Diagram({
     [layout, nodes, edges, plot.width, plot.height],
   );
 
+  // Per-edge routing override, keyed by endpoints, falling back to the chart default.
+  const edgeRouting = useMemo(() => {
+    const map = new Map<string, EdgeRouting>();
+    for (const e of edges ?? []) if (e.routing) map.set(`${e.from}->${e.to}`, e.routing);
+    return map;
+  }, [edges]);
+
   return (
     <Surface
       width={width}
@@ -68,7 +75,7 @@ export function Diagram({
             key={`${e.from}->${e.to}`}
             edge={e}
             orientation={scene.orientation}
-            routing={routing}
+            routing={edgeRouting.get(`${e.from}->${e.to}`) ?? routing}
             showArrowhead={showArrowheads}
           />
         ))}
