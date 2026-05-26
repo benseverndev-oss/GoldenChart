@@ -17,6 +17,7 @@ describe('renderToSVGString headless font embedding', () => {
 
   it('decodes &quot; entities so double-quoted families still match', () => {
     const svg = render('messy_sketch'); // '"Comic Neue", ...' → escaped to &quot; in markup
+    expect(svg).toContain('@font-face');
     expect(svg).toContain("font-family:'Comic Neue'");
   });
 

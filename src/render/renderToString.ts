@@ -2,6 +2,8 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import type { ReactElement } from 'react';
 import { bundledFontFor, fontFaceCss } from '../assets/fonts';
 
+// Matches only the SVG attribute form (font-family="…"), not inline
+// style="font-family:…". Every GoldenChart text path uses the attribute form.
 const FONT_FAMILY_ATTR = /font-family="([^"]*)"/g;
 
 /** Decode the HTML entities `renderToStaticMarkup` puts in attribute values. */
@@ -43,6 +45,7 @@ export function renderToSVGString(element: ReactElement): string {
   }
   const fonts = embeddedFontFaces(markup);
   if (!fonts) return markup;
-  const tagEnd = markup.indexOf('>') + 1; // end of the opening <svg ...> tag
+  // end of the opening <svg …> tag; safe because React encodes '>' as '&gt;' in attributes
+  const tagEnd = markup.indexOf('>') + 1;
   return markup.slice(0, tagEnd) + fonts + markup.slice(tagEnd);
 }
