@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
-import type { BaseChartProps } from '../types/charts';
+import type { AxisFormat, BaseChartProps } from '../types/charts';
 import { linearScale, sqrtScale, extentOf } from '../core/scales';
+import { resolveDomain, tickFormatter } from '../core/axisFormat';
 import { getPlotArea } from '../core/geometry';
 import { Surface } from './Surface';
 import { Axis } from './Axis';
@@ -28,6 +29,8 @@ export interface ScatterPlotProps extends BaseChartProps {
   showAxes?: boolean;
   showGrid?: boolean;
   annotations?: Annotation[];
+  xAxis?: AxisFormat;
+  yAxis?: AxisFormat;
 }
 
 /** Scatter / bubble chart: each datum maps to a sketchy `<RoughCircle>`. */
@@ -49,12 +52,16 @@ export function ScatterPlot({
   showAxes = true,
   showGrid = true,
   annotations,
+  xAxis,
+  yAxis,
 }: ScatterPlotProps) {
   const plot = getPlotArea(width, height, margin);
 
   const { x, y, points } = useMemo(() => {
-    const xScale = linearScale(extentOf(data.map((d) => d.x), false), [plot.x, plot.x + plot.width]);
-    const yScale = linearScale(extentOf(data.map((d) => d.y), false), [plot.y + plot.height, plot.y]);
+    const xs = data.map((d) => d.x);
+    const ys = data.map((d) => d.y);
+    const xScale = linearScale(resolveDomain(xs, extentOf(xs, false), xAxis), [plot.x, plot.x + plot.width]);
+    const yScale = linearScale(resolveDomain(ys, extentOf(ys, false), yAxis), [plot.y + plot.height, plot.y]);
     const rValues = data.map((d) => d.r).filter((r): r is number => r !== undefined);
     const rScale = rValues.length ? sqrtScale([0, Math.max(...rValues)], [2, maxRadius]) : null;
 
@@ -66,7 +73,7 @@ export function ScatterPlot({
     }));
 
     return { x: xScale, y: yScale, points: computed };
-  }, [data, radius, maxRadius, plot.x, plot.y, plot.width, plot.height]);
+  }, [data, radius, maxRadius, plot.x, plot.y, plot.width, plot.height, xAxis, yAxis]);
 
   return (
     <Surface
@@ -92,8 +99,8 @@ export function ScatterPlot({
       {annotations && <Annotations annotations={annotations} plot={plot} xScale={x} yScale={y} />}
       {showAxes && (
         <>
-          <Axis scale={x} orientation="bottom" plot={plot} />
-          <Axis scale={y} orientation="left" plot={plot} />
+          <Axis scale={x} orientation="bottom" plot={plot} tickFormat={tickFormatter(xAxis)} ticks={xAxis?.tickCount} />
+          <Axis scale={y} orientation="left" plot={plot} tickFormat={tickFormatter(yAxis)} ticks={yAxis?.tickCount} />
         </>
       )}
     </Surface>

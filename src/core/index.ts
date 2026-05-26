@@ -25,3 +25,6 @@ export * from './profile';
 export * from './recommend';
 export * from './compile';
 export * from './critique';
+export * from './transform';
+export * from './format';
+export * from './axisFormat';

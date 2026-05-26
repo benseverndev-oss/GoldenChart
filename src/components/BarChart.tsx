@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
-import type { BaseChartProps, ChartDatum, DataTableModel, MultiSeriesDatum } from '../types/charts';
+import type { AxisFormat, BaseChartProps, ChartDatum, DataTableModel, MultiSeriesDatum } from '../types/charts';
 import { bandScale, linearScale, extentOf } from '../core/scales';
+import { resolveDomain, tickFormatter } from '../core/axisFormat';
 import { getPlotArea } from '../core/geometry';
 import { colorAt } from '../core/palette';
 import { datumTable } from '../core/dataTable';
@@ -26,6 +27,9 @@ export interface BarChartProps extends BaseChartProps {
   showGrid?: boolean;
   showLegend?: boolean;
   annotations?: Annotation[];
+  /** Value-axis scale/format overrides; category axis takes `xAxis` for labels. */
+  xAxis?: AxisFormat;
+  yAxis?: AxisFormat;
 }
 
 interface LaidBar {
@@ -61,6 +65,8 @@ export function BarChart({
   showGrid = true,
   showLegend = true,
   annotations,
+  xAxis,
+  yAxis,
 }: BarChartProps) {
   const plot = getPlotArea(width, height, margin);
 
@@ -68,7 +74,8 @@ export function BarChart({
     if (mode === 'single') {
       const single = data as ChartDatum[];
       const xScale = bandScale(single.map((d) => d.label), [plot.x, plot.x + plot.width]);
-      const yScale = linearScale(extentOf(single.map((d) => d.value)), [plot.y + plot.height, plot.y]);
+      const values = single.map((d) => d.value);
+      const yScale = linearScale(resolveDomain(values, extentOf(values), yAxis), [plot.y + plot.height, plot.y]);
       const baseline = yScale(0);
       const computed: LaidBar[] = single.map((d) => {
         const top = yScale(d.value);
@@ -130,7 +137,7 @@ export function BarChart({
       legend: seriesIds.map((k, i) => ({ label: k, color: colorAt(i) })),
       keys: seriesIds,
     };
-  }, [data, mode, seriesKeys, plot.x, plot.y, plot.width, plot.height]);
+  }, [data, mode, seriesKeys, plot.x, plot.y, plot.width, plot.height, yAxis]);
 
   const table: DataTableModel | undefined = useMemo(() => {
     if (!dataTable) return undefined;
@@ -163,8 +170,8 @@ export function BarChart({
       {annotations && <Annotations annotations={annotations} plot={plot} yScale={y} />}
       {showAxes && (
         <>
-          <Axis scale={x} orientation="bottom" plot={plot} />
-          <Axis scale={y} orientation="left" plot={plot} />
+          <Axis scale={x} orientation="bottom" plot={plot} tickFormat={tickFormatter(xAxis)} ticks={xAxis?.tickCount} />
+          <Axis scale={y} orientation="left" plot={plot} tickFormat={tickFormatter(yAxis)} ticks={yAxis?.tickCount} />
         </>
       )}
       {showLegend && legend.length > 0 && <Legend items={legend} x={plot.x + plot.width - 84} y={plot.y} />}

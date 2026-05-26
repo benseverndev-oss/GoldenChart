@@ -12,8 +12,9 @@ import {
   divergingColor,
   sequentialColor,
   profileData,
+  applyTransforms,
 } from 'goldenchart';
-import type { ChartDatum, ColorScaleName, FlowDirection, FlowEdge, FlowNode } from 'goldenchart';
+import type { ChartDatum, ColorScaleName, FlowDirection, FlowEdge, FlowNode, Row, Transform } from 'goldenchart';
 import type { ToolDef } from './registry';
 import {
   ChartDatumSchema,
@@ -23,6 +24,7 @@ import {
   FlowEdgeSchema,
   FlowNodeSchema,
   SeriesPointSchema,
+  TransformSchema,
 } from './schemas';
 
 type Tick = { value: string | number; offset: number };
@@ -229,6 +231,20 @@ export const calcTools: ToolDef[] = [
         content: [{ type: 'text', text: JSON.stringify(profile, null, 2) }],
         structuredContent: profile as unknown as Record<string, unknown>,
       };
+    },
+  },
+  {
+    name: 'transform_data',
+    config: {
+      title: 'Transform Data',
+      description:
+        'Reshape an array of records with a transform pipeline (sort, filter, topN, aggregate, bin, rolling, pivot) before charting. JSON in, JSON out.',
+      inputSchema: { data: z.array(z.record(z.unknown())), pipeline: z.array(TransformSchema) },
+      outputSchema: { rows: z.array(z.record(z.unknown())) },
+    },
+    handler: async (args) => {
+      const rows = applyTransforms(args.data as Row[], args.pipeline as Transform[]);
+      return { content: [{ type: 'text', text: JSON.stringify({ rows }, null, 2) }], structuredContent: { rows } };
     },
   },
 ];
