@@ -29,6 +29,12 @@ installed font.
 | `art_deco` | Cinzel | SIL OFL 1.1 | fonts.google.com/specimen/Cinzel |
 | `manga` | Bangers | SIL OFL 1.1 | fonts.google.com/specimen/Bangers |
 | `highlighter` | Caveat | SIL OFL 1.1 | fonts.google.com/specimen/Caveat |
+| `kraft` | Special Elite | Apache-2.0 | fonts.google.com/specimen/Special+Elite |
+| `synthwave` | Orbitron | SIL OFL 1.1 | fonts.google.com/specimen/Orbitron |
+| `botanical` | EB Garamond | SIL OFL 1.1 | fonts.google.com/specimen/EB+Garamond |
+| `risograph` | IBM Plex Sans | SIL OFL 1.1 | fonts.google.com/specimen/IBM+Plex+Sans |
+| `sticky_note` | Caveat | SIL OFL 1.1 | fonts.google.com/specimen/Caveat |
+| `amber_crt` | VT323 | SIL OFL 1.1 | fonts.google.com/specimen/VT323 |
 
 The SIL Open Font License 1.1 and Apache License 2.0 permit redistribution and
 embedding. Full licence texts: https://openfontlicense.org and

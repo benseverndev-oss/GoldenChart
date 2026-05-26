@@ -25,7 +25,13 @@ export type VibePreset =
   | 'midnight'
   | 'art_deco'
   | 'manga'
-  | 'highlighter';
+  | 'highlighter'
+  | 'kraft'
+  | 'synthwave'
+  | 'botanical'
+  | 'risograph'
+  | 'sticky_note'
+  | 'amber_crt';
 
 /** Optional "draw-on" reveal: strokes animate as if being sketched. */
 export interface VibeAnimate {
