@@ -1,0 +1,267 @@
+// Renders the README hero, the vibe gallery, and the rendering-quality
+// before/after examples to PNG (plus the animated draw-on SVGs). Run from the
+// mcp workspace, which already has @resvg/resvg-js and a `goldenchart` link:
+//
+//   npm run build            # at repo root, so dist/ is fresh
+//   cd mcp && npm run assets  # writes into ../assets
+//
+// "Before" panels are faithful: the rendering-quality changes are purely
+// additive, so we reconstruct the old output by stripping the new bits.
+import React from 'react';
+import { mkdirSync, writeFileSync, mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { Resvg } from '@resvg/resvg-js';
+import { BarChart, LineChart, PieChart, Flowchart, TreemapChart, FONT_TTF_BASE64 } from 'goldenchart';
+import { renderToSVGString } from 'goldenchart/server';
+
+const OUT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'assets');
+mkdirSync(OUT, { recursive: true });
+
+// resvg can't read @font-face data URIs, so materialise the bundled fonts.
+const fontDir = mkdtempSync(join(tmpdir(), 'gc-fonts-'));
+for (const [family, base64] of Object.entries(FONT_TTF_BASE64)) {
+  writeFileSync(join(fontDir, `${family.replace(/[^A-Za-z0-9]+/g, '_')}.ttf`), Buffer.from(base64, 'base64'));
+}
+const UI = 'IBM Plex Sans';
+const HAND = 'Caveat';
+
+const h = (c, p) => React.createElement(c, p);
+const embed = (svg, x, y) => svg.replace(/^<svg /, `<svg x="${x}" y="${y}" `);
+
+function rasterize(svg, file, scale = 2) {
+  const png = new Resvg(svg, {
+    font: { fontDirs: [fontDir], loadSystemFonts: true },
+    fitTo: { mode: 'zoom', value: scale },
+  })
+    .render()
+    .asPng();
+  writeFileSync(join(OUT, file), png);
+  console.log(`  ${file}  (${(png.length / 1024).toFixed(0)} KB)`);
+}
+
+function doc(w, h, body, bg = '#faf9f7') {
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">` +
+    `<rect width="100%" height="100%" fill="${bg}"/>${body}</svg>`
+  );
+}
+const card = (x, y, w, h) =>
+  `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="14" fill="#ffffff" stroke="#e7e5e4" stroke-width="1.5"/>`;
+const cap = (text, x, y, size = 14, fill = '#78716c', weight = 500) =>
+  `<text x="${x}" y="${y}" text-anchor="middle" font-family="${UI}" font-size="${size}" font-weight="${weight}" fill="${fill}">${text}</text>`;
+
+// --- "before" reconstruction -------------------------------------------------
+const stripHalo = (svg) =>
+  svg.replace(/<text\b[^>]*>/g, (t) =>
+    t
+      .replace(/\sstroke="[^"]*"/, '')
+      .replace(/\sstroke-width="[^"]*"/, '')
+      .replace(/\sstroke-linejoin="[^"]*"/, '')
+      .replace(/\spaint-order="[^"]*"/, '')
+      .replace(/\stext-rendering="[^"]*"/, ''),
+  );
+const stripClip = (svg) =>
+  svg.replace(/<clipPath\b[^>]*>.*?<\/clipPath>/gs, '').replace(/\sclip-path="url\(#[^"]*\)"/g, '');
+const oldAnim = (svg, ms) =>
+  svg
+    .replace(
+      /<style>[^<]*gc-draw-on[^<]*<\/style>/,
+      `<style>@keyframes gc-draw-on{to{stroke-dashoffset:0}}@media (prefers-reduced-motion: no-preference){.gc-draw-on path{stroke-dasharray:1;stroke-dashoffset:1;animation:gc-draw-on ${ms}ms ease forwards}}</style>`,
+    )
+    .replace(/<path\b([^>]*)>/g, (m, a) => (/\bpathLength=/.test(a) ? m : `<path pathLength="1"${a}>`));
+
+// shared sample data
+const BAR = [
+  { label: 'Mon', value: 12 },
+  { label: 'Tue', value: 19 },
+  { label: 'Wed', value: 7 },
+  { label: 'Thu', value: 24 },
+  { label: 'Fri', value: 15 },
+];
+const SERIES = [
+  { id: 'visits', points: [0, 3, 2, 5, 4, 7, 6, 9].map((y, x) => ({ x, y })) },
+  { id: 'signups', points: [1, 2, 4, 3, 6, 5, 8, 7].map((y, x) => ({ x, y })) },
+];
+const FLOW_NODES = [
+  { id: 'a', label: 'Start', shape: 'ellipse' },
+  { id: 'b', label: 'Clean', parent: 'a' },
+  { id: 'c', label: 'Decide?', parent: 'a', shape: 'diamond' },
+  { id: 'd', label: 'Chart it', parent: 'b' },
+  { id: 'e', label: 'Ship', parent: 'c', shape: 'ellipse' },
+];
+const FLOW_EDGES = [
+  { from: 'a', to: 'b' },
+  { from: 'a', to: 'c', label: 'maybe' },
+  { from: 'b', to: 'd' },
+  { from: 'c', to: 'e', label: 'yes' },
+];
+
+// === HERO ====================================================================
+function hero() {
+  const cw = 360;
+  const ch = 250;
+  const capH = 30;
+  const gap = 22;
+  const pad = 30;
+  const titleH = 96;
+  const cols = 2;
+  const rows = 2;
+  const totalW = pad * 2 + cols * cw + (cols - 1) * gap;
+  const totalH = titleH + pad + rows * (ch + capH) + (rows - 1) * gap + pad;
+
+  const panels = [
+    { el: h(BarChart, { width: cw, height: ch, vibe: 'marker', data: BAR, bare: true }), label: 'marker' },
+    {
+      el: h(LineChart, { width: cw, height: ch, vibe: 'blueprint_dark', series: SERIES, curve: 'catmullRom', showPoints: true, bare: true }),
+      label: 'blueprint_dark',
+    },
+    { el: h(PieChart, { width: cw, height: ch, vibe: 'crayon', data: BAR, innerRadius: 48, bare: true }), label: 'crayon' },
+    {
+      el: h(Flowchart, { width: cw, height: ch, vibe: 'comic_book', nodes: FLOW_NODES, edges: FLOW_EDGES, direction: 'TB', bare: true }),
+      label: 'comic_book',
+    },
+  ];
+
+  let body =
+    `<text x="${totalW / 2}" y="58" text-anchor="middle" font-family="${HAND}" font-size="54" fill="#1c1917">GoldenChart</text>` +
+    cap('Hand-drawn charts &amp; diagrams with a configurable Vibe engine', totalW / 2, 84, 16, '#57534e', 500);
+
+  panels.forEach((p, i) => {
+    const r = Math.floor(i / cols);
+    const c = i % cols;
+    const x = pad + c * (cw + gap);
+    const y = titleH + pad + r * (ch + capH + gap);
+    body += card(x, y, cw, ch + capH);
+    body += embed(renderToSVGString(p.el), x, y);
+    body += cap(p.label, x + cw / 2, y + ch + 21, 14, '#a8a29e', 600);
+  });
+
+  rasterize(doc(totalW, totalH, body), 'hero.png', 2);
+}
+
+// === VIBE GALLERY ============================================================
+function vibeGallery() {
+  const cw = 250;
+  const ch = 170;
+  const capH = 26;
+  const gap = 16;
+  const pad = 20;
+  const cols = 3;
+  const vibes = ['pencil', 'ink', 'chalkboard', 'neon', 'watercolor', 'synthwave'];
+  const rows = Math.ceil(vibes.length / cols);
+  const totalW = pad * 2 + cols * cw + (cols - 1) * gap;
+  const totalH = pad * 2 + rows * (ch + capH) + (rows - 1) * gap;
+
+  let body = '';
+  vibes.forEach((v, i) => {
+    const r = Math.floor(i / cols);
+    const c = i % cols;
+    const x = pad + c * (cw + gap);
+    const y = pad + r * (ch + capH + gap);
+    body += card(x, y, cw, ch + capH);
+    body += embed(renderToSVGString(h(BarChart, { width: cw, height: ch, vibe: v, data: BAR, bare: true })), x, y);
+    body += cap(v, x + cw / 2, y + ch + 18, 13, '#a8a29e', 600);
+  });
+  rasterize(doc(totalW, totalH, body), 'vibes.png', 2);
+}
+
+// === BEFORE / AFTER ==========================================================
+function beforeAfter(beforeSvg, afterSvg, w, ht, caption, file, scale = 2) {
+  const pad = 18;
+  const gap = 34;
+  const labelH = 30;
+  const capH = caption ? 28 : 0;
+  const totalW = pad * 2 + w * 2 + gap;
+  const totalH = pad + labelH + ht + capH + pad;
+  let body =
+    cap('BEFORE', pad + w / 2, pad + 20, 18, '#dc2626', 700) +
+    cap('AFTER', pad + w + gap + w / 2, pad + 20, 18, '#16a34a', 700) +
+    embed(beforeSvg, pad, pad + labelH) +
+    embed(afterSvg, pad + w + gap, pad + labelH);
+  if (caption) body += cap(caption, totalW / 2, pad + labelH + ht + 18, 14, '#475569', 500);
+  rasterize(doc(totalW, totalH, body, '#ffffff'), file, scale);
+}
+
+function qualityHalo() {
+  const W = 460;
+  const H = 320;
+  const data = [
+    { id: 'root' },
+    { id: 'Engineering', parent: 'root', value: 42, label: 'Engineering' },
+    { id: 'Marketing', parent: 'root', value: 28, label: 'Marketing' },
+    { id: 'Operations', parent: 'root', value: 22, label: 'Operations' },
+    { id: 'Research', parent: 'root', value: 18, label: 'Research' },
+    { id: 'Support', parent: 'root', value: 14, label: 'Support' },
+  ];
+  const after = renderToSVGString(
+    h(TreemapChart, { width: W, height: H, vibe: { preset: 'blueprint_dark', fillStyle: 'cross-hatch', hachureGap: 5 }, data, bare: true }),
+  );
+  beforeAfter(
+    stripHalo(after),
+    after,
+    W,
+    H,
+    'Text halo: labels over a cross-hatch fill stay legible — the halo knocks the hatching out from behind each glyph.',
+    'quality-text-halo.png',
+  );
+}
+
+function qualityClip() {
+  const W = 360;
+  const H = 260;
+  const data = [
+    { label: 'Q1', value: 18 },
+    { label: 'Q2', value: 24 },
+  ];
+  const vibe = {
+    preset: 'ink',
+    fill: '#f472b6',
+    fillStyle: 'hachure',
+    roughness: 3.2,
+    bowing: 2,
+    hachureGap: 9,
+    fillWeight: 4,
+    strokeWidth: 2,
+    background: '#fffdf5',
+  };
+  const after = renderToSVGString(h(BarChart, { width: W, height: H, vibe, data, bare: true }));
+  beforeAfter(
+    stripClip(after),
+    after,
+    W,
+    H,
+    'Clipped fills: hachure no longer bleeds past the bar edges, while the sketch outline stays loose.',
+    'quality-clipped-fills.png',
+    3,
+  );
+}
+
+function drawOn() {
+  const W = 440;
+  const H = 300;
+  const ms = 1500;
+  const after = renderToSVGString(
+    h(Flowchart, {
+      width: W,
+      height: H,
+      vibe: { preset: 'crayon', animate: { drawOn: true, durationMs: ms } },
+      nodes: FLOW_NODES,
+      edges: FLOW_EDGES,
+      direction: 'TB',
+      bare: true,
+    }),
+  );
+  writeFileSync(join(OUT, 'quality-draw-on-after.svg'), after);
+  writeFileSync(join(OUT, 'quality-draw-on-before.svg'), oldAnim(after, ms));
+  console.log('  quality-draw-on-{before,after}.svg');
+}
+
+console.log('Generating assets ->', OUT);
+hero();
+vibeGallery();
+qualityHalo();
+qualityClip();
+drawOn();
+console.log('done.');

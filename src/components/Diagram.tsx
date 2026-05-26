@@ -4,7 +4,9 @@ import { getPlotArea } from '../core/geometry';
 import { sceneBounds } from '../core/diagram';
 import type { DiagramOrientation, LaidGroup, LaidOutEdge, LaidOutNode, LayoutEngine } from '../core/diagram';
 import { arrowHeadPath, diamondPath, ellipsePath, linkPath, orthogonalPath, orthogonalPoints } from '../core/shapes';
+import { measureText } from '../core/text';
 import { Surface } from './Surface';
+import { useResolvedVibe } from '../vibe/VibeProvider';
 import { RoughRectangle } from '../primitives/RoughRectangle';
 import { RoughPath } from '../primitives/RoughPath';
 import { RoughText } from '../primitives/RoughText';
@@ -54,6 +56,12 @@ export function Diagram({
     const b = sceneBounds(scene);
     return `${b.x} ${b.y} ${b.width} ${b.height}`;
   }, [scene]);
+  // Per-edge routing override, keyed by endpoints, falling back to the chart default.
+  const edgeRouting = useMemo(() => {
+    const map = new Map<string, EdgeRouting>();
+    for (const e of edges ?? []) if (e.routing) map.set(`${e.from}->${e.to}`, e.routing);
+    return map;
+  }, [edges]);
 
   return (
     <Surface
@@ -75,7 +83,7 @@ export function Diagram({
             key={`${e.from}->${e.to}`}
             edge={e}
             orientation={scene.orientation}
-            routing={routing}
+            routing={edgeRouting.get(`${e.from}->${e.to}`) ?? routing}
             showArrowhead={showArrowheads}
           />
         ))}
@@ -88,13 +96,31 @@ export function Diagram({
 }
 
 function DiagramGroup({ group }: { group: LaidGroup }) {
+  const resolved = useResolvedVibe();
+  const m = group.label ? measureText(group.label, resolved.fontSize, resolved.fontFamily) : null;
+  const anchor = group.labelAnchor ?? 'start';
+  const at = group.labelPoint ?? { x: group.x + 8, y: group.y };
+  const padX = 4;
+  const padY = 1;
+  const tabX = anchor === 'middle' && m ? at.x - m.width / 2 - padX : at.x - padX;
   return (
     <g>
       <RoughRectangle x={group.x} y={group.y} width={group.width} height={group.height} fill={null} />
-      {group.label && (
-        <RoughText x={group.x + 6} y={group.y + 6} anchor="start" baseline="hanging">
-          {group.label}
-        </RoughText>
+      {group.label && m && (
+        <>
+          {/* A page-coloured tab sits behind the title so it stays legible even
+              where a border or connector passes close by. */}
+          <rect
+            x={tabX}
+            y={at.y - m.height / 2 - padY}
+            width={m.width + padX * 2}
+            height={m.height + padY * 2}
+            fill={resolved.background ?? '#ffffff'}
+          />
+          <RoughText x={at.x} y={at.y} anchor={anchor} baseline="middle">
+            {group.label}
+          </RoughText>
+        </>
       )}
     </g>
   );
@@ -145,8 +171,8 @@ function DiagramEdge({
 
 function DiagramNode({ node, index }: { node: LaidOutNode; index: number }) {
   const seed = index + 1;
-  const fill = '#ffffff';
   const vibe = node.data.vibe;
+  const fill = useResolvedVibe(vibe).background ?? '#ffffff';
 
   let outline;
   if (node.shape === 'diamond') {

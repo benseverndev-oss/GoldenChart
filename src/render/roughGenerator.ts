@@ -16,19 +16,34 @@ export function getRoughGenerator(): RoughGenerator {
   return generator;
 }
 
+/** Whether a path is the sketch outline or part of the fill/hatching. */
+export type RoughPathKind = 'stroke' | 'fill';
+
 /** Flat description of one `<path>` element to render for a sketchy drawable. */
 export interface RoughPathInfo {
   d: string;
   stroke: string;
   strokeWidth: number;
   fill: string;
+  /** `stroke` = the sketch outline; `fill` = solid fill or hachure lines. */
+  kind: RoughPathKind;
 }
 
 /**
  * Turn a Rough.js `Drawable` into plain `<path>` descriptors. Rough.js emits
  * separate ops for the outline, the solid fill, and the hatching sketch — we
  * render each as its own path so React owns the DOM, not Rough.js.
+ *
+ * `toPaths` emits exactly one path per op-set, in order, so the returned paths
+ * line up 1:1 with `drawable.sets`: a `path` set is the outline; `fillPath` and
+ * `fillSketch` are the fill. We surface that as `kind` so callers can clip the
+ * fill to the shape and animate only the outline.
  */
 export function drawableToPaths(drawable: Drawable): RoughPathInfo[] {
-  return getRoughGenerator().toPaths(drawable) as RoughPathInfo[];
+  const infos = getRoughGenerator().toPaths(drawable) as Omit<RoughPathInfo, 'kind'>[];
+  const sets = drawable.sets ?? [];
+  return infos.map((info, i) => ({
+    ...info,
+    kind: sets[i]?.type === 'path' ? 'stroke' : 'fill',
+  }));
 }

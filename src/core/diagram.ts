@@ -1,4 +1,5 @@
-import type { FlowDirection, FlowEdge, FlowNode } from '../types/charts';
+import type { FlowDirection, FlowEdge, FlowNode, LayoutOptions } from '../types/charts';
+import type { Point } from '../types/geometry';
 import { layoutFlow } from './dag';
 import type { FlowLayout, LaidOutNode } from './hierarchy';
 
@@ -21,6 +22,13 @@ export interface LaidGroup {
   y: number;
   width: number;
   height: number;
+  /**
+   * Where to draw the label, when the layout wants it somewhere other than the
+   * default top-left-on-the-border spot — e.g. swimlane titles sat in a gutter
+   * clear of the connector flow. `labelAnchor` is the text anchor at that point.
+   */
+  labelPoint?: Point;
+  labelAnchor?: 'start' | 'middle';
 }
 
 export interface DiagramScene extends FlowLayout {
@@ -32,9 +40,9 @@ export interface DiagramScene extends FlowLayout {
 export type LayoutEngine = (nodes: FlowNode[], edges: FlowEdge[] | undefined, size: [number, number]) => DiagramScene;
 
 /** The flowchart layout (tidy tree or layered DAG) as a `LayoutEngine`. */
-export function flowLayout(direction: FlowDirection = 'TB'): LayoutEngine {
+export function flowLayout(direction: FlowDirection = 'TB', options?: LayoutOptions): LayoutEngine {
   return (nodes, edges, size) => ({
-    ...layoutFlow(nodes, size, edges, direction),
+    ...layoutFlow(nodes, size, edges, direction, options?.engine ?? 'auto'),
     orientation: direction === 'LR' || direction === 'RL' ? 'horizontal' : 'vertical',
   });
 }

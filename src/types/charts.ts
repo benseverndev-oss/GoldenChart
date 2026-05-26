@@ -62,6 +62,20 @@ export interface DataTableModel {
   rows: (string | number)[][];
 }
 
+/**
+ * Per-axis scale + formatting controls. All optional; omit to keep a chart's
+ * defaults. `format`/`unit` drive tick labels (see `core/format.ts#formatValue`);
+ * `domain` overrides the numeric extent (`'zero'` forces a zero baseline).
+ */
+export interface AxisFormat {
+  scale?: 'linear' | 'log' | 'time';
+  domain?: [number, number] | 'nice' | 'zero';
+  tickCount?: number;
+  /** d3-ish number spec (e.g. `',.0f'`, `'$.2s'`) or strftime pattern (`'%b %Y'`). */
+  format?: string;
+  unit?: string;
+}
+
 export type FlowNodeShape = 'rect' | 'ellipse' | 'diamond';
 
 /** A flowchart node prior to layout. */
@@ -82,10 +96,26 @@ export interface FlowEdge {
   from: string;
   to: string;
   label?: string;
+  /** Override the chart-level routing for just this edge. */
+  routing?: EdgeRouting;
 }
 
 /** Tree layout direction: Top-Bottom, Bottom-Top, Left-Right, Right-Left. */
 export type FlowDirection = 'TB' | 'BT' | 'LR' | 'RL';
+
+/**
+ * Structural layout dials for diagrams. All optional; omit to keep current
+ * defaults (which stay byte-identical). `density` scales spacing; explicit
+ * `nodeSpacing`/`rankSpacing` win over it. `engine` overrides the auto
+ * tree-vs-DAG pick; `laneGutter` tunes the architecture swimlane title gutter.
+ */
+export interface LayoutOptions {
+  density?: 'compact' | 'cozy' | 'comfortable';
+  nodeSpacing?: number;
+  rankSpacing?: number;
+  engine?: 'auto' | 'tree' | 'dag';
+  laneGutter?: number;
+}
 
 /** Edge connector style: smooth cubic `curved` links or `orthogonal` elbows. */
 export type EdgeRouting = 'curved' | 'orthogonal';

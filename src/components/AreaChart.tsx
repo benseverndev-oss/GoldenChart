@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
-import type { BaseChartProps, Series } from '../types/charts';
+import type { AxisFormat, BaseChartProps, Series } from '../types/charts';
 import { linearScale, extentOf } from '../core/scales';
+import { resolveDomain, tickFormatter } from '../core/axisFormat';
 import { areaPath, linePath } from '../core/shapes';
 import type { CurveName } from '../core/shapes';
 import { getPlotArea } from '../core/geometry';
@@ -24,6 +25,8 @@ export interface AreaChartProps extends BaseChartProps {
   showAxes?: boolean;
   showGrid?: boolean;
   annotations?: Annotation[];
+  xAxis?: AxisFormat;
+  yAxis?: AxisFormat;
 }
 
 /**
@@ -50,12 +53,15 @@ export function AreaChart({
   showAxes = true,
   showGrid = true,
   annotations,
+  xAxis,
+  yAxis,
 }: AreaChartProps) {
   const plot = getPlotArea(width, height, margin);
 
   const { x, y, areas } = useMemo(() => {
     const allPoints = series.flatMap((s) => s.points);
-    const xScale = linearScale(extentOf(allPoints.map((p) => p.x), false), [plot.x, plot.x + plot.width]);
+    const xs = allPoints.map((p) => p.x);
+    const xScale = linearScale(resolveDomain(xs, extentOf(xs, false), xAxis), [plot.x, plot.x + plot.width]);
 
     if (stacked) {
       const count = Math.max(0, ...series.map((s) => s.points.length));
@@ -77,10 +83,8 @@ export function AreaChart({
       return { x: xScale, y: yScale, areas: computed };
     }
 
-    const yScale = linearScale(extentOf([...allPoints.map((p) => p.y), baseline]), [
-      plot.y + plot.height,
-      plot.y,
-    ]);
+    const yValues = [...allPoints.map((p) => p.y), baseline];
+    const yScale = linearScale(resolveDomain(yValues, extentOf(yValues), yAxis), [plot.y + plot.height, plot.y]);
     const y0 = yScale(baseline);
 
     const computed = series.map((s, i) => {
@@ -94,7 +98,7 @@ export function AreaChart({
     });
 
     return { x: xScale, y: yScale, areas: computed };
-  }, [series, curve, baseline, stacked, plot.x, plot.y, plot.width, plot.height]);
+  }, [series, curve, baseline, stacked, plot.x, plot.y, plot.width, plot.height, xAxis, yAxis]);
 
   return (
     <Surface
@@ -119,8 +123,8 @@ export function AreaChart({
       {annotations && <Annotations annotations={annotations} plot={plot} xScale={x} yScale={y} />}
       {showAxes && (
         <>
-          <Axis scale={x} orientation="bottom" plot={plot} />
-          <Axis scale={y} orientation="left" plot={plot} />
+          <Axis scale={x} orientation="bottom" plot={plot} tickFormat={tickFormatter(xAxis)} ticks={xAxis?.tickCount} />
+          <Axis scale={y} orientation="left" plot={plot} tickFormat={tickFormatter(yAxis)} ticks={yAxis?.tickCount} />
         </>
       )}
     </Surface>

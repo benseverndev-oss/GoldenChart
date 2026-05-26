@@ -3,6 +3,7 @@ import type { VibeConfig } from '../types/vibe';
 import type { DataTableModel } from '../types/charts';
 import { VibeProvider } from '../vibe/VibeProvider';
 import { resolveVibe } from '../vibe/resolveVibe';
+import { bundledFontFor } from '../assets/fonts';
 
 export type { DataTableModel };
 
@@ -35,13 +36,23 @@ export interface SurfaceProps {
 
 const DRAW_ON_CLASS = 'gc-draw-on';
 
-/** CSS for the draw-on reveal, gated behind `prefers-reduced-motion`. */
+/**
+ * CSS for the draw-on reveal, gated behind `prefers-reduced-motion`. The outline
+ * dashes itself on like a pen stroke; fills fade in once the stroke is mostly
+ * drawn, so the hatching no longer dashes around and the reveal reads as
+ * intentional.
+ */
 function drawOnCss(durationMs: number): string {
+  const fillDelay = Math.round(durationMs * 0.6);
+  const fillDuration = Math.round(durationMs * 0.5);
   return (
     `@keyframes gc-draw-on{to{stroke-dashoffset:0}}` +
+    `@keyframes gc-fade-in{from{opacity:0}to{opacity:1}}` +
     `@media (prefers-reduced-motion: no-preference){` +
-    `.${DRAW_ON_CLASS} path{stroke-dasharray:1;stroke-dashoffset:1;` +
-    `animation:gc-draw-on ${durationMs}ms ease forwards}}`
+    `.${DRAW_ON_CLASS} .gc-draw-stroke{stroke-dasharray:1;stroke-dashoffset:1;` +
+    `animation:gc-draw-on ${durationMs}ms ease forwards}` +
+    `.${DRAW_ON_CLASS} .gc-draw-fill{opacity:0;` +
+    `animation:gc-fade-in ${fillDuration}ms ease ${fillDelay}ms forwards}}`
   );
 }
 
@@ -82,6 +93,14 @@ export function Surface({
   const drawOn = resolved.animate?.drawOn ?? false;
   const duration = resolved.animate?.durationMs ?? 800;
 
+  // Embed the vibe's font so the SVG is self-contained — it renders the same in
+  // a browser or a headless rasterizer with no installed/network fonts.
+  const font = bundledFontFor(resolved.fontFamily);
+  const fontFace = font
+    ? `@font-face{font-family:'${font.family}';font-style:normal;font-weight:400;` +
+      `src:url(data:font/ttf;base64,${font.ttfBase64}) format('truetype');}`
+    : null;
+
   const body = drawOn ? <g className={DRAW_ON_CLASS}>{children}</g> : children;
 
   const svg = (
@@ -96,7 +115,9 @@ export function Surface({
     >
       {title ? <title>{title}</title> : null}
       {description ? <desc>{description}</desc> : null}
+      {fontFace ? <style dangerouslySetInnerHTML={{ __html: fontFace }} /> : null}
       {drawOn ? <style dangerouslySetInnerHTML={{ __html: drawOnCss(duration) }} /> : null}
+      {resolved.background ? <rect x={0} y={0} width={width} height={height} fill={resolved.background} /> : null}
       {body}
     </svg>
   );

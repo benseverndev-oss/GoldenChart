@@ -33,6 +33,12 @@ export function RoughText({
   const resolved = useResolvedVibe(vibe, seed);
   const lines = maxWidth ? wrapText(children, maxWidth, resolved.fontSize, resolved.fontFamily) : null;
 
+  // Paint a halo in the page colour behind the glyphs so labels stay legible on
+  // dark/textured backgrounds and over hachure fills. `paint-order: stroke`
+  // keeps the stroke behind the fill, so it reads as a knockout, not an outline.
+  const halo = resolved.background;
+  const haloWidth = halo ? Math.max(2, resolved.fontSize * 0.18) : undefined;
+
   // Vertically center a wrapped block by lifting the first line half its height.
   const content =
     lines && lines.length > 1
@@ -53,6 +59,11 @@ export function RoughText({
       fontFamily={resolved.fontFamily}
       fontSize={resolved.fontSize}
       fill={fill ?? resolved.stroke}
+      stroke={halo}
+      strokeWidth={haloWidth}
+      strokeLinejoin="round"
+      paintOrder={halo ? 'stroke' : undefined}
+      textRendering="geometricPrecision"
       className={className}
       style={style}
       onClick={onClick}

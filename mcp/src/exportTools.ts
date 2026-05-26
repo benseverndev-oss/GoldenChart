@@ -1,6 +1,8 @@
-import { writeFileSync } from 'node:fs';
-import { extname, resolve } from 'node:path';
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { extname, join, resolve } from 'node:path';
 import { z } from 'zod';
+import { FONT_TTF_BASE64 } from 'goldenchart';
 import type { ToolDef, ToolResult } from './registry';
 
 function validateOutputPath(path: string, expectedExt: string): string {
@@ -9,6 +11,19 @@ function validateOutputPath(path: string, expectedExt: string): string {
     throw new Error(`Output path must end in ${expectedExt}`);
   }
   return resolved;
+}
+
+// resvg can't read @font-face data URIs embedded in the SVG, so materialise the
+// bundled vibe fonts as files once and point resvg at them via `fontDirs`.
+let cachedFontDir: string | undefined;
+function bundledFontDir(): string {
+  if (cachedFontDir) return cachedFontDir;
+  const dir = mkdtempSync(join(tmpdir(), 'gc-fonts-'));
+  for (const [family, base64] of Object.entries(FONT_TTF_BASE64)) {
+    writeFileSync(join(dir, `${family.replace(/[^A-Za-z0-9]+/g, '_')}.ttf`), Buffer.from(base64, 'base64'));
+  }
+  cachedFontDir = dir;
+  return dir;
 }
 
 /** Level 4 — turn an SVG into a returnable/exportable artifact. */
@@ -56,7 +71,11 @@ export const exportTools: ToolDef[] = [
         };
       }
 
-      const png = new Resvg(args.svg as string).render().asPng();
+      const png = new Resvg(args.svg as string, {
+        font: { fontDirs: [bundledFontDir()], loadSystemFonts: true },
+      })
+        .render()
+        .asPng();
       const path = args.path as string | undefined;
       if (path) {
         const out = validateOutputPath(path, '.png');

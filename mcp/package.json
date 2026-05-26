@@ -16,6 +16,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "gallery": "tsx scripts/generate-gallery.ts"
+    "assets": "node scripts/generate-assets.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.18.0",

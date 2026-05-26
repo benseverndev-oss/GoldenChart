@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
-import type { BaseChartProps, Series } from '../types/charts';
+import type { AxisFormat, BaseChartProps, Series } from '../types/charts';
 import { linearScale, extentOf } from '../core/scales';
+import { resolveDomain, tickFormatter } from '../core/axisFormat';
 import { linePath } from '../core/shapes';
 import type { CurveName } from '../core/shapes';
 import { getPlotArea } from '../core/geometry';
@@ -11,6 +12,8 @@ import { Axis } from './Axis';
 import { Grid } from './Grid';
 import { Annotations } from './Annotations';
 import type { Annotation } from './Annotations';
+import type { EmphasisSpec } from '../core/annotations';
+import { resolveEmphasis } from '../core/emphasis';
 import { RoughPath } from '../primitives/RoughPath';
 import { RoughCircle } from '../primitives/RoughCircle';
 
@@ -21,6 +24,10 @@ export interface LineChartProps extends BaseChartProps {
   showAxes?: boolean;
   showGrid?: boolean;
   annotations?: Annotation[];
+  /** Data-relative emphasis: trend lines, auto-callouts, series highlighting. */
+  emphasis?: EmphasisSpec[];
+  xAxis?: AxisFormat;
+  yAxis?: AxisFormat;
 }
 
 /** Multi-series line chart: d3-shape builds each path, `<RoughPath>` sketches it. */
@@ -42,13 +49,20 @@ export function LineChart({
   showAxes = true,
   showGrid = true,
   annotations,
+  emphasis,
+  xAxis,
+  yAxis,
 }: LineChartProps) {
   const plot = getPlotArea(width, height, margin);
+  const resolved = useMemo(() => resolveEmphasis(series, emphasis ?? []), [series, emphasis]);
+  const overlay = emphasis ? [...(annotations ?? []), ...resolved.annotations] : annotations;
 
   const { x, y, lines } = useMemo(() => {
     const allPoints = series.flatMap((s) => s.points);
-    const xScale = linearScale(extentOf(allPoints.map((p) => p.x), false), [plot.x, plot.x + plot.width]);
-    const yScale = linearScale(extentOf(allPoints.map((p) => p.y)), [plot.y + plot.height, plot.y]);
+    const xs = allPoints.map((p) => p.x);
+    const ys = allPoints.map((p) => p.y);
+    const xScale = linearScale(resolveDomain(xs, extentOf(xs, false), xAxis), [plot.x, plot.x + plot.width]);
+    const yScale = linearScale(resolveDomain(ys, extentOf(ys), yAxis), [plot.y + plot.height, plot.y]);
 
     const computed = series.map((s, i) => {
       const pixels = s.points.map((p) => ({ x: xScale(p.x), y: yScale(p.y) }));
@@ -61,7 +75,7 @@ export function LineChart({
     });
 
     return { x: xScale, y: yScale, lines: computed };
-  }, [series, curve, plot.x, plot.y, plot.width, plot.height]);
+  }, [series, curve, plot.x, plot.y, plot.width, plot.height, xAxis, yAxis]);
 
   return (
     <Surface
@@ -78,7 +92,7 @@ export function LineChart({
     >
       {showGrid && <Grid plot={plot} xScale={x} yScale={y} />}
       {lines.map((line, i) => (
-        <g key={line.id}>
+        <g key={line.id} style={resolved.muted.has(line.id) ? { opacity: 0.22 } : undefined}>
           <RoughPath d={line.d} stroke={line.color} fill={null} seed={i + 1} />
           {showPoints &&
             line.pixels.map((p, j) => (
@@ -86,11 +100,11 @@ export function LineChart({
             ))}
         </g>
       ))}
-      {annotations && <Annotations annotations={annotations} plot={plot} xScale={x} yScale={y} />}
+      {overlay && <Annotations annotations={overlay} plot={plot} xScale={x} yScale={y} />}
       {showAxes && (
         <>
-          <Axis scale={x} orientation="bottom" plot={plot} />
-          <Axis scale={y} orientation="left" plot={plot} />
+          <Axis scale={x} orientation="bottom" plot={plot} tickFormat={tickFormatter(xAxis)} ticks={xAxis?.tickCount} />
+          <Axis scale={y} orientation="left" plot={plot} tickFormat={tickFormatter(yAxis)} ticks={yAxis?.tickCount} />
         </>
       )}
     </Surface>

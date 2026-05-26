@@ -148,7 +148,7 @@ export function routeOrthogonal(from: Point, to: Point, obstacles: Obstacle[], o
 }
 
 /** Drop collinear interior points so the polyline is just its corners. */
-function simplify(points: Point[]): Point[] {
+export function simplify(points: Point[]): Point[] {
   if (points.length <= 2) return points;
   const out: Point[] = [points[0]];
   for (let i = 1; i < points.length - 1; i++) {
