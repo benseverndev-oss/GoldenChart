@@ -34,7 +34,18 @@ primitives the agent can tweak":
 2. **`animate` knob missing.**
    The library's `VibeOverrides` includes `animate?: { drawOn?: boolean;
    durationMs?: number }` (the hand-drawn reveal). `VibeOverridesSchema` omits
-   it, so an agent cannot request the reveal.
+   it, so today an agent passing `animate` has it silently stripped by Zod
+   before it reaches `resolveVibe`.
+
+   **Note on what closing this gap does:** `animate.drawOn` is a client-side
+   reveal animation. `vibeToRoughOptions` does not emit it, and server-side
+   `renderToSVGString` produces a static SVG, so `animate` has **no visible
+   effect in render-tool SVG output**. Surfacing it into the vibe schema makes
+   it (a) reachable and round-trippable through `resolve_vibe` — where an agent
+   inspects the resolved vibe it would hand to a live `<Surface>` — and (b)
+   carried through `compose_surface` per-primitive vibe. Verification is
+   therefore a `resolve_vibe` round-trip test, **not** an SVG-output assertion
+   (which could not exist for a static render).
 
 3. **`render_rough_text` drops `fill` and `maxWidth`.**
    The library's `RoughTextProps` supports `fill` (text colour override) and
@@ -89,17 +100,25 @@ All changes are in `mcp/`. No library (`src/`) changes.
 
 ### `mcp/src/primitives.ts`
 - In the `text` case of `primitiveToElement`, forward `fill: spec.fill` and
-  `maxWidth: spec.maxWidth` to `RoughText`.
+  `maxWidth: spec.maxWidth` to `RoughText`. `primitiveToElement` is shared with
+  `compose_surface` (via `orchestrationTools.ts`), so this one edit also lights
+  up `fill`/`maxWidth` for composed-scene text — a free win, not a regression,
+  since `RoughText` genuinely consumes both.
 
 ## Testing
 
 - **Preset coverage:** assert `VibeConfigSchema` parses every name in
-  `Object.keys(VIBE_PRESETS)`, and that the enum's option set equals
-  `Object.keys(VIBE_PRESETS)` (catches drift in both directions).
+  `Object.keys(VIBE_PRESETS)`, and that the enum's option set **equals**
+  `Object.keys(VIBE_PRESETS)` compared as sets (sort both sides or use `Set`
+  equality — not ordered `toEqual`, which would incidentally couple the test to
+  declaration order). Catches drift in both directions.
 - **Previously-blocked preset:** `preview_vibe` smoke test with a preset that
   was rejected before (e.g. `synthwave`) returns valid SVG.
 - **`animate` round-trip:** `resolve_vibe` accepts `{ preset, animate: { drawOn:
-  true } }` and the resolved output carries it.
+  true } }` and the resolved output carries it. (This is the correct
+  verification — not an SVG-output check; see gap #2.) This test is load-bearing
+  on the schema change: without it, Zod strips `animate` before `resolveVibe`
+  sees it.
 - **Text knobs:** `render_rough_text` with `fill` and `maxWidth` produces SVG
   (wrapped text / coloured fill present in output).
 - **Regression:** existing snapshot and tool-count tests stay green. The
