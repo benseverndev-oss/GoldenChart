@@ -59,6 +59,15 @@ import { linePath } from 'goldenchart';
 </Surface>
 ```
 
+Beyond lines and rectangles, the calculation layer ships path builders for richer
+shapes — `regularPolygonPath`, `starPath`, `arcStrokePath`, `wedgePath`,
+`ellipsePath` — plus `connectorPath` for arrows (shaft + arrowhead + label, with
+straight/curved/orthogonal routing). Hand any of their path strings to `<RoughPath>`.
+The MCP server exposes the same shapes as `compose_surface` scene kinds
+(`polygon`, `regular-polygon`, `star`, `arc`, `wedge`, `ellipse`, `arrowhead`, `arrow`).
+
+![A hexagon, arrow, ellipse, pie-wedge gauge, triangle and star composed from GoldenChart primitives](assets/compose.png)
+
 ## The Vibe engine
 
 A `VibeConfig` is either a preset name or a preset plus targeted overrides:
