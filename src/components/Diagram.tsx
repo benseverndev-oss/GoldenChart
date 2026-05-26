@@ -3,7 +3,9 @@ import type { BaseChartProps, EdgeRouting, FlowEdge, FlowNode } from '../types/c
 import { getPlotArea } from '../core/geometry';
 import type { DiagramOrientation, LaidGroup, LaidOutEdge, LaidOutNode, LayoutEngine } from '../core/diagram';
 import { arrowHeadPath, diamondPath, ellipsePath, linkPath, orthogonalPath, orthogonalPoints } from '../core/shapes';
+import { measureText } from '../core/text';
 import { Surface } from './Surface';
+import { useResolvedVibe } from '../vibe/VibeProvider';
 import { RoughRectangle } from '../primitives/RoughRectangle';
 import { RoughPath } from '../primitives/RoughPath';
 import { RoughText } from '../primitives/RoughText';
@@ -79,13 +81,28 @@ export function Diagram({
 }
 
 function DiagramGroup({ group }: { group: LaidGroup }) {
+  const resolved = useResolvedVibe();
+  const m = group.label ? measureText(group.label, resolved.fontSize, resolved.fontFamily) : null;
+  const padX = 4;
+  const padY = 1;
   return (
     <g>
       <RoughRectangle x={group.x} y={group.y} width={group.width} height={group.height} fill={null} />
-      {group.label && (
-        <RoughText x={group.x + 6} y={group.y + 6} anchor="start" baseline="hanging">
-          {group.label}
-        </RoughText>
+      {group.label && m && (
+        <>
+          {/* White tab punches a gap in the border behind the label, so the zone
+              name stays legible instead of being struck through by the line. */}
+          <rect
+            x={group.x + 8 - padX}
+            y={group.y - m.height / 2 - padY}
+            width={m.width + padX * 2}
+            height={m.height + padY * 2}
+            fill="#ffffff"
+          />
+          <RoughText x={group.x + 8} y={group.y} anchor="start" baseline="middle">
+            {group.label}
+          </RoughText>
+        </>
       )}
     </g>
   );
