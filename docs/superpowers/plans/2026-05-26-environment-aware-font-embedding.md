@@ -25,7 +25,7 @@
 - **Downstream importers of the font symbols from `'goldenchart'`** that will break when the export moves and must switch to `'goldenchart/fonts'`:
   - `mcp/src/exportTools.ts:5` — `import { FONT_TTF_BASE64 } from 'goldenchart'` (the `export_png` tool; production code, has tests).
   - `mcp/scripts/compare-agent-surface.mjs:25` — `FONT_TTF_BASE64`.
-  - `mcp/scripts/generate-assets.mjs` — imports a font symbol (confirm which).
+  - `mcp/scripts/generate-assets.mjs:22` — imports `FONT_TTF_BASE64` from `'goldenchart'`.
 - **mcp ↔ dist coupling (Windows):** the `mcp/` workspace resolves `goldenchart` from the built `dist/`. After changing anything in `src/`, you must rebuild the root (`npm run build`) and refresh the mcp copy before mcp typecheck/test/compare see the change. Per project note: `file:..` symlink is unreliable on Windows — reinstall mcp deps with `--install-links` and force-recopy after src changes. Always rebuild root before running anything in `mcp/`.
 - **Run tests from the right place:** library tests `npm test` (repo root); mcp tests `cd mcp && npm test` (after a fresh root build + dep refresh).
 
@@ -237,9 +237,9 @@ const render = (vibe: unknown) =>
 
 describe('renderToSVGString headless font embedding', () => {
   it('embeds the @font-face for a single-quoted family vibe', () => {
-    const svg = render('clean_blueprint'); // IBM Plex Sans (bundled)
+    const svg = render('clean_blueprint'); // resolves to Cousine (bundled)
     expect(svg).toContain('@font-face');
-    expect(svg).toContain("font-family:'IBM Plex Sans'");
+    expect(svg).toContain("font-family:'Cousine'");
     expect(svg).toContain('data:font/ttf;base64,');
   });
 
@@ -399,7 +399,7 @@ Expected: PASS. (No library test asserted `@font-face` before, so only the new S
 
 - `mcp/src/exportTools.ts:5`: `import { FONT_TTF_BASE64 } from 'goldenchart/fonts';`
 - `mcp/scripts/compare-agent-surface.mjs:25`: move `FONT_TTF_BASE64` out of the `from 'goldenchart'` import and import it from `'goldenchart/fonts'`.
-- `mcp/scripts/generate-assets.mjs`: same — repoint its font-symbol import to `'goldenchart/fonts'`.
+- `mcp/scripts/generate-assets.mjs:22/32`: same — repoint the `FONT_TTF_BASE64` import to `'goldenchart/fonts'`.
 
 - [ ] **Step 7: Rebuild root, refresh mcp dep, run mcp typecheck**
 
