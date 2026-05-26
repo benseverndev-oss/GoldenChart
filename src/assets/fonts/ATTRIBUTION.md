@@ -20,6 +20,9 @@ installed font.
 | `chalkboard` | Schoolbell | SIL OFL 1.1 | fonts.google.com/specimen/Schoolbell |
 | `neon` | Orbitron | SIL OFL 1.1 | fonts.google.com/specimen/Orbitron |
 | `comic_book` | Bangers | SIL OFL 1.1 | fonts.google.com/specimen/Bangers |
+| `terminal` | VT323 | SIL OFL 1.1 | fonts.google.com/specimen/VT323 |
+| `watercolor` | Quicksand | SIL OFL 1.1 | fonts.google.com/specimen/Quicksand |
+| `newsprint` | Playfair Display | SIL OFL 1.1 | fonts.google.com/specimen/Playfair+Display |
 
 The SIL Open Font License 1.1 and Apache License 2.0 permit redistribution and
 embedding. Full licence texts: https://openfontlicense.org and

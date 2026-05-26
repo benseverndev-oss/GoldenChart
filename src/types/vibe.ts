@@ -16,7 +16,10 @@ export type VibePreset =
   | 'blueprint_dark'
   | 'chalkboard'
   | 'neon'
-  | 'comic_book';
+  | 'comic_book'
+  | 'terminal'
+  | 'watercolor'
+  | 'newsprint';
 
 /** Optional "draw-on" reveal: strokes animate as if being sketched. */
 export interface VibeAnimate {
