@@ -39,6 +39,7 @@ describe('render_diagram (diagram DSL tool)', () => {
         const result = await renderDiagramTool.handler(args);
         expect(result.content[0].text.startsWith('<svg')).toBe(true);
         expect(result.structuredContent?.meta).toMatchObject({ kind });
+        expect(result.content[0].text).toMatchSnapshot();
       });
     });
   }
@@ -71,6 +72,7 @@ describe('build_diagram_from_mermaid', () => {
     expect(result.content[0].text.startsWith('<svg')).toBe(true);
     expect(result.content[0].text).toContain('Start');
     expect(result.structuredContent?.meta).toMatchObject({ kind: 'flowchart' });
+    expect(result.content[0].text).toMatchSnapshot();
   });
 
   it('renders a Mermaid sequenceDiagram snippet', async () => {
@@ -82,6 +84,7 @@ describe('build_diagram_from_mermaid', () => {
     expect(result.isError).toBeFalsy();
     expect(result.content[0].text).toContain('request');
     expect(result.structuredContent?.meta).toMatchObject({ kind: 'sequence' });
+    expect(result.content[0].text).toMatchSnapshot();
   });
 
   it('returns a structured error (not a crash) for unsupported Mermaid', async () => {

@@ -91,6 +91,7 @@ describe('visualize_data', () => {
     expect(sc.chosen.chartType).toBe('bar');
     expect(sc.chosen.rationale).toBeTruthy();
     expect(Array.isArray(sc.alternatives)).toBe(true);
+    expect(svg).toMatchSnapshot();
   });
 
   it('honors intent (trend ⇒ line over time)', async () => {
