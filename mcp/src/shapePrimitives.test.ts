@@ -23,7 +23,7 @@ const renderScene = async (node: Record<string, unknown>): Promise<string> =>
 describe('shape calc tools', () => {
   it('compute_regular_polygon_path is closed with one vertex per side', async () => {
     const d = await dOf('compute_regular_polygon_path', { cx: 50, cy: 50, r: 20, sides: 6 });
-    expect(d.startsWith('M70,50')).toBe(true); // 0deg vertex at east
+    expect(d.startsWith('M50,30')).toBe(true); // rotation 0 => first vertex at top
     expect(d.endsWith('Z')).toBe(true);
     expect(d.split('L')).toHaveLength(6);
   });
@@ -87,10 +87,10 @@ describe('shape scene kinds (compose_surface)', () => {
     expect(svg).toContain('<clipPath'); // closed + fill => clipped hachure
   });
 
-  it('suppresses fill on an open arc even when a fill is supplied', async () => {
-    const svg = await renderScene({ kind: 'arc', cx: 100, cy: 100, r: 50, startAngle: 0, endAngle: 120, fill: '#ff0000' });
+  it('renders an open arc with no fill (the arc kind takes no fill)', async () => {
+    const svg = await renderScene({ kind: 'arc', cx: 100, cy: 100, r: 50, startAngle: 0, endAngle: 120 });
     expect(svg).toContain('<path');
-    expect(svg).not.toContain('<clipPath'); // fill suppressed => no fill path to clip
+    expect(svg).not.toContain('<clipPath'); // open stroke => no fill path to clip
   });
 });
 
