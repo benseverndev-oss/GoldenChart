@@ -37,15 +37,17 @@ Do not change `name`, `license`, `files`, `exports`, `types`, `sideEffects`, dep
 ### 3. Release workflow `.github/workflows/release.yml`
 - **Trigger:** `on: push: tags: ['v*']`.
 - **Permissions:** `id-token: write` (required by npm provenance) and `contents: read`.
+- **Permissions placement:** put both `id-token: write` and `contents: read` together in the **job-level** `permissions` block (not split across workflow/job) so `actions/checkout` keeps read access while provenance gets the id-token.
 - **Job (ubuntu-latest, node 20):**
   1. `actions/checkout@v4`
   2. `actions/setup-node@v4` with `node-version: 20` and `registry-url: 'https://registry.npmjs.org'` (so `NODE_AUTH_TOKEN` is wired for publish).
   3. `npm ci`
-  4. **Tag/version guard:** assert the pushed tag (`${GITHUB_REF_NAME}` without the leading `v`) equals `package.json` `version`; fail the job on mismatch so a mis-tagged release can't publish the wrong version.
+  4. **Tag/version guard:** read the version with `node -p "require('./package.json').version"` (not grep/sed) and assert it equals the pushed tag minus its leading `v` (`${GITHUB_REF_NAME#v}`); fail the job on mismatch so a mis-tagged release can't publish the wrong version.
   5. `npm run build`
-  6. `npm run typecheck`
-  7. `npm test`
-  8. `npm publish` (access + provenance come from `publishConfig`; provenance also needs the `id-token` permission above), with `NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}`.
+  6. `npm run check:bundle` (mirrors the `library` CI job; catches a packaging/bundle regression at the moment it matters most)
+  7. `npm run typecheck`
+  8. `npm test`
+  9. `npm publish` (access + provenance come from `publishConfig`; provenance also needs the `id-token` permission above), with `NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}`.
 
 This workflow is separate from the existing `ci.yml` (which keeps running on push/PR). The library job in `ci.yml` is unchanged.
 
