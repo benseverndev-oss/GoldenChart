@@ -1,7 +1,16 @@
 {
   "name": "goldenchart",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Hand-drawn, sketchy React charts and flowcharts. D3 does the math, Rough.js does the drawing, and a Vibe engine dials in the aesthetic.",
+  "author": "Ben Severn",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benseverndev-oss/GoldenChart.git"
+  },
+  "homepage": "https://github.com/benseverndev-oss/GoldenChart#readme",
+  "bugs": {
+    "url": "https://github.com/benseverndev-oss/GoldenChart/issues"
+  },
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -28,8 +37,13 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "build": "tsup",
+    "prepublishOnly": "npm run build",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
