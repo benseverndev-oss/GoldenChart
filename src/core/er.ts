@@ -120,7 +120,16 @@ export function computeER(
     .filter((r) => ids.has(r.from) && ids.has(r.to))
     .map((r) => ({ from: r.from, to: r.to }));
 
-  const positioned = layoutFlow(flowNodes, size, edges, opts.direction ?? 'LR');
+  // layoutFlow positions box centres within the area it's given, so the end
+  // boxes would spill half their width past the canvas. Shrink the area by the
+  // largest box's half-extent (plus a little breathing room) and offset the
+  // result, so every entity sits fully inside the plot.
+  const PAD = 8;
+  const offX = Math.max(...sized.map((s) => s.width)) / 2 + PAD;
+  const offY = Math.max(...sized.map((s) => s.height)) / 2 + PAD;
+  const inner: [number, number] = [Math.max(1, size[0] - 2 * offX), Math.max(1, size[1] - 2 * offY)];
+
+  const positioned = layoutFlow(flowNodes, inner, edges, opts.direction ?? 'LR');
   const posById = new Map(positioned.nodes.map((n) => [n.id, n]));
 
   const laidEntities: LaidEntity[] = sized.map((s) => {
@@ -133,8 +142,8 @@ export function computeER(
     return {
       id: s.input.id,
       label: s.label,
-      x: p.x,
-      y: p.y,
+      x: p.x + offX,
+      y: p.y + offY,
       width: s.width,
       height: s.height,
       headerHeight: HEADER_H,
