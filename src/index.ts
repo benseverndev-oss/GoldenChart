@@ -13,10 +13,6 @@ export {
 } from './vibe';
 export type { VibeProviderProps } from './vibe';
 
-// Bundled (subsetted, open-source) vibe fonts, for headless rasterizers that
-// must load fonts explicitly (e.g. resvg `fontFiles`).
-export { FONT_TTF_BASE64, bundledFontFor, primaryFamily } from './assets/fonts';
-
 // Calculation layer (D3, DOM-free)
 export * from './core';
 
