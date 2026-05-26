@@ -470,7 +470,7 @@ export const PrimitiveSpecSchema = z.discriminatedUnion('kind', [
     startAngle: z.number(),
     endAngle: z.number(),
     stroke: z.string().optional(),
-    fill: z.string().nullable().optional(),
+    // No `fill`: an arc is an open stroke; the mapper always renders it unfilled.
     seed: z.number().optional(),
     vibe: VibeConfigSchema.optional(),
   }),

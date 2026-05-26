@@ -109,11 +109,14 @@ export function connectorPath(
 
   if (routing === 'orthogonal') {
     const points = orthogonalPoints(from, to, orientation);
+    // Centre the label on the middle (cross) segment rather than on the elbow vertex.
+    const a = points[1];
+    const b = points[2];
     return {
       d: orthogonalPath(from, to, orientation),
       endHeadTail: points[points.length - 2],
       startHeadTail: points[1],
-      labelAt: points[Math.floor((points.length - 1) / 2)],
+      labelAt: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 },
     };
   }
   if (routing === 'curved') {

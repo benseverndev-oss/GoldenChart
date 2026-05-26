@@ -40,28 +40,37 @@ describe('polar helpers', () => {
 
   it('regularPolygonPath builds a closed n-gon with one vertex per side', () => {
     const d = regularPolygonPath(50, 50, 20, 6);
-    expect(d.startsWith('M70,50')).toBe(true); // first vertex at angle 0 = east
+    expect(d.startsWith('M50,30')).toBe(true); // rotation 0 => first vertex at top
     expect(d.endsWith('Z')).toBe(true);
     expect(d.split('L')).toHaveLength(6); // 6 vertices => M + 5 L
   });
 
-  it('regularPolygonPath rotates vertices by rotationRad', () => {
-    const d = regularPolygonPath(50, 50, 20, 4, Math.PI / 2); // first vertex south
-    expect(d.startsWith('M50,70')).toBe(true);
+  it('regularPolygonPath rotates vertices clockwise by rotationRad', () => {
+    const d = regularPolygonPath(50, 50, 20, 4, Math.PI / 2); // top + 90deg => east
+    expect(d.startsWith('M70,50')).toBe(true);
   });
 
   it('starPath alternates outer/inner radii over 2*points vertices', () => {
     const d = starPath(50, 50, 20, 10, 5);
-    expect(d.startsWith('M70,50')).toBe(true); // first (outer) vertex east
+    expect(d.startsWith('M50,30')).toBe(true); // first (outer) vertex at top
     expect(d.endsWith('Z')).toBe(true);
     expect(d.split('L')).toHaveLength(10); // 10 vertices
   });
 
   it('arcStrokePath is an open arc using the SVG A command', () => {
     const d = arcStrokePath(50, 50, 20, 0, Math.PI / 2);
-    expect(d.startsWith('M70,50')).toBe(true); // start at east
+    expect(d.startsWith('M70,50')).toBe(true); // start at east (0 = east for arcs)
     expect(d).toContain('A');
     expect(d.endsWith('Z')).toBe(false); // open, not closed
+  });
+
+  it('arcStrokePath uses the short arc for a wrapped span and the large-arc flag past 180deg', () => {
+    // 340deg -> 20deg is a 40deg forward arc despite end < start: large-arc flag 0
+    const wrapped = arcStrokePath(50, 50, 20, (340 * Math.PI) / 180, (20 * Math.PI) / 180);
+    expect(wrapped).toContain(' 0,1 ');
+    // a 270deg arc is past 180deg: large-arc flag 1
+    const big = arcStrokePath(50, 50, 20, 0, (270 * Math.PI) / 180);
+    expect(big).toContain(' 1,1 ');
   });
 
   it('wedgePath is a closed pie slice from the center', () => {
