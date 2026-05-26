@@ -40,12 +40,17 @@ Or add it to a client config manually:
 |-------|-------|
 | Charts | `render_bar_chart` (single/grouped/stacked), `render_line_chart`, `render_area_chart` (+ stacked), `render_scatter_plot`, `render_pie_chart`, `render_flowchart`, `render_sankey`, `render_treemap`, `render_heatmap`, `render_radar` |
 | Vibe | `list_vibe_presets`, `resolve_vibe`, `preview_vibe` |
-| Calculation | `compute_scale`, `compute_ticks`, `compute_line_path`, `compute_area_path`, `compute_pie`, `layout_tree`, `compute_color_scale` |
+| Calculation | `compute_scale`, `compute_ticks`, `compute_line_path`, `compute_area_path`, `compute_pie`, `layout_tree`, `compute_color_scale`, `profile_data`, `transform_data`, `compute_regular_polygon_path`, `compute_star_path`, `compute_arc_path`, `compute_wedge_path`, `compute_arrowhead_path` |
 | Primitives | `render_rough_path`, `render_rough_rect`, `render_rough_circle`, `render_rough_line`, `render_rough_text` |
 | Orchestration / export | `compose_surface`, `build_flowchart_from_spec`, `export_svg`, `export_png` |
 
 The cartesian chart tools accept an `annotations` array (reference lines/bands, callouts,
 circled points) and `description` / `ariaLabel` / `dataTable` for accessible output.
+
+`compose_surface` scenes accept these primitive node `kind`s: `path`, `rect`, `circle`,
+`line`, `text`, `polygon`, `regular-polygon`, `star`, `arc`, `wedge`, `ellipse`, and
+`arrowhead`. Shape angles are in degrees (0 = east, clockwise); open shapes (`arc`, an
+unfilled `arrowhead`) never fill.
 
 ## Resources & prompts
 

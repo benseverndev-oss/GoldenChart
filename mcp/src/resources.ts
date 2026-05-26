@@ -28,8 +28,9 @@ GoldenChart separates *where* things go from *how* they look:
 - Calculation layer (d3-scale, d3-shape, d3-hierarchy): coordinates, path strings,
   layouts. Never touches the DOM.
 - Rendering layer (roughjs): turns coordinates into hand-drawn SVG paths.
-- Vibe engine: maps a semantic config (messy_sketch | clean_blueprint |
-  chaotic_notebook, plus overrides) to concrete Rough.js options.
+- Vibe engine: maps a semantic config (one of many named presets such as
+  messy_sketch, clean_blueprint, pencil, neon, …, plus overrides) to concrete
+  Rough.js options. Call list_vibe_presets or read vibe://presets for the full set.
 
 This MCP server surfaces a tool at every level: vibe (list/resolve/preview),
 calculation (compute_*), primitives (render_rough_*), charts (render_*),

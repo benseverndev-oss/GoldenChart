@@ -13,8 +13,13 @@ import {
   sequentialColor,
   profileData,
   applyTransforms,
+  regularPolygonPath,
+  starPath,
+  arcStrokePath,
+  wedgePath,
+  arrowHeadPath,
 } from 'goldenchart';
-import type { ChartDatum, ColorScaleName, FlowDirection, FlowEdge, FlowNode, Row, Transform } from 'goldenchart';
+import type { ChartDatum, ColorScaleName, FlowDirection, FlowEdge, FlowNode, Point, Row, Transform } from 'goldenchart';
 import type { ToolDef } from './registry';
 import {
   ChartDatumSchema,
@@ -28,6 +33,9 @@ import {
 } from './schemas';
 
 type Tick = { value: string | number; offset: number };
+
+/** Degrees -> radians. The MCP layer takes friendly degrees; core builders take radians. */
+const toRad = (deg: number) => (deg * Math.PI) / 180;
 
 const scaleInputShape = {
   type: z.enum(['linear', 'sqrt', 'band', 'point']),
@@ -245,6 +253,138 @@ export const calcTools: ToolDef[] = [
     handler: async (args) => {
       const rows = applyTransforms(args.data as Row[], args.pipeline as Transform[]);
       return { content: [{ type: 'text', text: JSON.stringify({ rows }, null, 2) }], structuredContent: { rows } };
+    },
+  },
+  {
+    name: 'compute_regular_polygon_path',
+    config: {
+      title: 'Compute Regular Polygon Path',
+      description:
+        'Build a closed SVG path `d` for a regular n-gon centered at (cx,cy) with radius r. `rotation` is in degrees; 0 points the first vertex up (12 o’clock), positive rotates clockwise.',
+      inputSchema: {
+        cx: z.number(),
+        cy: z.number(),
+        r: z.number().positive(),
+        sides: z.number().int().min(3),
+        rotation: z.number().optional(),
+      },
+      outputSchema: { d: z.string() },
+    },
+    handler: async (args) => {
+      const d = regularPolygonPath(
+        args.cx as number,
+        args.cy as number,
+        args.r as number,
+        args.sides as number,
+        toRad((args.rotation as number | undefined) ?? 0),
+      );
+      return { content: [{ type: 'text', text: d }], structuredContent: { d } };
+    },
+  },
+  {
+    name: 'compute_star_path',
+    config: {
+      title: 'Compute Star Path',
+      description:
+        'Build a closed SVG path `d` for a star with `points` tips, alternating outerRadius/innerRadius around (cx,cy). `rotation` in degrees; 0 points the first tip up (12 o’clock), positive rotates clockwise.',
+      inputSchema: {
+        cx: z.number(),
+        cy: z.number(),
+        outerRadius: z.number().positive(),
+        innerRadius: z.number().positive(),
+        points: z.number().int().min(2),
+        rotation: z.number().optional(),
+      },
+      outputSchema: { d: z.string() },
+    },
+    handler: async (args) => {
+      const d = starPath(
+        args.cx as number,
+        args.cy as number,
+        args.outerRadius as number,
+        args.innerRadius as number,
+        args.points as number,
+        toRad((args.rotation as number | undefined) ?? 0),
+      );
+      return { content: [{ type: 'text', text: d }], structuredContent: { d } };
+    },
+  },
+  {
+    name: 'compute_arc_path',
+    config: {
+      title: 'Compute Arc Path',
+      description:
+        'Build an open SVG path `d` for an arc stroke from startAngle to endAngle (degrees, 0 = east, clockwise) at radius r around (cx,cy). No fill.',
+      inputSchema: {
+        cx: z.number(),
+        cy: z.number(),
+        r: z.number().positive(),
+        startAngle: z.number(),
+        endAngle: z.number(),
+      },
+      outputSchema: { d: z.string() },
+    },
+    handler: async (args) => {
+      const d = arcStrokePath(
+        args.cx as number,
+        args.cy as number,
+        args.r as number,
+        toRad(args.startAngle as number),
+        toRad(args.endAngle as number),
+      );
+      return { content: [{ type: 'text', text: d }], structuredContent: { d } };
+    },
+  },
+  {
+    name: 'compute_wedge_path',
+    config: {
+      title: 'Compute Wedge Path',
+      description:
+        'Build a closed SVG path `d` for a pie wedge from startAngle to endAngle (degrees, 0 = east, clockwise) at radius r around (cx,cy). With innerRadius, builds an annular (ring) wedge.',
+      inputSchema: {
+        cx: z.number(),
+        cy: z.number(),
+        r: z.number().positive(),
+        startAngle: z.number(),
+        endAngle: z.number(),
+        innerRadius: z.number().positive().optional(),
+      },
+      outputSchema: { d: z.string() },
+    },
+    handler: async (args) => {
+      const d = wedgePath(
+        args.cx as number,
+        args.cy as number,
+        args.r as number,
+        toRad(args.startAngle as number),
+        toRad(args.endAngle as number),
+        args.innerRadius as number | undefined,
+      );
+      return { content: [{ type: 'text', text: d }], structuredContent: { d } };
+    },
+  },
+  {
+    name: 'compute_arrowhead_path',
+    config: {
+      title: 'Compute Arrowhead Path',
+      description:
+        'Build an SVG path `d` for an arrowhead at `to`, pointing along from->to. Open two-stroke head by default; `filled` closes it into a solid triangle.',
+      inputSchema: {
+        from: SeriesPointSchema,
+        to: SeriesPointSchema,
+        size: z.number().positive().optional(),
+        filled: z.boolean().optional(),
+      },
+      outputSchema: { d: z.string() },
+    },
+    handler: async (args) => {
+      const d = arrowHeadPath(
+        args.from as Point,
+        args.to as Point,
+        args.size as number | undefined,
+        (args.filled as boolean | undefined) ?? false,
+      );
+      return { content: [{ type: 'text', text: d }], structuredContent: { d } };
     },
   },
 ];

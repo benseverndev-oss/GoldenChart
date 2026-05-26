@@ -78,11 +78,16 @@ export function ellipsePath(cx: number, cy: number, rx: number, ry: number): str
   return `M${cx - rx},${cy} a${rx},${ry} 0 1,0 ${rx * 2},0 a${rx},${ry} 0 1,0 ${-rx * 2},0 Z`;
 }
 
-/** Two-stroke arrowhead at `to`, pointing along the `from -> to` direction. */
-export function arrowHeadPath(from: Point, to: Point, size = 9): string {
+/**
+ * Arrowhead at `to`, pointing along the `from -> to` direction. By default an
+ * open two-stroke head (`left -> tip -> right`); when `filled` is true the path
+ * is closed into a solid triangle.
+ */
+export function arrowHeadPath(from: Point, to: Point, size = 9, filled = false): string {
   const angle = Math.atan2(to.y - from.y, to.x - from.x);
   const spread = Math.PI / 7;
   const left = { x: to.x - size * Math.cos(angle - spread), y: to.y - size * Math.sin(angle - spread) };
   const right = { x: to.x - size * Math.cos(angle + spread), y: to.y - size * Math.sin(angle + spread) };
-  return `M${left.x},${left.y} L${to.x},${to.y} L${right.x},${right.y}`;
+  const d = `M${left.x},${left.y} L${to.x},${to.y} L${right.x},${right.y}`;
+  return filled ? `${d} Z` : d;
 }

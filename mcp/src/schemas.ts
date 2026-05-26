@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { VIBE_PRESETS } from 'goldenchart';
+import type { VibePreset } from 'goldenchart';
 
 /**
  * Shared Zod fragments for the MCP tool inputs. These mirror the GoldenChart
@@ -15,7 +17,14 @@ export const FILL_STYLES = [
   'zigzag-line',
 ] as const;
 
-export const VIBE_PRESET_NAMES = ['messy_sketch', 'clean_blueprint', 'chaotic_notebook'] as const;
+/**
+ * Every built-in vibe preset, derived at runtime from the library's
+ * `VIBE_PRESETS` record so the MCP surface can never drift behind it — a new
+ * preset added to the library appears here automatically (ROADMAP principle 4).
+ * Cast to the `VibePreset` tuple so `z.enum` still infers the literal union
+ * (keeping `VibeConfig` assignability) while sourcing the values at runtime.
+ */
+export const VIBE_PRESET_NAMES = Object.keys(VIBE_PRESETS) as [VibePreset, ...VibePreset[]];
 
 export const VibeOverridesSchema = z.object({
   preset: z.enum(VIBE_PRESET_NAMES).optional(),
@@ -35,6 +44,8 @@ export const VibeOverridesSchema = z.object({
   fontFamily: z.string().optional(),
   fontSize: z.number().optional(),
   background: z.string().optional(),
+  /** Hand-drawn "draw-on" reveal. A client/runtime concern — has no effect on static render-tool SVG. */
+  animate: z.object({ drawOn: z.boolean().optional(), durationMs: z.number().optional() }).optional(),
 });
 
 /** A bare preset name or a preset + targeted overrides. */
@@ -410,6 +421,91 @@ export const PrimitiveSpecSchema = z.discriminatedUnion('kind', [
     anchor: z.enum(['start', 'middle', 'end']).optional(),
     baseline: z.enum(['auto', 'middle', 'hanging']).optional(),
     rotate: z.number().optional(),
+    fill: z.string().optional(),
+    maxWidth: z.number().positive().optional(),
+    seed: z.number().optional(),
+    vibe: VibeConfigSchema.optional(),
+  }),
+  // SP2 shape primitives. Angles are degrees (0 = east, clockwise); converted to
+  // radians in primitiveToElement. Open kinds (`arc`, unfilled `arrowhead`)
+  // suppress fill in the mapper so hachure can't smear across the open edge.
+  z.object({
+    kind: z.literal('polygon'),
+    points: z.array(SeriesPointSchema).min(3),
+    stroke: z.string().optional(),
+    fill: z.string().nullable().optional(),
+    seed: z.number().optional(),
+    vibe: VibeConfigSchema.optional(),
+  }),
+  z.object({
+    kind: z.literal('regular-polygon'),
+    cx: z.number(),
+    cy: z.number(),
+    r: z.number().positive(),
+    sides: z.number().int().min(3),
+    rotation: z.number().optional(),
+    stroke: z.string().optional(),
+    fill: z.string().nullable().optional(),
+    seed: z.number().optional(),
+    vibe: VibeConfigSchema.optional(),
+  }),
+  z.object({
+    kind: z.literal('star'),
+    cx: z.number(),
+    cy: z.number(),
+    outerRadius: z.number().positive(),
+    innerRadius: z.number().positive(),
+    points: z.number().int().min(2),
+    rotation: z.number().optional(),
+    stroke: z.string().optional(),
+    fill: z.string().nullable().optional(),
+    seed: z.number().optional(),
+    vibe: VibeConfigSchema.optional(),
+  }),
+  z.object({
+    kind: z.literal('arc'),
+    cx: z.number(),
+    cy: z.number(),
+    r: z.number().positive(),
+    startAngle: z.number(),
+    endAngle: z.number(),
+    stroke: z.string().optional(),
+    // No `fill`: an arc is an open stroke; the mapper always renders it unfilled.
+    seed: z.number().optional(),
+    vibe: VibeConfigSchema.optional(),
+  }),
+  z.object({
+    kind: z.literal('wedge'),
+    cx: z.number(),
+    cy: z.number(),
+    r: z.number().positive(),
+    startAngle: z.number(),
+    endAngle: z.number(),
+    innerRadius: z.number().positive().optional(),
+    stroke: z.string().optional(),
+    fill: z.string().nullable().optional(),
+    seed: z.number().optional(),
+    vibe: VibeConfigSchema.optional(),
+  }),
+  z.object({
+    kind: z.literal('ellipse'),
+    cx: z.number(),
+    cy: z.number(),
+    rx: z.number().positive(),
+    ry: z.number().positive(),
+    stroke: z.string().optional(),
+    fill: z.string().nullable().optional(),
+    seed: z.number().optional(),
+    vibe: VibeConfigSchema.optional(),
+  }),
+  z.object({
+    kind: z.literal('arrowhead'),
+    from: SeriesPointSchema,
+    to: SeriesPointSchema,
+    size: z.number().positive().optional(),
+    filled: z.boolean().optional(),
+    stroke: z.string().optional(),
+    fill: z.string().nullable().optional(),
     seed: z.number().optional(),
     vibe: VibeConfigSchema.optional(),
   }),
