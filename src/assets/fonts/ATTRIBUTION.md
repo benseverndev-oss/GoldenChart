@@ -16,6 +16,10 @@ installed font.
 | `ink` | Spectral | SIL OFL 1.1 | fonts.google.com/specimen/Spectral |
 | `crayon` | Schoolbell | SIL OFL 1.1 | fonts.google.com/specimen/Schoolbell |
 | `davinci_journal` | EB Garamond | SIL OFL 1.1 | fonts.google.com/specimen/EB+Garamond |
+| `blueprint_dark` | Cousine | Apache-2.0 | fonts.google.com/specimen/Cousine |
+| `chalkboard` | Schoolbell | SIL OFL 1.1 | fonts.google.com/specimen/Schoolbell |
+| `neon` | Orbitron | SIL OFL 1.1 | fonts.google.com/specimen/Orbitron |
+| `comic_book` | Bangers | SIL OFL 1.1 | fonts.google.com/specimen/Bangers |
 
 The SIL Open Font License 1.1 and Apache License 2.0 permit redistribution and
 embedding. Full licence texts: https://openfontlicense.org and

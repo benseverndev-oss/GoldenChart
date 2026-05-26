@@ -12,7 +12,11 @@ export type VibePreset =
   | 'marker'
   | 'ink'
   | 'crayon'
-  | 'davinci_journal';
+  | 'davinci_journal'
+  | 'blueprint_dark'
+  | 'chalkboard'
+  | 'neon'
+  | 'comic_book';
 
 /** Optional "draw-on" reveal: strokes animate as if being sketched. */
 export interface VibeAnimate {
