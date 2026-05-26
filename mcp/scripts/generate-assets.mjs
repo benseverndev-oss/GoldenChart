@@ -289,7 +289,7 @@ function compose() {
       Surface,
       { width: W, height: H, vibe, bare: true },
       // hexagon "input" node -> arrow -> ellipse "output"
-      e(RoughPath, { key: 'hex', d: regularPolygonPath(86, 96, 46, 6, rad(-90)), fill: '#fca5a5' }),
+      e(RoughPath, { key: 'hex', d: regularPolygonPath(86, 96, 46, 6, 0), fill: '#fca5a5' }),
       e(RoughText, { key: 'hexL', x: 86, y: 96, children: 'input' }),
       e(RoughPath, { key: 'arrow', d: arrow.d, fill: null }),
       e(RoughPath, { key: 'arrowHead', d: arrowHeadPath(arrow.endHeadTail, { x: 300, y: 96 }, 13, true), fill: '#1f2937' }),
@@ -297,10 +297,10 @@ function compose() {
       e(RoughPath, { key: 'ell', d: ellipsePath(366, 96, 62, 38), fill: '#a5f3fc' }),
       e(RoughText, { key: 'ellL', x: 366, y: 96, children: 'output' }),
       // a star highlight, a pie-wedge gauge, and a triangle
-      e(RoughPath, { key: 'star', d: starPath(410, 222, 30, 14, 5, rad(-90)), fill: '#fcd34d' }),
+      e(RoughPath, { key: 'star', d: starPath(410, 222, 30, 14, 5, 0), fill: '#fcd34d' }),
       e(RoughPath, { key: 'wedge', d: wedgePath(96, 222, 50, rad(-90), rad(-90 + 252), 26), fill: '#86efac' }),
       e(RoughText, { key: 'wedgeL', x: 96, y: 226, children: '70%' }),
-      e(RoughPath, { key: 'tri', d: regularPolygonPath(248, 224, 44, 3, rad(-90)), fill: '#c4b5fd' }),
+      e(RoughPath, { key: 'tri', d: regularPolygonPath(248, 224, 44, 3, 0), fill: '#c4b5fd' }),
       e(RoughText, { key: 'triL', x: 248, y: 234, children: 'build' }),
     ),
   );
