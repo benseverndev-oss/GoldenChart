@@ -94,6 +94,7 @@ export function Surface({
       {title ? <title>{title}</title> : null}
       {description ? <desc>{description}</desc> : null}
       {drawOn ? <style dangerouslySetInnerHTML={{ __html: drawOnCss(duration) }} /> : null}
+      {resolved.background ? <rect x={0} y={0} width={width} height={height} fill={resolved.background} /> : null}
       {body}
     </svg>
   );

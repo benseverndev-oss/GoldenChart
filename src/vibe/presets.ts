@@ -147,10 +147,15 @@ export const VIBE_PRESETS: Record<VibePreset, ResolvedVibe> = {
     hachureGap: 7,
     curveStepCount: 14,
     curveTightness: 0,
-    disableMultiStroke: false,
+    // Single-stroke so connectors and outlines read as one confident pen line
+    // rather than a doubled, scratchy one. (Fill hatching is unaffected.)
+    disableMultiStroke: true,
     seed: 1452,
     fontFamily: '"Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif',
     fontSize: 14,
+    // Aged-parchment page so the ink has somewhere to sit; this also drives the
+    // node fill and the gap behind zone labels, so no stark-white seams show.
+    background: '#f2e8cf',
   },
 };
 

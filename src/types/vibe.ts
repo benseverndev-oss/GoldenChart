@@ -60,6 +60,13 @@ export interface VibeOverrides {
   seed?: number;
   fontFamily?: string;
   fontSize?: number;
+  /**
+   * Canvas/page colour. Painted as a full-surface backdrop and used wherever
+   * the renderer needs to match the page (node fills, the gap behind zone
+   * labels). Omit to keep the surface transparent over a white page. Not a
+   * Rough.js knob — consumed by the renderer.
+   */
+  background?: string;
   /** Reveal animation. Not a Rough.js knob — consumed by the renderer. */
   animate?: VibeAnimate;
 }
@@ -69,9 +76,11 @@ export interface VibeOverrides {
  * down to this shape before it ever reaches Rough.js. `fill` and `animate` are
  * handled explicitly (nullable / optional) rather than via `Required`.
  */
-export interface ResolvedVibe extends Required<Omit<VibeOverrides, 'fill' | 'animate'>> {
+export interface ResolvedVibe extends Required<Omit<VibeOverrides, 'fill' | 'animate' | 'background'>> {
   preset: VibePreset;
   fill: string | null;
+  /** Optional page colour; see `VibeOverrides.background`. */
+  background?: string;
   animate?: VibeAnimate;
 }
 

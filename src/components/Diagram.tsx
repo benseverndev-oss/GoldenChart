@@ -90,14 +90,14 @@ function DiagramGroup({ group }: { group: LaidGroup }) {
       <RoughRectangle x={group.x} y={group.y} width={group.width} height={group.height} fill={null} />
       {group.label && m && (
         <>
-          {/* White tab punches a gap in the border behind the label, so the zone
-              name stays legible instead of being struck through by the line. */}
+          {/* A page-coloured tab punches a gap in the border behind the label,
+              so the zone name stays legible instead of being struck through. */}
           <rect
             x={group.x + 8 - padX}
             y={group.y - m.height / 2 - padY}
             width={m.width + padX * 2}
             height={m.height + padY * 2}
-            fill="#ffffff"
+            fill={resolved.background ?? '#ffffff'}
           />
           <RoughText x={group.x + 8} y={group.y} anchor="start" baseline="middle">
             {group.label}
@@ -153,8 +153,8 @@ function DiagramEdge({
 
 function DiagramNode({ node, index }: { node: LaidOutNode; index: number }) {
   const seed = index + 1;
-  const fill = '#ffffff';
   const vibe = node.data.vibe;
+  const fill = useResolvedVibe(vibe).background ?? '#ffffff';
 
   let outline;
   if (node.shape === 'diamond') {

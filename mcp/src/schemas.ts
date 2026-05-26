@@ -34,6 +34,7 @@ export const VibeOverridesSchema = z.object({
   seed: z.number().optional(),
   fontFamily: z.string().optional(),
   fontSize: z.number().optional(),
+  background: z.string().optional(),
 });
 
 /** A bare preset name or a preset + targeted overrides. */
