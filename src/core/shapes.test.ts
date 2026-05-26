@@ -60,4 +60,12 @@ describe('shape path generators', () => {
     const d = arrowHeadPath({ x: 0, y: 0 }, { x: 10, y: 0 });
     expect(d).toContain('L10,0');
   });
+
+  it('arrowHeadPath is open by default and closed when filled', () => {
+    const open = arrowHeadPath({ x: 0, y: 0 }, { x: 10, y: 0 });
+    const filled = arrowHeadPath({ x: 0, y: 0 }, { x: 10, y: 0 }, 9, true);
+    expect(open.endsWith('Z')).toBe(false);
+    expect(filled.endsWith('Z')).toBe(true);
+    expect(filled).toContain('L10,0'); // still passes through the tip
+  });
 });

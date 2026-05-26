@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { axisAngle, polarToCartesian, polygonPath } from './polar';
+import {
+  axisAngle,
+  polarToCartesian,
+  polygonPath,
+  regularPolygonPath,
+  starPath,
+  arcStrokePath,
+  wedgePath,
+} from './polar';
 
 describe('polar helpers', () => {
   it('polarToCartesian maps radius/angle to a point', () => {
@@ -28,5 +36,45 @@ describe('polar helpers', () => {
 
   it('polygonPath is empty for no points', () => {
     expect(polygonPath([])).toBe('');
+  });
+
+  it('regularPolygonPath builds a closed n-gon with one vertex per side', () => {
+    const d = regularPolygonPath(50, 50, 20, 6);
+    expect(d.startsWith('M70,50')).toBe(true); // first vertex at angle 0 = east
+    expect(d.endsWith('Z')).toBe(true);
+    expect(d.split('L')).toHaveLength(6); // 6 vertices => M + 5 L
+  });
+
+  it('regularPolygonPath rotates vertices by rotationRad', () => {
+    const d = regularPolygonPath(50, 50, 20, 4, Math.PI / 2); // first vertex south
+    expect(d.startsWith('M50,70')).toBe(true);
+  });
+
+  it('starPath alternates outer/inner radii over 2*points vertices', () => {
+    const d = starPath(50, 50, 20, 10, 5);
+    expect(d.startsWith('M70,50')).toBe(true); // first (outer) vertex east
+    expect(d.endsWith('Z')).toBe(true);
+    expect(d.split('L')).toHaveLength(10); // 10 vertices
+  });
+
+  it('arcStrokePath is an open arc using the SVG A command', () => {
+    const d = arcStrokePath(50, 50, 20, 0, Math.PI / 2);
+    expect(d.startsWith('M70,50')).toBe(true); // start at east
+    expect(d).toContain('A');
+    expect(d.endsWith('Z')).toBe(false); // open, not closed
+  });
+
+  it('wedgePath is a closed pie slice from the center', () => {
+    const d = wedgePath(50, 50, 20, 0, Math.PI / 2);
+    expect(d.startsWith('M50,50')).toBe(true); // starts at the center
+    expect(d).toContain('A');
+    expect(d.endsWith('Z')).toBe(true);
+    expect((d.match(/A/g) ?? []).length).toBe(1); // one arc
+  });
+
+  it('wedgePath with innerR is a closed annular wedge with two arcs', () => {
+    const d = wedgePath(50, 50, 20, 0, Math.PI / 2, 10);
+    expect(d.endsWith('Z')).toBe(true);
+    expect((d.match(/A/g) ?? []).length).toBe(2); // outer + inner arc
   });
 });

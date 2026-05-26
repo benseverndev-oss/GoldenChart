@@ -1,7 +1,23 @@
 import { createElement } from 'react';
 import type { ReactElement } from 'react';
-import { RoughPath, RoughRectangle, RoughCircle, RoughLine, RoughText } from 'goldenchart';
+import {
+  RoughPath,
+  RoughRectangle,
+  RoughCircle,
+  RoughLine,
+  RoughText,
+  polygonPath,
+  regularPolygonPath,
+  starPath,
+  arcStrokePath,
+  wedgePath,
+  ellipsePath,
+  arrowHeadPath,
+} from 'goldenchart';
 import type { PrimitiveSpec } from './schemas';
+
+/** Degrees -> radians. Scene specs use friendly degrees; core builders take radians. */
+const toRad = (deg: number) => (deg * Math.PI) / 180;
 
 /**
  * Map a serializable `PrimitiveSpec` to its GoldenChart primitive element.
@@ -59,6 +75,71 @@ export function primitiveToElement(spec: PrimitiveSpec, key: string | number): R
         seed: spec.seed,
         vibe: spec.vibe,
         children: spec.text,
+      });
+    // SP2 shape primitives: each resolves to a path `d` rendered via RoughPath.
+    case 'polygon':
+      return createElement(RoughPath, {
+        key,
+        d: polygonPath(spec.points),
+        stroke: spec.stroke,
+        fill: spec.fill,
+        seed: spec.seed,
+        vibe: spec.vibe,
+      });
+    case 'regular-polygon':
+      return createElement(RoughPath, {
+        key,
+        d: regularPolygonPath(spec.cx, spec.cy, spec.r, spec.sides, toRad(spec.rotation ?? 0)),
+        stroke: spec.stroke,
+        fill: spec.fill,
+        seed: spec.seed,
+        vibe: spec.vibe,
+      });
+    case 'star':
+      return createElement(RoughPath, {
+        key,
+        d: starPath(spec.cx, spec.cy, spec.outerRadius, spec.innerRadius, spec.points, toRad(spec.rotation ?? 0)),
+        stroke: spec.stroke,
+        fill: spec.fill,
+        seed: spec.seed,
+        vibe: spec.vibe,
+      });
+    case 'arc':
+      return createElement(RoughPath, {
+        key,
+        d: arcStrokePath(spec.cx, spec.cy, spec.r, toRad(spec.startAngle), toRad(spec.endAngle)),
+        stroke: spec.stroke,
+        fill: null, // open stroke: never fill, regardless of any supplied fill
+        seed: spec.seed,
+        vibe: spec.vibe,
+      });
+    case 'wedge':
+      return createElement(RoughPath, {
+        key,
+        d: wedgePath(spec.cx, spec.cy, spec.r, toRad(spec.startAngle), toRad(spec.endAngle), spec.innerRadius),
+        stroke: spec.stroke,
+        fill: spec.fill,
+        seed: spec.seed,
+        vibe: spec.vibe,
+      });
+    case 'ellipse':
+      return createElement(RoughPath, {
+        key,
+        d: ellipsePath(spec.cx, spec.cy, spec.rx, spec.ry),
+        stroke: spec.stroke,
+        fill: spec.fill,
+        seed: spec.seed,
+        vibe: spec.vibe,
+      });
+    case 'arrowhead':
+      return createElement(RoughPath, {
+        key,
+        d: arrowHeadPath(spec.from, spec.to, spec.size, spec.filled ?? false),
+        stroke: spec.stroke,
+        // Open head suppresses fill; a filled (closed) head honors the caller's fill.
+        fill: spec.filled ? spec.fill : null,
+        seed: spec.seed,
+        vibe: spec.vibe,
       });
   }
 }
