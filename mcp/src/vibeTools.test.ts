@@ -34,5 +34,6 @@ describe('vibe tools', () => {
     expect(svg.startsWith('<svg')).toBe(true);
     expect(svg).toContain('<path');
     expect(svg).toContain('GoldenChart');
+    expect(svg).toMatchSnapshot();
   });
 });

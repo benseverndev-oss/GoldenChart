@@ -34,6 +34,7 @@ describe('compose_surface', () => {
     expect(svg).toContain('Dashboard');
     // nested chart svgs sit inside the outer surface
     expect(svg.match(/<svg/g)?.length).toBeGreaterThan(1);
+    expect(svg).toMatchSnapshot();
   });
 });
 
@@ -53,6 +54,7 @@ describe('build_flowchart_from_spec', () => {
     expect(svg.startsWith('<svg')).toBe(true);
     expect(svg).toContain('Ready?');
     expect(svg).toContain('<path');
+    expect(svg).toMatchSnapshot();
   });
 
   it('renders a merge (DAG) spec with multiple parents', async () => {
