@@ -15,7 +15,8 @@
     "build": "tsup",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "assets": "node scripts/generate-assets.mjs"
+    "assets": "node scripts/generate-assets.mjs",
+    "compare": "node scripts/compare-agent-surface.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.18.0",
