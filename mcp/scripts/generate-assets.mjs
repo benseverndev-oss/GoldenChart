@@ -19,7 +19,6 @@ import {
   PieChart,
   Flowchart,
   TreemapChart,
-  FONT_TTF_BASE64,
   Surface,
   RoughPath,
   RoughText,
@@ -30,6 +29,7 @@ import {
   arrowHeadPath,
   connectorPath,
 } from 'goldenchart';
+import { FONT_TTF_BASE64 } from 'goldenchart/fonts';
 import { renderToSVGString } from 'goldenchart/server';
 
 const OUT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'assets');

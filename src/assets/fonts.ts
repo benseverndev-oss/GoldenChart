@@ -36,3 +36,15 @@ export function bundledFontFor(fontFamily: string): { family: string; ttfBase64:
   const ttfBase64 = FONT_TTF_BASE64[family];
   return ttfBase64 ? { family, ttfBase64 } : undefined;
 }
+
+/**
+ * The single source of truth for the `@font-face` rule that makes an SVG
+ * self-contained. Used by the headless renderer and the `goldenchart/fonts`
+ * opt-in helper so both emit byte-identical CSS.
+ */
+export function fontFaceCss(font: { family: string; ttfBase64: string }): string {
+  return (
+    `@font-face{font-family:'${font.family}';font-style:normal;font-weight:400;` +
+    `src:url(data:font/ttf;base64,${font.ttfBase64}) format('truetype');}`
+  );
+}

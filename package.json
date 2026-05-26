@@ -18,6 +18,11 @@
       "types": "./dist/server.d.ts",
       "import": "./dist/server.js",
       "require": "./dist/server.cjs"
+    },
+    "./fonts": {
+      "types": "./dist/fonts.d.ts",
+      "import": "./dist/fonts.js",
+      "require": "./dist/fonts.cjs"
     }
   },
   "files": [
@@ -30,7 +35,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "playground": "vite --config playground/vite.config.ts",
-    "playground:build": "vite build --config playground/vite.config.ts"
+    "playground:build": "vite build --config playground/vite.config.ts",
+    "check:bundle": "node scripts/check-bundle.mjs"
   },
   "keywords": [
     "react",

@@ -84,6 +84,11 @@ describe('chart render tools', () => {
         expect(svg).not.toContain('<div');
       });
 
+      it('embeds the vibe font for headless rendering', async () => {
+        const result = await tool.handler(sample);
+        expect(result.content[0].text).toContain('@font-face');
+      });
+
       it('is deterministic (golden snapshot)', async () => {
         const result = await tool.handler(sample);
         expect(result.content[0].text).toMatchSnapshot();

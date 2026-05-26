@@ -2,7 +2,7 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { extname, join, resolve } from 'node:path';
 import { z } from 'zod';
-import { FONT_TTF_BASE64 } from 'goldenchart';
+import { FONT_TTF_BASE64 } from 'goldenchart/fonts';
 import type { ToolDef, ToolResult } from './registry';
 
 function validateOutputPath(path: string, expectedExt: string): string {

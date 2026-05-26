@@ -87,11 +87,22 @@ The same chart, six different vibes:
 
 ![One bar chart rendered in the pencil, ink, chalkboard, neon, watercolor and synthwave vibes](assets/vibes.png)
 
-Each preset ships with a matching open-source font, subsetted and embedded as
-`@font-face` in the SVG, so a vibe's typography renders identically in a browser
-or a headless rasterizer with no installed/network fonts. Headless rasterizers
-that load fonts explicitly (e.g. resvg) can use the exported `FONT_TTF_BASE64`.
-See `src/assets/fonts/ATTRIBUTION.md` for sources and licences.
+Each preset ships with a matching open-source font. Rendering is environment-aware:
+
+- **Headless/server rendering** (`goldenchart/server`, the MCP server, PNG export) embeds the
+  vibe's font automatically as `@font-face` in the SVG, so that output is self-contained and
+  renders identically with no installed/network fonts.
+- **Browser rendering** emits the `font-family` and relies on the page's webfonts, keeping the
+  main bundle small (~35 KB gzipped). To make a browser-rendered SVG self-contained, import from
+  `goldenchart/fonts` and inject the CSS:
+
+  ```tsx
+  import { fontFaceFor } from 'goldenchart/fonts';
+  // inject fontFaceFor('pencil') into a <style> in your document for self-contained output
+  ```
+
+Rasterizers that load fonts explicitly (e.g. resvg) can use `FONT_TTF_BASE64` from
+`goldenchart/fonts`. See `src/assets/fonts/ATTRIBUTION.md` for sources and licences.
 
 ## Components
 
