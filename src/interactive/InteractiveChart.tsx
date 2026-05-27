@@ -3,6 +3,8 @@ import type { ReactElement } from 'react';
 import { readMark } from './readMark';
 import { useZoomPan, chartXExtent } from './useZoomPan';
 import type { Domain } from '../core/zoom';
+import { Brush } from './Brush';
+import { clientToViewBox, brushRect, marksInPixelRange } from '../core/brush';
 import type { MarkMeta } from '../types/interaction';
 import type { VibeConfig } from '../types/vibe';
 import { VibeProvider } from '../vibe/VibeProvider';
@@ -36,6 +38,9 @@ export interface InteractiveChartProps {
   zoom?: boolean;
   /** Drag to pan the zoomed x-axis. Implies a zoomable chart. Default `false`. */
   pan?: boolean;
+  /** Drag a sketched x-range selection; emits the brushed marks. Takes precedence over pan. */
+  brush?: boolean;
+  onBrush?: (marks: MarkMeta[]) => void;
   /** Mirrors the wrapped chart's vibe so the tooltip is sketched to match. */
   vibe?: VibeConfig;
 }
@@ -97,6 +102,8 @@ export function InteractiveChart({
   crosshair = false,
   zoom = false,
   pan = false,
+  brush = false,
+  onBrush,
   vibe,
 }: InteractiveChartProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -128,13 +135,18 @@ export function InteractiveChart({
     () => (zoom ? chartXExtent(children.props as Record<string, unknown>) : null),
     [zoom, children],
   );
-  const zp = useZoomPan(zoomBounds, { pan });
+  const zp = useZoomPan(zoomBounds, { pan: pan && !brush });
   const content =
     zp.domain
       ? cloneElement(children as ReactElement<{ xAxis?: Record<string, unknown> }>, {
           xAxis: { ...((children.props as { xAxis?: Record<string, unknown> }).xAxis ?? {}), domain: zp.domain },
         })
       : children;
+
+  // x-axis brush: track a drag rect in viewBox space; on release, emit the marks
+  // whose anchors fall inside it (via the pure marksInPixelRange helper).
+  const [brushPx, setBrushPx] = useState<{ a: number; b: number } | null>(null);
+  const brushing = useRef(false);
 
   const clear = useCallback(() => {
     const svg = svgRef.current;
@@ -225,7 +237,7 @@ export function InteractiveChart({
     const move = (e: Event) => zp.onPointerMove(e as unknown as PointerEvent);
     const up = () => zp.onPointerUp();
     svg.addEventListener('wheel', wheel, { passive: false });
-    if (pan) {
+    if (pan && !brush) {
       svg.addEventListener('pointerdown', down);
       svg.addEventListener('pointermove', move);
       svg.addEventListener('pointerup', up);
@@ -238,7 +250,55 @@ export function InteractiveChart({
       svg.removeEventListener('pointerup', up);
       svg.removeEventListener('pointerleave', up);
     };
-  }, [zoom, pan, zp.onWheel, zp.onPointerDown, zp.onPointerMove, zp.onPointerUp]);
+  }, [zoom, pan, brush, zp.onWheel, zp.onPointerDown, zp.onPointerMove, zp.onPointerUp]);
+
+  // Brush drag (takes precedence over pan). Coordinates are converted to viewBox
+  // space so they compare directly against the marks' baked data-gc anchors.
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg || !brush) return;
+    const vb = (viewBox ?? '0 0 0 0').split(/[\s,]+/).map(Number);
+    const toVb = (clientX: number) => {
+      const r = svg.getBoundingClientRect();
+      return clientToViewBox(clientX, r.left, r.width, vb[0] ?? 0, vb[2] ?? 0);
+    };
+    const down = (e: Event) => {
+      brushing.current = true;
+      const x = toVb((e as PointerEvent).clientX);
+      setBrushPx({ a: x, b: x });
+    };
+    const move = (e: Event) => {
+      if (!brushing.current) return;
+      const x = toVb((e as PointerEvent).clientX);
+      setBrushPx((p) => (p ? { a: p.a, b: x } : null));
+    };
+    const up = () => {
+      if (!brushing.current) return;
+      brushing.current = false;
+      setBrushPx((p) => {
+        if (p && svgRef.current) {
+          const tagged: { meta: MarkMeta; key: string; cx: number; cy: number }[] = [];
+          svgRef.current.querySelectorAll('[data-gc-mark]').forEach((el) => {
+            const m = readMark(el);
+            if (m) tagged.push({ meta: m, key: markKey(m), cx: m.cx, cy: m.cy });
+          });
+          const hit = marksInPixelRange(tagged, [p.a, p.b], 'x').map((t) => t.meta);
+          onBrush?.(hit);
+        }
+        return null;
+      });
+    };
+    svg.addEventListener('pointerdown', down);
+    svg.addEventListener('pointermove', move);
+    svg.addEventListener('pointerup', up);
+    svg.addEventListener('pointerleave', up);
+    return () => {
+      svg.removeEventListener('pointerdown', down);
+      svg.removeEventListener('pointermove', move);
+      svg.removeEventListener('pointerup', up);
+      svg.removeEventListener('pointerleave', up);
+    };
+  }, [brush, viewBox, onBrush]);
 
   useEffect(() => {
     const svg = svgRef.current;
@@ -269,6 +329,16 @@ export function InteractiveChart({
       <SeriesVisibilityProvider value={visibility}>{content}</SeriesVisibilityProvider>
       {highlight ? <style>{hoverCss()}</style> : null}
       {selectable ? <style>{selectCss()}</style> : null}
+      {brush && brushPx && vbHeight !== undefined ? (
+        <svg
+          viewBox={viewBox}
+          style={{ position: 'absolute', inset: 0, pointerEvents: 'none', width: '100%', height: '100%' }}
+        >
+          <VibeProvider vibe={vibe}>
+            <Brush start={brushRect(brushPx.a, brushPx.b).start} length={brushRect(brushPx.a, brushPx.b).length} height={vbHeight} />
+          </VibeProvider>
+        </svg>
+      ) : null}
       {hover && (tooltip || crosshair) ? (
         <svg
           viewBox={viewBox}

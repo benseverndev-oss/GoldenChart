@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { pixelToValue, marksInPixelRange } from './brush';
+import { pixelToValue, marksInPixelRange, clientToViewBox, brushRect } from './brush';
 
 describe('brush math', () => {
   it('pixelToValue inverts a linear pixel range to a domain value', () => {
@@ -26,5 +26,15 @@ describe('brush math', () => {
       { key: 'b', cx: 0, cy: 50 },
     ];
     expect(marksInPixelRange(marks, [60, 0], 'y').map((m) => m.key)).toEqual(['a', 'b']);
+  });
+
+  it('clientToViewBox maps a screen x into viewBox space', () => {
+    // element at left=100 width=400 rendering a 0..200 viewBox; client 300 -> 100
+    expect(clientToViewBox(300, 100, 400, 0, 200)).toBe(100);
+  });
+
+  it('brushRect normalizes endpoints into origin + length', () => {
+    expect(brushRect(120, 40)).toEqual({ start: 40, length: 80 });
+    expect(brushRect(40, 120)).toEqual({ start: 40, length: 80 });
   });
 });
