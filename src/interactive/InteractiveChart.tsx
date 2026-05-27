@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { cloneElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import { readMark } from './readMark';
+import { useZoomPan, chartXExtent } from './useZoomPan';
+import type { Domain } from '../core/zoom';
 import type { MarkMeta } from '../types/interaction';
 import type { VibeConfig } from '../types/vibe';
 import { VibeProvider } from '../vibe/VibeProvider';
@@ -30,6 +32,10 @@ export interface InteractiveChartProps {
   legendToggle?: boolean;
   /** Draw a sketched vertical focus line snapped to the hovered mark. Default `false`. */
   crosshair?: boolean;
+  /** Wheel-zoom the continuous x-axis (line/area/scatter), re-sketching at the new domain. */
+  zoom?: boolean;
+  /** Drag to pan the zoomed x-axis. Implies a zoomable chart. Default `false`. */
+  pan?: boolean;
   /** Mirrors the wrapped chart's vibe so the tooltip is sketched to match. */
   vibe?: VibeConfig;
 }
@@ -89,6 +95,8 @@ export function InteractiveChart({
   onSelect,
   legendToggle = true,
   crosshair = false,
+  zoom = false,
+  pan = false,
   vibe,
 }: InteractiveChartProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -113,6 +121,20 @@ export function InteractiveChart({
     () => ({ hidden, toggle, interactive: legendToggle }),
     [hidden, toggle, legendToggle],
   );
+
+  // Semantic zoom/pan: track a view domain and re-sketch the chart at it by
+  // cloning with a controlled `xAxis.domain` (re-scale, never a CSS transform).
+  const zoomBounds = useMemo<Domain | null>(
+    () => (zoom ? chartXExtent(children.props as Record<string, unknown>) : null),
+    [zoom, children],
+  );
+  const zp = useZoomPan(zoomBounds, { pan });
+  const content =
+    zp.domain
+      ? cloneElement(children as ReactElement<{ xAxis?: Record<string, unknown> }>, {
+          xAxis: { ...((children.props as { xAxis?: Record<string, unknown> }).xAxis ?? {}), domain: zp.domain },
+        })
+      : children;
 
   const clear = useCallback(() => {
     const svg = svgRef.current;
@@ -193,6 +215,31 @@ export function InteractiveChart({
     });
   }, [selSig]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Zoom (wheel) + optional pan (drag), attached with passive:false so the
+  // wheel can preventDefault. Kept separate from the hover/selection listeners.
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg || !(zoom || pan)) return;
+    const wheel = (e: Event) => zp.onWheel(e as unknown as WheelEvent);
+    const down = (e: Event) => zp.onPointerDown(e as unknown as PointerEvent);
+    const move = (e: Event) => zp.onPointerMove(e as unknown as PointerEvent);
+    const up = () => zp.onPointerUp();
+    svg.addEventListener('wheel', wheel, { passive: false });
+    if (pan) {
+      svg.addEventListener('pointerdown', down);
+      svg.addEventListener('pointermove', move);
+      svg.addEventListener('pointerup', up);
+      svg.addEventListener('pointerleave', up);
+    }
+    return () => {
+      svg.removeEventListener('wheel', wheel);
+      svg.removeEventListener('pointerdown', down);
+      svg.removeEventListener('pointermove', move);
+      svg.removeEventListener('pointerup', up);
+      svg.removeEventListener('pointerleave', up);
+    };
+  }, [zoom, pan, zp.onWheel, zp.onPointerDown, zp.onPointerMove, zp.onPointerUp]);
+
   useEffect(() => {
     const svg = svgRef.current;
     if (!svg) return;
@@ -215,8 +262,11 @@ export function InteractiveChart({
   const renderTooltip = typeof tooltip === 'function' ? tooltip : undefined;
   const vbHeight = viewBox ? Number(viewBox.split(/[\s,]+/)[3]) : undefined;
   return (
-    <div ref={attach} style={{ position: 'relative', display: 'inline-block' }}>
-      <SeriesVisibilityProvider value={visibility}>{children}</SeriesVisibilityProvider>
+    <div
+      ref={attach}
+      style={{ position: 'relative', display: 'inline-block', overflow: zoom || pan ? 'hidden' : undefined }}
+    >
+      <SeriesVisibilityProvider value={visibility}>{content}</SeriesVisibilityProvider>
       {highlight ? <style>{hoverCss()}</style> : null}
       {selectable ? <style>{selectCss()}</style> : null}
       {hover && (tooltip || crosshair) ? (

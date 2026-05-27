@@ -25,3 +25,20 @@ export function clampDomain([lo, hi]: Domain, [bLo, bHi]: Domain, minSpan: numbe
   const nLo = Math.max(bLo, Math.min(lo, bHi - span));
   return [nLo, nLo + span];
 }
+
+/** One wheel notch -> zoom factor. Scroll up (deltaY < 0) zooms in; reciprocals
+ *  so a zoom-in then zoom-out returns to the original domain. */
+export function wheelFactor(deltaY: number): number {
+  return deltaY < 0 ? 0.8 : 1.25;
+}
+
+/** Apply a wheel event to a domain: zoom around `focus` (0..1) then clamp. */
+export function wheelZoom(domain: Domain, focus: number, deltaY: number, bounds: Domain, minSpan: number): Domain {
+  return clampDomain(zoomDomain(domain, focus, wheelFactor(deltaY)), bounds, minSpan);
+}
+
+/** Pointer position -> 0..1 fraction across an element, clamped to the edges. */
+export function focusFraction(clientPos: number, edgeStart: number, length: number): number {
+  if (length <= 0) return 0;
+  return Math.max(0, Math.min(1, (clientPos - edgeStart) / length));
+}
