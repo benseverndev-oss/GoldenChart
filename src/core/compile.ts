@@ -45,12 +45,21 @@ export function compileChart(data: Row[], rec: ChartRecommendation): CompiledCha
     case 'line':
     case 'area': {
       const component = rec.chartType === 'line' ? 'LineChart' : 'AreaChart';
+      // Line/area need a numeric x. Numbers and parseable dates map directly; a
+      // categorical x (e.g. month names) would all coerce to 0, so fall back to
+      // the category's position so the line actually spreads across the axis.
+      const xNumeric = data.every((r) => {
+        const v = r[e.x];
+        return typeof v === 'number' || (typeof v === 'string' && !Number.isNaN(Date.parse(v)));
+      });
+      const order = [...new Set(data.map((r) => str(r[e.x])))];
+      const xOf = (r: Row) => (xNumeric ? num(r[e.x]) : order.indexOf(str(r[e.x])));
       const series = e.series
         ? [...groupBy(data, e.series)].map(([id, rows]) => ({
             id,
-            points: rows.map((r) => ({ x: num(r[e.x]), y: num(r[e.y]) })),
+            points: rows.map((r) => ({ x: xOf(r), y: num(r[e.y]) })),
           }))
-        : [{ id: e.y, points: data.map((r) => ({ x: num(r[e.x]), y: num(r[e.y]) })) }];
+        : [{ id: e.y, points: data.map((r) => ({ x: xOf(r), y: num(r[e.y]) })) }];
       return { component, props: { series, title: `${e.y} by ${e.x}` } };
     }
 
