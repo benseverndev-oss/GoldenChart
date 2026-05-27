@@ -12,6 +12,7 @@ import type { EmphasisSpec } from '../core/annotations';
 import { resolveEmphasis } from '../core/emphasis';
 import { RoughCircle } from '../primitives/RoughCircle';
 import { useVibeContext } from '../vibe/VibeProvider';
+import { markAttrs } from '../core/interaction';
 
 export interface ScatterDatum {
   x: number;
@@ -81,6 +82,9 @@ export function ScatterPlot({
       cy: yScale(d.y),
       r: d.r !== undefined && rScale ? rScale(d.r) : radius,
       color: d.color,
+      label: d.label,
+      dx: d.x,
+      dy: d.y,
     }));
 
     return { x: xScale, y: yScale, points: computed };
@@ -123,7 +127,7 @@ function ScatterDot({
   point,
   index,
 }: {
-  point: { cx: number; cy: number; r: number; color?: string };
+  point: { cx: number; cy: number; r: number; color?: string; label?: string; dx: number; dy: number };
   index: number;
 }) {
   const vibe = useVibeContext();
@@ -134,6 +138,14 @@ function ScatterDot({
       diameter={point.r * 2}
       fill={point.color ?? vibe.fill}
       seed={vibe.seed + index + 1}
+      dataAttrs={markAttrs({
+        kind: 'point',
+        index,
+        label: point.label,
+        value: { x: point.dx, y: point.dy },
+        cx: point.cx,
+        cy: point.cy,
+      })}
     />
   );
 }
