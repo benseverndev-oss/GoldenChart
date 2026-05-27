@@ -128,6 +128,9 @@ jobs:
         uses: actions/deploy-pages@v4
 ```
 
+(Note: both jobs declare `runs-on: ubuntu-latest` — every job needs it; there is no implicit default.)
+```
+
 - [ ] **Step 2: Validate the YAML parses.**
 ```bash
 npx --yes js-yaml .github/workflows/deploy-pages.yml > /dev/null && echo "YAML OK"
