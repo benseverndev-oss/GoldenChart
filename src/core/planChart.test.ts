@@ -62,4 +62,22 @@ describe('planChart', () => {
     const plan = planChart(rows, { query: 'revenue by month as a line' });
     expect(plan.hints.chartType).toBe('line');
   });
+
+  it('drops a series that an x-override has made redundant (no phantom legend)', () => {
+    // Two categoricals make the recommender pick grouped bars (x=month,
+    // series=region). "by region" overrides x to region, which would leave a
+    // series identical to x — a degenerate group that renders a redundant legend.
+    const plan = planChart(rows, { query: 'revenue by region' });
+    expect(plan.recommendation.encoding.x).toBe('region');
+    expect(plan.recommendation.encoding.series).toBeUndefined();
+    // Single-series bar data: { label, value }, not grouped { label, values }.
+    const data = plan.compiled.props.data as Record<string, unknown>[];
+    expect(data[0]).toHaveProperty('value');
+    expect(data[0]).not.toHaveProperty('values');
+  });
+
+  it('keeps an explicitly requested series', () => {
+    const plan = planChart(rows, { query: 'revenue by month split by region' });
+    expect(plan.recommendation.encoding.series).toBe('region');
+  });
 });

@@ -78,7 +78,18 @@ export function planChart(data: Row[], opts: { query?: string; intent?: Intent }
     for (const [role, field] of Object.entries(hints.roles)) {
       patch[encodingKeyFor(chosen.chartType, role)] = field;
     }
-    chosen = { ...chosen, encoding: { ...chosen.encoding, ...patch } };
+    const encoding = { ...chosen.encoding, ...patch };
+    // An override can leave a stale series identical to the x/y field — a
+    // degenerate group that renders a redundant legend over the bars. Drop it
+    // unless the query explicitly asked for that series.
+    if (
+      encoding.series &&
+      encoding.series !== patch.series &&
+      (encoding.series === encoding.x || encoding.series === encoding.y)
+    ) {
+      delete encoding.series;
+    }
+    chosen = { ...chosen, encoding };
   }
 
   const compiled = compileChart(data, chosen);
