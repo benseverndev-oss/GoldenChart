@@ -117,6 +117,9 @@ export function InteractiveChart({
   const link = useLinkGroup();
   const svgRef = useRef<SVGSVGElement | null>(null);
   const currentRef = useRef<Element | null>(null);
+  // Key of the currently-hovered mark, so pointermoves *within* the same mark
+  // don't re-fire state/onHover (which would re-render and re-sketch the chart).
+  const lastKeyRef = useRef<string | null>(null);
   const [hover, setHover] = useState<HoverState | null>(null);
   const [viewBox, setViewBox] = useState<string | undefined>(undefined);
 
@@ -178,6 +181,7 @@ export function InteractiveChart({
       currentRef.current?.removeAttribute(CURRENT_ATTR);
       currentRef.current = null;
     }
+    lastKeyRef.current = null;
     setHover(null);
     onHover?.(null);
   }, [onHover]);
@@ -192,6 +196,10 @@ export function InteractiveChart({
         clear();
         return;
       }
+      // Same mark as last move? Nothing changed — skip the re-render/re-sketch.
+      const key = markKey(next.mark);
+      if (key === lastKeyRef.current) return;
+      lastKeyRef.current = key;
       if (highlight) {
         svg.setAttribute(HOVER_ATTR, '');
         const group = target.closest('[data-gc-mark]');
