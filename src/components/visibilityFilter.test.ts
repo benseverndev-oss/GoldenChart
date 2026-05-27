@@ -8,7 +8,7 @@ import { renderToSVGString } from '../render/renderToString';
 
 const hide = (set: string[], el: ReturnType<typeof createElement>) =>
   renderToSVGString(
-    createElement(SeriesVisibilityProvider, { value: { hidden: new Set(set), toggle: () => {} } }, el),
+    createElement(SeriesVisibilityProvider, { value: { hidden: new Set(set), toggle: () => {}, interactive: false } }, el),
   );
 
 describe('charts filter hidden series via SeriesVisibility', () => {
