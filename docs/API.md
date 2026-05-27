@@ -172,10 +172,21 @@ Everything under `goldenchart`'s core export is pure and DOM-free: `linearScale`
 hierarchy/DAG/sankey/treemap layouts, color scales, and text metrics. Hand any path
 string to `<RoughPath>` to sketch arbitrary geometry.
 
+## Interactivity (`goldenchart/interactive`)
+
+Opt-in, progressive enhancement layered over the static charts — the core
+`goldenchart` entry ships none of it. Wrap a chart in `<InteractiveChart>`:
+`tooltip`, `highlight`, `onHover`, `selectable` / `selected` / `onSelect`,
+`legendToggle`, `crosshair`, `zoom`, `pan`, `brush` / `onBrush`, `transition`,
+`linkGroup`. Also exports `LinkedCharts`, `readMark`, and `interactiveEmbed(svg)`
+(self-contained interactive HTML; also the MCP `export_interactive_html` tool).
+Full guide: [`INTERACTIVITY.md`](./INTERACTIVITY.md).
+
 ## Accessibility
 
 Charts and diagrams render a `role="img"` surface labelled by `title` /
 `ariaLabel` with an optional `<desc>` from `description`. Data charts additionally
 support `dataTable` to emit a visually-hidden table mirroring the data for screen
 readers (diagrams have no tabular equivalent, so `dataTable` is a no-op there). The
-`drawOn` animation is disabled under `prefers-reduced-motion`.
+`drawOn` animation is disabled under `prefers-reduced-motion`. Interactive marks
+(via `goldenchart/interactive`) are keyboard-focusable with `aria-label`s.

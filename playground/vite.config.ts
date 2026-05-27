@@ -13,6 +13,8 @@ export default defineConfig(({ command }) => ({
   plugins: [react()],
   resolve: {
     alias: {
+      // More-specific subpath alias must precede the bare package alias.
+      'goldenchart/interactive': resolve(dir, '../src/interactive.ts'),
       goldenchart: resolve(dir, '../src/index.ts'),
     },
   },
