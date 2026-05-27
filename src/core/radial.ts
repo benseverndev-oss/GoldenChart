@@ -29,7 +29,31 @@ export function radialLayout(): LayoutEngine {
 
     const cx = width / 2;
     const cy = height / 2;
-    const radius = Math.max(0, Math.min(width, height) / 2 - Math.max(DEFAULT_NODE_W, DEFAULT_NODE_H) / 2);
+
+    // Size the radius from the content, not the canvas: each generation needs a
+    // ring gap of roughly a node height, and the outer ring's circumference must
+    // fit every leaf at its measured width. `Diagram` scales the result to fit.
+    const widths = withParent.map((n) => n.width ?? DEFAULT_NODE_W);
+    const heights = withParent.map((n) => n.height ?? DEFAULT_NODE_H);
+    const maxW = Math.max(DEFAULT_NODE_W / 2, ...widths);
+    const maxH = Math.max(DEFAULT_NODE_H / 2, ...heights);
+    const depth = Math.max(1, root.height);
+    const gap = 28;
+    // Generous ring spacing so generations clear each other. The binding
+    // dimension near the centre is node *width* (a child can sit beside the
+    // root), so factor that in — height alone left the root overlapping its
+    // first ring.
+    const ringStep = Math.max(maxH * 2.2, maxW * 1.15);
+    let radius = depth * ringStep;
+    // ...and enough total radius that *every* ring's circumference fits its
+    // nodes at the measured width (the inner rings are usually the binding
+    // constraint — few nodes, but a small radius).
+    const countByDepth = new Map<number, number>();
+    for (const d of root.descendants()) countByDepth.set(d.depth, (countByDepth.get(d.depth) ?? 0) + 1);
+    for (const [d, count] of countByDepth) {
+      if (d === 0) continue;
+      radius = Math.max(radius, (count * (maxW + gap) * depth) / (2 * Math.PI * d));
+    }
 
     const layout = tree<FlowNode>()
       .size([2 * Math.PI, radius])
