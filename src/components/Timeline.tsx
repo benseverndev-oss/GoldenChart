@@ -46,6 +46,9 @@ export function Timeline({
 
   const resolved = useResolvedVibe(vibe);
   const labelWidth = layout.orientation === 'horizontal' ? plot.width / Math.max(1, events.length) - 8 : undefined;
+  // The sharp vector text reads as too crisp next to the sketchy axis/markers,
+  // so soften it: a touch smaller and slightly muted, letting it recede.
+  const textStyle = { fontSize: Math.round(resolved.fontSize * 0.92), opacity: 0.68 };
 
   return (
     <Surface
@@ -93,7 +96,7 @@ export function Timeline({
               <RoughLine x1={e.marker.x} y1={e.marker.y} x2={connTo.x} y2={connTo.y} seed={i + 1} />
               <RoughCircle cx={e.marker.x} cy={e.marker.y} diameter={11} fill="#ffffff" seed={i + 1} />
               {lines.map((ln, k) => (
-                <RoughText key={k} x={lineX} y={lineY(k)} anchor={e.anchor} baseline="middle">
+                <RoughText key={k} x={lineX} y={lineY(k)} anchor={e.anchor} baseline="middle" style={textStyle}>
                   {ln}
                 </RoughText>
               ))}
