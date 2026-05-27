@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import type { RoughPathProps } from '../types/primitives';
 import { useResolvedVibe } from '../vibe/VibeProvider';
 import { vibeToRoughOptions } from '../vibe/resolveVibe';
-import { getRoughGenerator, drawableToPaths } from '../render/roughGenerator';
+import { getRoughGenerator, drawableToPaths, pathIsRenderable } from '../render/roughGenerator';
 import { SketchPaths } from './SketchPaths';
 
 /**
@@ -26,7 +26,7 @@ export function RoughPath({
   const resolved = useResolvedVibe(vibe, seed);
 
   const paths = useMemo(() => {
-    if (!d) return [];
+    if (!pathIsRenderable(d)) return [];
 
     // Per-shape stroke/fill overrides win over the vibe, but only for this path.
     const shapeVibe = {
@@ -41,7 +41,7 @@ export function RoughPath({
   }, [d, resolved, stroke, fill]);
 
   return (
-    <SketchPaths paths={paths} className={className} style={style} onClick={onClick} animate={!!resolved.animate?.drawOn} clip={d}>
+    <SketchPaths paths={paths} className={className} style={style} onClick={onClick} animate={!!resolved.animate?.drawOn} clip={pathIsRenderable(d) ? d : undefined}>
       {children}
     </SketchPaths>
   );

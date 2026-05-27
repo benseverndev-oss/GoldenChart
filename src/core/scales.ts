@@ -25,9 +25,12 @@ export function sqrtScale(domain: [number, number], range: [number, number]): Sc
 
 /** Convenience: nice min/max for a numeric series, with optional zero baseline. */
 export function extentOf(values: number[], includeZero = true): [number, number] {
-  if (values.length === 0) return [0, 1];
-  let min = Math.min(...values);
-  let max = Math.max(...values);
+  // Drop NaN/±Infinity so one bad datum can't poison the whole domain (a NaN
+  // extent flows into scales and ultimately hangs Rough.js' hachure fill).
+  const finite = values.filter((v) => Number.isFinite(v));
+  if (finite.length === 0) return [0, 1];
+  let min = Math.min(...finite);
+  let max = Math.max(...finite);
   if (includeZero) {
     min = Math.min(min, 0);
     max = Math.max(max, 0);

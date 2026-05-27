@@ -109,15 +109,82 @@ Rasterizers that load fonts explicitly (e.g. resvg) can use `FONT_TTF_BASE64` fr
 ## Components
 
 - **Charts:** `BarChart` (single/grouped/stacked), `LineChart`, `AreaChart` (+ stacked),
-  `ScatterPlot`, `PieChart` (+ donut), `Flowchart`, `SankeyChart`, `TreemapChart`,
+  `ScatterPlot`, `PieChart` (+ donut), `SankeyChart`, `TreemapChart`,
   `HeatmapChart`, `RadarChart`
+- **Diagrams:** `Flowchart`, `MindMap`, `OrgChart`, `ArchitectureDiagram`,
+  `SequenceDiagram`, `ERDiagram`, `Timeline`, plus the low-level `Diagram`
+- **Auto-charting:** `AutoChart` / `visualize` (pick a chart from the data)
 - **Chart furniture:** `Axis`, `Grid`, `Legend`, `Annotations` (reference lines/bands, callouts)
 - **Primitives:** `RoughPath`, `RoughLine`, `RoughRectangle`, `RoughCircle`, `RoughText`
 - **Container:** `Surface` (Tailwind wrapper + `VibeProvider`)
 
+Every chart and diagram shares a `BaseChartProps` base (`width`, `height`, `vibe`,
+`margin`, `title`, `description`, `ariaLabel`, `bare`). Data charts also accept
+`dataTable` to emit a visually-hidden table for screen readers; diagrams render a
+`role="img"` surface with `title`/`description`.
+
+See [`docs/API.md`](./docs/API.md) for the full per-component prop reference.
+
+## Auto-charting
+
+Hand `visualize` (or its component form `AutoChart`) a row-oriented dataset and it
+profiles the fields, picks a chart, and renders it. Steer it with an `intent`
+(`trend`, `compare`, `composition`, `distribution`, `correlation`, `flow`, `hierarchy`):
+
+```tsx
+import { AutoChart } from 'goldenchart';
+
+<AutoChart
+  width={480}
+  height={300}
+  intent="trend"
+  data={[
+    { month: 'Jan', revenue: 12 },
+    { month: 'Feb', revenue: 19 },
+    { month: 'Mar', revenue: 7 },
+  ]}
+/>;
+```
+
+## Diagrams
+
+Beyond charts, GoldenChart lays out and sketches node-link diagrams. `Flowchart`,
+`MindMap`, `OrgChart`, and `ArchitectureDiagram` take `nodes` / `edges` and a layout
+engine; `SequenceDiagram` (`actors` / `messages`), `ERDiagram` (`entities` /
+`relationships`), and `Timeline` (`events`) are purpose-built.
+
+```tsx
+import { Flowchart } from 'goldenchart';
+
+<Flowchart
+  width={420}
+  height={260}
+  direction="TB"
+  nodes={[
+    { id: 'a', label: 'Start' },
+    { id: 'b', label: 'Work', shape: 'diamond' },
+    { id: 'c', label: 'Done' },
+  ]}
+  edges={[
+    { from: 'a', to: 'b' },
+    { from: 'b', to: 'c', label: 'ok' },
+  ]}
+/>;
+```
+
 `Flowchart` supports four layout directions (`TB`/`BT`/`LR`/`RL`), `rect`/`ellipse`/`diamond`
 node shapes, edge labels, arrowheads, `curved`/`orthogonal` routing, and general DAG layout
-(merges, multiple roots). Charts accept `description` / `ariaLabel` / `dataTable` for accessibility.
+(merges, multiple roots).
+
+You can also parse [Mermaid](https://mermaid.js.org/) source into a diagram spec with
+`parseMermaid` (flowchart, sequence, and mindmap syntaxes) and render it with `renderDiagram`:
+
+```tsx
+import { parseMermaid, renderDiagram } from 'goldenchart';
+
+const spec = parseMermaid('graph TD; A-->B; B-->C;');
+renderDiagram(spec, { width: 400, height: 240, vibe: 'pencil' });
+```
 
 ## Rendering quality
 

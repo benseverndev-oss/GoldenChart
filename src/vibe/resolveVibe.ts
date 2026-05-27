@@ -2,6 +2,26 @@ import type { ResolvedVibe, RoughOptions, VibeConfig } from '../types/vibe';
 import { DEFAULT_VIBE, VIBE_PRESETS } from './presets';
 
 /**
+ * Look up a preset, falling back to the default (with a dev warning) when the
+ * name isn't one we ship. Guards against a typo'd preset name producing
+ * `undefined` and a cryptic downstream crash.
+ */
+function presetOrDefault(preset: string | undefined): ResolvedVibe {
+  if (preset === undefined) {
+    return VIBE_PRESETS[DEFAULT_VIBE];
+  }
+  const found = VIBE_PRESETS[preset as keyof typeof VIBE_PRESETS];
+  if (found === undefined) {
+    console.warn(
+      `[goldenchart] Unknown vibe preset "${preset}"; falling back to "${DEFAULT_VIBE}". ` +
+        `Valid presets: ${Object.keys(VIBE_PRESETS).join(', ')}.`,
+    );
+    return VIBE_PRESETS[DEFAULT_VIBE];
+  }
+  return found;
+}
+
+/**
  * Collapse any `VibeConfig` (a bare preset name, or a preset + overrides, or
  * just overrides) into a fully-resolved vibe. This is the single boundary
  * between the loose user-facing config and the strict internal shape.
@@ -12,10 +32,10 @@ export function resolveVibe(config?: VibeConfig): ResolvedVibe {
   }
 
   if (typeof config === 'string') {
-    return VIBE_PRESETS[config];
+    return presetOrDefault(config);
   }
 
-  const base = VIBE_PRESETS[config.preset ?? DEFAULT_VIBE];
+  const base = presetOrDefault(config.preset);
 
   // Only spread keys the caller actually set, so `undefined` never clobbers a
   // preset value. `fill` is handled explicitly because `null` is meaningful.

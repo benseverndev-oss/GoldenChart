@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { resolveVibe, vibeToRoughOptions } from './resolveVibe';
-import { VIBE_PRESETS } from './presets';
+import { DEFAULT_VIBE, VIBE_PRESETS } from './presets';
 
 describe('resolveVibe', () => {
   it('defaults to messy_sketch when nothing is passed', () => {
@@ -25,6 +25,35 @@ describe('resolveVibe', () => {
   it('ignores undefined override values', () => {
     const resolved = resolveVibe({ preset: 'messy_sketch', bowing: undefined });
     expect(resolved.bowing).toBe(VIBE_PRESETS.messy_sketch.bowing);
+  });
+
+  describe('unknown preset', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('falls back to the default vibe for an unknown bare preset name', () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      // @ts-expect-error — exercising a runtime typo that bypasses the type
+      const resolved = resolveVibe('not_a_real_preset');
+      expect(resolved).toEqual(VIBE_PRESETS[DEFAULT_VIBE]);
+    });
+
+    it('falls back to the default base but keeps overrides for an unknown preset in config form', () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      // @ts-expect-error — exercising a runtime typo that bypasses the type
+      const resolved = resolveVibe({ preset: 'nope', roughness: 7 });
+      expect(resolved.roughness).toBe(7);
+      expect(resolved.stroke).toBe(VIBE_PRESETS[DEFAULT_VIBE].stroke);
+    });
+
+    it('warns once, naming the offending preset', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      // @ts-expect-error — exercising a runtime typo that bypasses the type
+      resolveVibe('not_a_real_preset');
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(warn.mock.calls[0]?.[0]).toContain('not_a_real_preset');
+    });
   });
 });
 
