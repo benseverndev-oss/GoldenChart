@@ -204,7 +204,9 @@ export function BarChart({
     >
       {showGrid && <Grid plot={plot} yScale={y} />}
       {bars.map((bar, i) => (
-        <BarChartBar key={bar.id} bar={bar} index={i} />
+        // Index-suffix the key so degenerate data (duplicate or undefined labels,
+        // e.g. from an auto-picked chart) can't collide and trigger React warnings.
+        <BarChartBar key={`${bar.id}-${i}`} bar={bar} index={i} />
       ))}
       {annotations && <Annotations annotations={annotations} plot={plot} yScale={y} />}
       {showAxes && (
