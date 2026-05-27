@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { extname, join, resolve } from 'node:path';
 import { z } from 'zod';
 import { FONT_TTF_BASE64 } from 'goldenchart/fonts';
+import { interactiveEmbed } from 'goldenchart/interactive';
 import type { ToolDef, ToolResult } from './registry';
 
 function validateOutputPath(path: string, expectedExt: string): string {
@@ -90,6 +91,28 @@ export const exportTools: ToolDef[] = [
         content: [{ type: 'text', text: `data:image/png;base64,${base64}` }],
         structuredContent: { base64, bytes: png.length },
       };
+    },
+  },
+  {
+    name: 'export_interactive_html',
+    config: {
+      title: 'Export interactive HTML',
+      description:
+        'Wrap a GoldenChart SVG into a self-contained interactive HTML document with hover tooltips (a vanilla hydrator reads the embedded data-gc-* contract — no runtime deps). Returns the HTML, or writes it to an explicit `.html` path. Writes only happen when a path is given.',
+      inputSchema: { svg: z.string(), title: z.string().optional(), path: z.string().optional() },
+      outputSchema: { html: z.string().optional(), path: z.string().optional() },
+    },
+    handler: async (args) => {
+      const svg = args.svg as string;
+      const title = args.title as string | undefined;
+      const path = args.path as string | undefined;
+      const html = interactiveEmbed(svg, { title });
+      if (path) {
+        const out = validateOutputPath(path, '.html');
+        writeFileSync(out, html, 'utf8');
+        return { content: [{ type: 'text', text: `Wrote interactive HTML to ${out}` }], structuredContent: { path: out } };
+      }
+      return { content: [{ type: 'text', text: html }], structuredContent: { html } };
     },
   },
 ];
