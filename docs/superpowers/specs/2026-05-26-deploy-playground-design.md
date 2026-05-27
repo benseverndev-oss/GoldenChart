@@ -17,7 +17,7 @@ Verified facts:
 ## Design
 
 ### 1. Conditional `base` in `playground/vite.config.ts`
-A project page serves under `/GoldenChart/`, so the production build needs that base, but `npm run playground` (dev) should stay at `/`. Switch the config to the function form and set `base` only for `build`:
+A project page serves under `/GoldenChart/`, so the production build needs that base, but `npm run playground` (dev) should stay at `/`. The config currently exports an **object** (`export default defineConfig({ ... })`); it must be **converted to the function form** `defineConfig(({ command }) => ({ ... }))` so `base` can be conditional (inserting `base` into the object form would apply `/GoldenChart/` in dev too, breaking the dev server):
 ```ts
 export default defineConfig(({ command }) => ({
   base: command === 'build' ? '/GoldenChart/' : '/',
@@ -33,7 +33,7 @@ Standard GitHub Pages-via-Actions pattern:
 - **Trigger:** `on: push: branches: [main]` plus `workflow_dispatch` (manual re-run button).
 - **Permissions (workflow level):** `pages: write`, `id-token: write`, `contents: read`.
 - **Concurrency:** group `pages`, `cancel-in-progress: false` (the standard Pages setting so in-flight deploys aren't cancelled mid-publish).
-- **`build` job (ubuntu-latest, node 20):** checkout → `actions/configure-pages@v5` → `npm ci` → `npm run playground:build` → `actions/upload-pages-artifact@v3` with `path: playground/dist`.
+- **`build` job (ubuntu-latest, node 20):** checkout → `actions/setup-node@v4` (`node-version: 20`, matching the other workflows) → `actions/configure-pages@v5` → `npm ci` → `npm run playground:build` → `actions/upload-pages-artifact@v3` with `path: playground/dist`.
 - **`deploy` job:** `needs: build`, `environment: github-pages`, step `actions/deploy-pages@v4`.
 
 Because the playground aliases the library source, the deployed demo always reflects the repo (no dependency on the npm release).
