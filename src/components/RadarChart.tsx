@@ -4,7 +4,11 @@ import { axisAngle, polarToCartesian, polygonPath } from '../core/polar';
 import { linearScale } from '../core/scales';
 import { getPlotArea } from '../core/geometry';
 import { colorAt } from '../core/palette';
+import { layoutLegend } from '../core/legend';
+import type { LegendItem } from '../core/legend';
+import { resolveVibe } from '../vibe/resolveVibe';
 import { Surface } from './Surface';
+import { Legend } from './Legend';
 import { RoughPath } from '../primitives/RoughPath';
 import { RoughLine } from '../primitives/RoughLine';
 import { RoughCircle } from '../primitives/RoughCircle';
@@ -23,6 +27,8 @@ export interface RadarChartProps extends BaseChartProps {
   levels?: number;
   showDots?: boolean;
   showLabels?: boolean;
+  /** Show a legend below the chart for multiple series. Defaults to on. */
+  showLegend?: boolean;
 }
 
 /**
@@ -46,8 +52,16 @@ export function RadarChart({
   levels = 4,
   showDots = true,
   showLabels = true,
+  showLegend = true,
 }: RadarChartProps) {
-  const plot = getPlotArea(width, height, margin);
+  const fullPlot = getPlotArea(width, height, margin);
+  const rv = resolveVibe(vibe);
+  const legendItems: LegendItem[] =
+    showLegend && series.length > 1 ? series.map((s, i) => ({ label: s.id, color: s.color ?? colorAt(i) })) : [];
+  const legendModel = legendItems.length
+    ? layoutLegend(legendItems, fullPlot.width, { fontSize: rv.fontSize, fontFamily: rv.fontFamily })
+    : null;
+  const plot = legendModel ? { ...fullPlot, height: Math.max(1, fullPlot.height - legendModel.height - 36) } : fullPlot;
 
   const geom = useMemo(() => {
     const n = axes.length;
@@ -120,6 +134,7 @@ export function RadarChart({
             {l.label}
           </RoughText>
         ))}
+      {legendModel && <Legend items={legendItems} x={fullPlot.x} y={plot.y + plot.height + 30} width={fullPlot.width} />}
     </Surface>
   );
 }

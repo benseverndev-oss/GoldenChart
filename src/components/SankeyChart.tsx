@@ -4,6 +4,8 @@ import type { SankeyLinkInput, SankeyNodeInput, SankeyOrientation } from '../cor
 import { computeSankey } from '../core/sankey';
 import { getPlotArea } from '../core/geometry';
 import { colorAt } from '../core/palette';
+import { measureText } from '../core/text';
+import { resolveVibe } from '../vibe/resolveVibe';
 import { Surface } from './Surface';
 import { RoughRectangle } from '../primitives/RoughRectangle';
 import { RoughPath } from '../primitives/RoughPath';
@@ -42,10 +44,19 @@ export function SankeyChart({
   showValues = false,
 }: SankeyChartProps) {
   const plot = getPlotArea(width, height, margin);
+  const horizontal = direction === 'LR';
+
+  // For LR flows the node labels sit to the right of each node; reserve a right
+  // margin (sized to the widest label + room for the value) so the last column's
+  // labels don't run off the canvas.
+  const rv = resolveVibe(vibe);
+  const maxLabelW = Math.max(0, ...nodes.map((n) => measureText(n.label ?? n.id, rv.fontSize, rv.fontFamily).width));
+  const rightPad = horizontal ? Math.ceil(maxLabelW + (showValues ? 44 : 8) + 6) : 0;
+  const layoutWidth = Math.max(1, plot.width - rightPad);
 
   const layout = useMemo(
-    () => computeSankey(nodes, links, [plot.width, plot.height], { direction, nodeWidth, nodePadding }),
-    [nodes, links, direction, nodeWidth, nodePadding, plot.width, plot.height],
+    () => computeSankey(nodes, links, [layoutWidth, plot.height], { direction, nodeWidth, nodePadding }),
+    [nodes, links, direction, nodeWidth, nodePadding, layoutWidth, plot.height],
   );
 
   const colorOf = useMemo(() => {
@@ -53,8 +64,6 @@ export function SankeyChart({
     layout.nodes.forEach((n, i) => map.set(n.id, n.color ?? colorAt(i)));
     return map;
   }, [layout.nodes]);
-
-  const horizontal = direction === 'LR';
 
   return (
     <Surface

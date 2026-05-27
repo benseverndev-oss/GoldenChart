@@ -10,6 +10,9 @@ import { Surface } from './Surface';
 import { Axis } from './Axis';
 import { Grid } from './Grid';
 import { Legend } from './Legend';
+import { layoutLegend } from '../core/legend';
+import type { LegendItem } from '../core/legend';
+import { resolveVibe } from '../vibe/resolveVibe';
 import { Annotations } from './Annotations';
 import type { Annotation } from './Annotations';
 import { RoughRectangle } from '../primitives/RoughRectangle';
@@ -68,9 +71,25 @@ export function BarChart({
   xAxis,
   yAxis,
 }: BarChartProps) {
-  const plot = getPlotArea(width, height, margin);
+  const fullPlot = getPlotArea(width, height, margin);
+  const resolved = resolveVibe(vibe);
 
-  const { x, y, bars, legend, keys } = useMemo(() => {
+  // Legend items depend only on the series, so compute them (and the legend's
+  // height) up front and reserve a band at the bottom — the plot shrinks so the
+  // legend never overlaps the bars.
+  const legendItems = useMemo<LegendItem[]>(() => {
+    if (mode === 'single' || !showLegend) return [];
+    const ids = seriesKeys ?? seriesKeysOf(data as MultiSeriesDatum[]);
+    return ids.map((k, i) => ({ label: k, color: colorAt(i) }));
+  }, [mode, showLegend, seriesKeys, data]);
+  const legendModel = legendItems.length
+    ? layoutLegend(legendItems, fullPlot.width, { fontSize: resolved.fontSize, fontFamily: resolved.fontFamily })
+    : null;
+  const plot = legendModel
+    ? { ...fullPlot, height: Math.max(1, fullPlot.height - legendModel.height - 36) }
+    : fullPlot;
+
+  const { x, y, bars, keys } = useMemo(() => {
     if (mode === 'single') {
       const single = data as ChartDatum[];
       const xScale = bandScale(single.map((d) => d.label), [plot.x, plot.x + plot.width]);
@@ -88,7 +107,7 @@ export function BarChart({
           height: Math.abs(baseline - top),
         };
       });
-      return { x: xScale, y: yScale, bars: computed, legend: [], keys: [] as string[] };
+      return { x: xScale, y: yScale, bars: computed, keys: [] as string[] };
     }
 
     const multi = data as MultiSeriesDatum[];
@@ -134,7 +153,6 @@ export function BarChart({
       x: xScale,
       y: yScale,
       bars: computed,
-      legend: seriesIds.map((k, i) => ({ label: k, color: colorAt(i) })),
       keys: seriesIds,
     };
   }, [data, mode, seriesKeys, plot.x, plot.y, plot.width, plot.height, yAxis]);
@@ -174,7 +192,7 @@ export function BarChart({
           <Axis scale={y} orientation="left" plot={plot} tickFormat={tickFormatter(yAxis)} ticks={yAxis?.tickCount} />
         </>
       )}
-      {showLegend && legend.length > 0 && <Legend items={legend} x={plot.x + plot.width - 84} y={plot.y} />}
+      {legendModel && <Legend items={legendItems} x={fullPlot.x} y={plot.y + plot.height + 30} width={fullPlot.width} />}
     </Surface>
   );
 }
