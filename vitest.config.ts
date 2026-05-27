@@ -5,5 +5,12 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     include: ['src/**/*.test.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      include: ['src/**/*.{ts,tsx}'],
+      // Barrel files and the generated font blob carry no testable branches.
+      exclude: ['src/**/*.test.ts', 'src/**/index.ts', 'src/assets/fonts.ts'],
+    },
   },
 });

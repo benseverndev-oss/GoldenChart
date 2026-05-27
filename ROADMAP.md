@@ -1,6 +1,12 @@
 # GoldenChart MCP Server — Roadmap
 
-A plan for shipping an **MCP server** (`@modelcontextprotocol/sdk`) that exposes
+> **Status: shipped.** The MCP server described below is built, tested, and
+> published to npm as [`goldenchart-mcp`](https://www.npmjs.com/package/goldenchart-mcp).
+> Its source lives in [`mcp/`](./mcp); see [`mcp/README.md`](./mcp/README.md) for
+> the current tool list and usage. This document is kept as the original design
+> record — read it in the past tense.
+
+The original plan, for an **MCP server** (`@modelcontextprotocol/sdk`) that exposes
 GoldenChart so an agent can generate hand-drawn charts and flowcharts by calling
 tools. The defining idea: **surface a tool at every level of the library's
 architecture**, so an agent can work top-down (`render a bar chart`) or drop down
