@@ -5,6 +5,8 @@ import { useZoomPan, chartXExtent } from './useZoomPan';
 import type { Domain } from '../core/zoom';
 import { Brush } from './Brush';
 import { clientToViewBox, brushRect, marksInPixelRange } from '../core/brush';
+import { useDataTransition } from './useDataTransition';
+import { useLinkGroup } from './LinkedCharts';
 import type { MarkMeta } from '../types/interaction';
 import type { VibeConfig } from '../types/vibe';
 import { VibeProvider } from '../vibe/VibeProvider';
@@ -41,6 +43,10 @@ export interface InteractiveChartProps {
   /** Drag a sketched x-range selection; emits the brushed marks. Takes precedence over pan. */
   brush?: boolean;
   onBrush?: (marks: MarkMeta[]) => void;
+  /** Animate the chart's data prop when it changes (snaps under reduced-motion). */
+  transition?: boolean | { durationMs?: number };
+  /** This chart's source id within a surrounding `<LinkedCharts>` group (crossfilter). */
+  linkGroup?: string;
   /** Mirrors the wrapped chart's vibe so the tooltip is sketched to match. */
   vibe?: VibeConfig;
 }
@@ -104,8 +110,11 @@ export function InteractiveChart({
   pan = false,
   brush = false,
   onBrush,
+  transition = false,
+  linkGroup,
   vibe,
 }: InteractiveChartProps) {
+  const link = useLinkGroup();
   const svgRef = useRef<SVGSVGElement | null>(null);
   const currentRef = useRef<Element | null>(null);
   const [hover, setHover] = useState<HoverState | null>(null);
@@ -136,12 +145,26 @@ export function InteractiveChart({
     [zoom, children],
   );
   const zp = useZoomPan(zoomBounds, { pan: pan && !brush });
-  const content =
-    zp.domain
-      ? cloneElement(children as ReactElement<{ xAxis?: Record<string, unknown> }>, {
-          xAxis: { ...((children.props as { xAxis?: Record<string, unknown> }).xAxis ?? {}), domain: zp.domain },
-        })
-      : children;
+
+  // Animate the chart's data prop on change (line/area use `series`, others `data`).
+  const childProps = children.props as { xAxis?: Record<string, unknown>; data?: unknown; series?: unknown };
+  const dataKey: 'series' | 'data' | null = Array.isArray(childProps.series)
+    ? 'series'
+    : Array.isArray(childProps.data)
+      ? 'data'
+      : null;
+  const transitionOn = !!transition && dataKey != null;
+  const durationMs = typeof transition === 'object' ? transition.durationMs ?? 500 : 500;
+  const animatedData = useDataTransition(dataKey ? childProps[dataKey] : undefined, durationMs, transitionOn);
+
+  // Re-sketch the wrapped chart with a controlled view domain and/or animated
+  // data by cloning it (re-scale, never a transform).
+  const overrides: Record<string, unknown> = {};
+  if (zp.domain) overrides.xAxis = { ...(childProps.xAxis ?? {}), domain: zp.domain };
+  if (transitionOn && dataKey) overrides[dataKey] = animatedData;
+  const content = Object.keys(overrides).length
+    ? cloneElement(children as ReactElement<Record<string, unknown>>, overrides)
+    : children;
 
   // x-axis brush: track a drag rect in viewBox space; on release, emit the marks
   // whose anchors fall inside it (via the pure marksInPixelRange helper).
@@ -192,8 +215,9 @@ export function InteractiveChart({
       const next = toggleSelection(selectedKeys, markKey(mark), multiSelect);
       if (selected === undefined) setInternalSel(next);
       onSelect?.(mark, [...next]);
+      if (linkGroup) link?.publish(linkGroup, [...next]);
     },
-    [selectable, multiSelect, selected, onSelect, selSig], // selSig: stable signature of selectedKeys
+    [selectable, multiSelect, selected, onSelect, selSig, linkGroup, link], // selSig: stable signature of selectedKeys
   );
 
   const onClick = useCallback((e: Event) => activate(e.target as Element | null), [activate]);
@@ -214,18 +238,21 @@ export function InteractiveChart({
     if (svg) enhanceMarks(svg);
   }, []);
 
-  // Reflect the current selection onto the DOM (render-free emphasis).
+  // Reflect emphasis onto the DOM (render-free): this chart's own selection plus
+  // any incoming filter from a surrounding LinkedCharts group (crossfilter).
+  const linkSig = linkGroup && link ? link.filter.join('|') : '';
   useEffect(() => {
     const svg = svgRef.current;
     if (!svg) return;
-    if (selectedKeys.size > 0) svg.setAttribute(SELECTED_ATTR, '');
+    const emphasized = new Set<string>([...selectedKeys, ...(linkGroup && link ? link.filter : [])]);
+    if (emphasized.size > 0) svg.setAttribute(SELECTED_ATTR, '');
     else svg.removeAttribute(SELECTED_ATTR);
     svg.querySelectorAll('[data-gc-mark]').forEach((el) => {
       const m = readMark(el);
-      if (m && selectedKeys.has(markKey(m))) el.setAttribute(CHOSEN_ATTR, '');
+      if (m && emphasized.has(markKey(m))) el.setAttribute(CHOSEN_ATTR, '');
       else el.removeAttribute(CHOSEN_ATTR);
     });
-  }, [selSig]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selSig, linkSig]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Zoom (wheel) + optional pan (drag), attached with passive:false so the
   // wheel can preventDefault. Kept separate from the hover/selection listeners.
@@ -284,6 +311,7 @@ export function InteractiveChart({
           });
           const hit = marksInPixelRange(tagged, [p.a, p.b], 'x').map((t) => t.meta);
           onBrush?.(hit);
+          if (linkGroup) link?.publish(linkGroup, hit.map(markKey));
         }
         return null;
       });
@@ -298,7 +326,7 @@ export function InteractiveChart({
       svg.removeEventListener('pointerup', up);
       svg.removeEventListener('pointerleave', up);
     };
-  }, [brush, viewBox, onBrush]);
+  }, [brush, viewBox, onBrush, linkGroup, link]);
 
   useEffect(() => {
     const svg = svgRef.current;
@@ -328,7 +356,7 @@ export function InteractiveChart({
     >
       <SeriesVisibilityProvider value={visibility}>{content}</SeriesVisibilityProvider>
       {highlight ? <style>{hoverCss()}</style> : null}
-      {selectable ? <style>{selectCss()}</style> : null}
+      {selectable || linkGroup ? <style>{selectCss()}</style> : null}
       {brush && brushPx && vbHeight !== undefined ? (
         <svg
           viewBox={viewBox}
