@@ -7,9 +7,13 @@ import type { CurveName } from '../core/shapes';
 import { getPlotArea } from '../core/geometry';
 import { colorAt } from '../core/palette';
 import { seriesTable } from '../core/dataTable';
+import { layoutLegend } from '../core/legend';
+import type { LegendItem } from '../core/legend';
+import { resolveVibe } from '../vibe/resolveVibe';
 import { Surface } from './Surface';
 import { Axis } from './Axis';
 import { Grid } from './Grid';
+import { Legend } from './Legend';
 import { Annotations } from './Annotations';
 import type { Annotation } from './Annotations';
 import { RoughPath } from '../primitives/RoughPath';
@@ -24,6 +28,8 @@ export interface AreaChartProps extends BaseChartProps {
   stacked?: boolean;
   showAxes?: boolean;
   showGrid?: boolean;
+  /** Show a legend below the plot for multi-series data. Defaults to on. */
+  showLegend?: boolean;
   annotations?: Annotation[];
   xAxis?: AxisFormat;
   yAxis?: AxisFormat;
@@ -52,11 +58,19 @@ export function AreaChart({
   stacked = false,
   showAxes = true,
   showGrid = true,
+  showLegend = true,
   annotations,
   xAxis,
   yAxis,
 }: AreaChartProps) {
-  const plot = getPlotArea(width, height, margin);
+  const fullPlot = getPlotArea(width, height, margin);
+  const rv = resolveVibe(vibe);
+  const legendItems: LegendItem[] =
+    showLegend && series.length > 1 ? series.map((s, i) => ({ label: s.id, color: s.color ?? colorAt(i) })) : [];
+  const legendModel = legendItems.length
+    ? layoutLegend(legendItems, fullPlot.width, { fontSize: rv.fontSize, fontFamily: rv.fontFamily })
+    : null;
+  const plot = legendModel ? { ...fullPlot, height: Math.max(1, fullPlot.height - legendModel.height - 36) } : fullPlot;
 
   const { x, y, areas } = useMemo(() => {
     const allPoints = series.flatMap((s) => s.points);
@@ -127,6 +141,7 @@ export function AreaChart({
           <Axis scale={y} orientation="left" plot={plot} tickFormat={tickFormatter(yAxis)} ticks={yAxis?.tickCount} />
         </>
       )}
+      {legendModel && <Legend items={legendItems} x={fullPlot.x} y={plot.y + plot.height + 30} width={fullPlot.width} />}
     </Surface>
   );
 }
