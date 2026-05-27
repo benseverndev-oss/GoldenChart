@@ -6,6 +6,8 @@ Hand-drawn, sketchy React charts and flowcharts.
 
 **D3 does the math. Rough.js does the drawing. A Vibe engine dials in the aesthetic.**
 
+**[Live demo →](https://benseverndev-oss.github.io/GoldenChart/)** · [npm](https://www.npmjs.com/package/goldenchart)
+
 GoldenChart cleanly separates *where* things go from *how* they look:
 
 - **Calculation layer** (`d3-scale`, `d3-shape`, `d3-hierarchy`) computes coordinates,
