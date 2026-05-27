@@ -1,0 +1,54 @@
+name: Release MCP
+
+on:
+  push:
+    tags:
+      - 'mcp-v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+      # Build the local library so the MCP package's file:.. dependency resolves.
+      - run: npm ci
+      - run: npm run build
+      - name: Install MCP deps
+        working-directory: mcp
+        run: npm install
+      - name: Verify tag matches MCP package.json version
+        working-directory: mcp
+        run: |
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          TAG_VERSION="${GITHUB_REF_NAME#mcp-v}"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "Tag $GITHUB_REF_NAME ($TAG_VERSION) != MCP version $PKG_VERSION"
+            exit 1
+          fi
+          echo "Version OK: $PKG_VERSION"
+      - name: Build, typecheck, test MCP
+        working-directory: mcp
+        run: |
+          npm run build
+          npm run typecheck
+          npm test
+      # Replace the committed file:.. with a published caret range for the tarball.
+      # prepublishOnly will rebuild on publish; that double-build is intentional.
+      - name: Pin goldenchart dependency for publish
+        working-directory: mcp
+        run: |
+          LIB_VERSION="$(node -p "JSON.parse(require('fs').readFileSync('./node_modules/goldenchart/package.json','utf8')).version")"
+          npm pkg set dependencies.goldenchart="^$LIB_VERSION"
+          echo "Pinned goldenchart ^$LIB_VERSION"
+      - name: Publish
+        working-directory: mcp
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
