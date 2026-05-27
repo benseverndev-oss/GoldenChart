@@ -26,6 +26,7 @@ export * from './recommend';
 export * from './compile';
 export * from './queryParse';
 export * from './planChart';
+export * from './texture';
 export * from './critique';
 export * from './transform';
 export * from './format';
