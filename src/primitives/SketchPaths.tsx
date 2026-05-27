@@ -67,6 +67,11 @@ export function SketchPaths({
           <path d={clip!} />
         </clipPath>
       ) : null}
+      {/* Solid (transparent) hit area for interactive marks, so hover/click
+          register across the whole shape and not just the hand-drawn strokes
+          (hachure fills leave gaps that otherwise flicker the hover state).
+          Only emitted for tagged marks, so non-interactive output is unchanged. */}
+      {dataAttrs && clip ? <path d={clip} fill="transparent" stroke="none" data-gc-hit="" /> : null}
       {paths.map((p, i) => {
         const isStroke = p.kind === 'stroke';
         return (
