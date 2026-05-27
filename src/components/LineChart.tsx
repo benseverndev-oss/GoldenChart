@@ -21,6 +21,7 @@ import type { EmphasisSpec } from '../core/annotations';
 import { resolveEmphasis } from '../core/emphasis';
 import { RoughPath } from '../primitives/RoughPath';
 import { RoughCircle } from '../primitives/RoughCircle';
+import { markAttrs } from '../core/interaction';
 
 export interface LineChartProps extends BaseChartProps {
   series: Series[];
@@ -89,6 +90,7 @@ export function LineChart({
         color: s.color ?? colorAt(i, palette),
         d: linePath(pixels, curve),
         pixels,
+        points: s.points,
       };
     });
 
@@ -117,6 +119,25 @@ export function LineChart({
             line.pixels.map((p, j) => (
               <RoughCircle key={j} cx={p.x} cy={p.y} diameter={8} fill={line.color} seed={i * 100 + j + 1} />
             ))}
+          {/* Inert transparent hit targets per datum: the line is one merged path,
+              so per-point hover needs an addressable element. */}
+          {line.pixels.map((p, j) => (
+            <circle
+              key={`hit-${j}`}
+              cx={p.x}
+              cy={p.y}
+              r={10}
+              fill="transparent"
+              {...markAttrs({
+                kind: 'point',
+                series: line.id,
+                index: j,
+                value: { x: line.points[j].x, y: line.points[j].y },
+                cx: p.x,
+                cy: p.y,
+              })}
+            />
+          ))}
         </g>
       ))}
       {overlay && <Annotations annotations={overlay} plot={plot} xScale={x} yScale={y} />}
