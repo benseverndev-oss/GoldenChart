@@ -348,15 +348,40 @@ export function InteractiveChart({
   }, [onMove, clear, onClick, onKey]);
 
   const renderTooltip = typeof tooltip === 'function' ? tooltip : undefined;
-  const vbHeight = viewBox ? Number(viewBox.split(/[\s,]+/)[3]) : undefined;
+  const vbParts = viewBox ? viewBox.split(/[\s,]+/).map(Number) : undefined;
+  const vbWidth = vbParts?.[2];
+  const vbHeight = vbParts?.[3];
+  // Cursor affordance for the active interaction mode.
+  const cursor = brush ? 'crosshair' : pan ? 'grab' : zoom ? 'zoom-in' : undefined;
+  const zoomed = (zoom || pan) && zp.domain != null;
   return (
     <div
       ref={attach}
-      style={{ position: 'relative', display: 'inline-block', overflow: zoom || pan ? 'hidden' : undefined }}
+      style={{ position: 'relative', display: 'inline-block', overflow: zoom || pan ? 'hidden' : undefined, cursor }}
     >
       <SeriesVisibilityProvider value={visibility}>{content}</SeriesVisibilityProvider>
       {highlight ? <style>{hoverCss()}</style> : null}
       {selectable || linkGroup ? <style>{selectCss()}</style> : null}
+      {selectable ? <style>{`[${HOVER_ATTR}] [data-gc-mark],[data-gc-mark]{cursor:pointer}`}</style> : null}
+      {zoomed ? (
+        <button
+          type="button"
+          onClick={() => zp.reset()}
+          style={{
+            position: 'absolute',
+            top: 6,
+            right: 6,
+            font: '11px system-ui, sans-serif',
+            padding: '2px 8px',
+            borderRadius: 4,
+            border: '1px solid rgba(0,0,0,0.25)',
+            background: 'rgba(255,255,255,0.85)',
+            cursor: 'pointer',
+          }}
+        >
+          Reset view
+        </button>
+      ) : null}
       {brush && brushPx && vbHeight !== undefined ? (
         <svg
           viewBox={viewBox}
@@ -376,8 +401,10 @@ export function InteractiveChart({
             {crosshair && vbHeight !== undefined ? <Crosshair x={hover.x} height={vbHeight} /> : null}
             {tooltip
               ? renderTooltip
-                ? renderTooltip(hover.mark)
-                : <Tooltip mark={hover.mark} x={hover.x} y={hover.y} />
+                ? <g transform={`translate(${hover.x}, ${hover.y})`}>{renderTooltip(hover.mark)}</g>
+                : vbWidth !== undefined && vbHeight !== undefined
+                  ? <Tooltip mark={hover.mark} anchor={{ x: hover.x, y: hover.y }} bounds={{ width: vbWidth, height: vbHeight }} />
+                  : null
               : null}
           </VibeProvider>
         </svg>
