@@ -17,6 +17,12 @@ export function RoughCircle({
   className,
   style,
   onClick,
+  dataAttrs,
+  onPointerEnter,
+  onPointerMove,
+  onPointerLeave,
+  onPointerDown,
+  onPointerUp,
   children,
 }: RoughCircleProps) {
   const resolved = useResolvedVibe(vibe, seed);
@@ -39,7 +45,20 @@ export function RoughCircle({
     : undefined;
 
   return (
-    <SketchPaths paths={paths} className={className} style={style} onClick={onClick} animate={!!resolved.animate?.drawOn} clip={clip}>
+    <SketchPaths
+      paths={paths}
+      className={className}
+      style={style}
+      onClick={onClick}
+      dataAttrs={dataAttrs}
+      onPointerEnter={onPointerEnter}
+      onPointerMove={onPointerMove}
+      onPointerLeave={onPointerLeave}
+      onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
+      animate={!!resolved.animate?.drawOn}
+      clip={clip}
+    >
       {children}
     </SketchPaths>
   );

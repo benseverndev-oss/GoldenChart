@@ -1,4 +1,4 @@
-import type { CSSProperties, MouseEvent, ReactNode } from 'react';
+import type { CSSProperties, MouseEvent, PointerEvent, ReactNode } from 'react';
 import type { VibeConfig } from './vibe';
 
 /**
@@ -14,6 +14,16 @@ export interface RoughPrimitiveProps {
   style?: CSSProperties;
   /** Forwarded to the rendered element so primitives stay composable/clickable. */
   onClick?: (event: MouseEvent<SVGElement>) => void;
+  /**
+   * Inert `data-*` attributes (e.g. from `markAttrs`) spread onto the rendered
+   * element. Lets the interactivity layer address marks without changing behavior.
+   */
+  dataAttrs?: Record<string, string>;
+  onPointerEnter?: (event: PointerEvent<SVGElement>) => void;
+  onPointerMove?: (event: PointerEvent<SVGElement>) => void;
+  onPointerLeave?: (event: PointerEvent<SVGElement>) => void;
+  onPointerDown?: (event: PointerEvent<SVGElement>) => void;
+  onPointerUp?: (event: PointerEvent<SVGElement>) => void;
   children?: ReactNode;
 }
 

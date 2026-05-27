@@ -21,6 +21,12 @@ export function RoughPath({
   className,
   style,
   onClick,
+  dataAttrs,
+  onPointerEnter,
+  onPointerMove,
+  onPointerLeave,
+  onPointerDown,
+  onPointerUp,
   children,
 }: RoughPathProps) {
   const resolved = useResolvedVibe(vibe, seed);
@@ -41,7 +47,20 @@ export function RoughPath({
   }, [d, resolved, stroke, fill]);
 
   return (
-    <SketchPaths paths={paths} className={className} style={style} onClick={onClick} animate={!!resolved.animate?.drawOn} clip={pathIsRenderable(d) ? d : undefined}>
+    <SketchPaths
+      paths={paths}
+      className={className}
+      style={style}
+      onClick={onClick}
+      dataAttrs={dataAttrs}
+      onPointerEnter={onPointerEnter}
+      onPointerMove={onPointerMove}
+      onPointerLeave={onPointerLeave}
+      onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
+      animate={!!resolved.animate?.drawOn}
+      clip={pathIsRenderable(d) ? d : undefined}
+    >
       {children}
     </SketchPaths>
   );
