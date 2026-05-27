@@ -25,6 +25,7 @@ export function RoughText({
   vibe,
   seed,
   fill,
+  haloColor,
   maxWidth,
   className,
   style,
@@ -36,7 +37,9 @@ export function RoughText({
   // Paint a halo in the page colour behind the glyphs so labels stay legible on
   // dark/textured backgrounds and over hachure fills. `paint-order: stroke`
   // keeps the stroke behind the fill, so it reads as a knockout, not an outline.
-  const halo = resolved.background;
+  // Callers can force one (`haloColor`) where the vibe has no background but the
+  // label still sits over a fill — e.g. pie slices.
+  const halo = haloColor ?? resolved.background;
   const haloWidth = halo ? Math.max(2, resolved.fontSize * 0.18) : undefined;
 
   // Vertically center a wrapped block by lifting the first line half its height.
