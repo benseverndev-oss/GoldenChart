@@ -7,6 +7,7 @@ import { VibeProvider } from '../vibe/VibeProvider';
 import { SeriesVisibilityProvider, type SeriesVisibility } from '../components/SeriesVisibilityContext';
 import { markKey, toggleSelection } from '../core/seriesVisibility';
 import { Tooltip, type TooltipRenderer } from './Tooltip';
+import { Crosshair } from './Crosshair';
 import { markAriaLabel } from './defaultTooltipFormat';
 import { HOVER_ATTR, CURRENT_ATTR, hoverCss } from './hoverStyle';
 import { SELECTED_ATTR, CHOSEN_ATTR, selectCss } from './selectStyle';
@@ -27,6 +28,8 @@ export interface InteractiveChartProps {
   onSelect?: (mark: MarkMeta, selectedKeys: string[]) => void;
   /** Make the chart's legend toggle series visibility. Default `true`. */
   legendToggle?: boolean;
+  /** Draw a sketched vertical focus line snapped to the hovered mark. Default `false`. */
+  crosshair?: boolean;
   /** Mirrors the wrapped chart's vibe so the tooltip is sketched to match. */
   vibe?: VibeConfig;
 }
@@ -85,6 +88,7 @@ export function InteractiveChart({
   multiSelect = false,
   onSelect,
   legendToggle = true,
+  crosshair = false,
   vibe,
 }: InteractiveChartProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -209,18 +213,24 @@ export function InteractiveChart({
   }, [onMove, clear, onClick, onKey]);
 
   const renderTooltip = typeof tooltip === 'function' ? tooltip : undefined;
+  const vbHeight = viewBox ? Number(viewBox.split(/[\s,]+/)[3]) : undefined;
   return (
     <div ref={attach} style={{ position: 'relative', display: 'inline-block' }}>
       <SeriesVisibilityProvider value={visibility}>{children}</SeriesVisibilityProvider>
       {highlight ? <style>{hoverCss()}</style> : null}
       {selectable ? <style>{selectCss()}</style> : null}
-      {tooltip && hover ? (
+      {hover && (tooltip || crosshair) ? (
         <svg
           viewBox={viewBox}
           style={{ position: 'absolute', inset: 0, pointerEvents: 'none', width: '100%', height: '100%' }}
         >
           <VibeProvider vibe={vibe}>
-            {renderTooltip ? renderTooltip(hover.mark) : <Tooltip mark={hover.mark} x={hover.x} y={hover.y} />}
+            {crosshair && vbHeight !== undefined ? <Crosshair x={hover.x} height={vbHeight} /> : null}
+            {tooltip
+              ? renderTooltip
+                ? renderTooltip(hover.mark)
+                : <Tooltip mark={hover.mark} x={hover.x} y={hover.y} />
+              : null}
           </VibeProvider>
         </svg>
       ) : null}
