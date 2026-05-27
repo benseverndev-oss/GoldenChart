@@ -4,7 +4,9 @@ import { getPlotArea } from '../core/geometry';
 import type { DiagramOrientation, LaidGroup, LaidOutEdge, LaidOutNode, LayoutEngine } from '../core/diagram';
 import { arrowHeadPath, diamondPath, ellipsePath, linkPath, orthogonalPath, orthogonalPoints } from '../core/shapes';
 import { measureText } from '../core/text';
+import { nodeSize } from '../core/nodeSize';
 import { Surface } from './Surface';
+import { resolveVibe } from '../vibe/resolveVibe';
 import { useResolvedVibe } from '../vibe/VibeProvider';
 import { RoughRectangle } from '../primitives/RoughRectangle';
 import { RoughPath } from '../primitives/RoughPath';
@@ -44,9 +46,20 @@ export function Diagram({
 }: DiagramProps) {
   const plot = getPlotArea(width, height, margin);
 
+  // Size each node to its label (with the vibe's font) before layout, so the
+  // engine spaces them by real extent. Explicit width/height on a node win.
+  const sizedNodes = useMemo(() => {
+    const resolved = resolveVibe(vibe);
+    return nodes.map((n) => {
+      if (n.width != null && n.height != null) return n;
+      const s = nodeSize(n.label, n.shape ?? 'rect', resolved.fontSize, resolved.fontFamily);
+      return { ...n, width: n.width ?? s.width, height: n.height ?? s.height };
+    });
+  }, [nodes, vibe]);
+
   const scene = useMemo(
-    () => layout(nodes, edges, [plot.width, plot.height]),
-    [layout, nodes, edges, plot.width, plot.height],
+    () => layout(sizedNodes, edges, [plot.width, plot.height]),
+    [layout, sizedNodes, edges, plot.width, plot.height],
   );
 
   // Per-edge routing override, keyed by endpoints, falling back to the chart default.
@@ -55,6 +68,35 @@ export function Diagram({
     for (const e of edges ?? []) if (e.routing) map.set(`${e.from}->${e.to}`, e.routing);
     return map;
   }, [edges]);
+
+  // Fit the laid-out scene into the plot: scale down (never up) and centre, so a
+  // layout that's wider/taller than the canvas is never clipped at the edge.
+  const fit = useMemo(() => {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    for (const n of scene.nodes) {
+      minX = Math.min(minX, n.x - n.width / 2);
+      maxX = Math.max(maxX, n.x + n.width / 2);
+      minY = Math.min(minY, n.y - n.height / 2);
+      maxY = Math.max(maxY, n.y + n.height / 2);
+    }
+    for (const g of scene.groups ?? []) {
+      minX = Math.min(minX, g.x);
+      maxX = Math.max(maxX, g.x + g.width);
+      minY = Math.min(minY, g.y);
+      maxY = Math.max(maxY, g.y + g.height);
+    }
+    if (!Number.isFinite(minX)) return `translate(${plot.x}, ${plot.y})`;
+    const pad = 4;
+    const bw = maxX - minX || 1;
+    const bh = maxY - minY || 1;
+    const s = Math.min((plot.width - pad * 2) / bw, (plot.height - pad * 2) / bh, 1);
+    const tx = plot.x + pad + (plot.width - pad * 2 - bw * s) / 2 - minX * s;
+    const ty = plot.y + pad + (plot.height - pad * 2 - bh * s) / 2 - minY * s;
+    return `translate(${tx}, ${ty}) scale(${s})`;
+  }, [scene, plot.x, plot.y, plot.width, plot.height]);
 
   return (
     <Surface
@@ -68,7 +110,7 @@ export function Diagram({
       style={style}
       bare={bare}
     >
-      <g transform={`translate(${plot.x}, ${plot.y})`}>
+      <g transform={fit}>
         {scene.groups?.map((g) => <DiagramGroup key={g.id} group={g} />)}
         {scene.edges.map((e) => (
           <DiagramEdge
@@ -148,14 +190,26 @@ function DiagramEdge({
   } else {
     d = linkPath(from, to, orientation);
   }
+  const resolved = useResolvedVibe();
+  const m = edge.label ? measureText(edge.label, resolved.fontSize, resolved.fontFamily) : null;
   return (
     <g>
       <RoughPath d={d} fill={null} />
       {showArrowhead && <RoughPath d={arrowHeadPath(arrowTail, to)} fill={null} />}
-      {edge.label && (
-        <RoughText x={labelAt.x} y={labelAt.y} anchor="middle" baseline="middle">
-          {edge.label}
-        </RoughText>
+      {edge.label && m && (
+        <>
+          {/* Page-coloured knockout so the label reads clearly over the connector. */}
+          <rect
+            x={labelAt.x - m.width / 2 - 3}
+            y={labelAt.y - m.height / 2 - 1}
+            width={m.width + 6}
+            height={m.height + 2}
+            fill={resolved.background ?? '#ffffff'}
+          />
+          <RoughText x={labelAt.x} y={labelAt.y} anchor="middle" baseline="middle">
+            {edge.label}
+          </RoughText>
+        </>
       )}
     </g>
   );

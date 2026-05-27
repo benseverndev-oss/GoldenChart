@@ -89,10 +89,18 @@ export function computeSequence(
   const top = actorHeight + topPadding;
   const bottom = height - 8;
   const valid = messages.filter((m) => xOf.has(m.from) && xOf.has(m.to));
-  const rowStep = (bottom - top) / Math.max(1, valid.length);
 
+  // A self-message draws a downward loop, so it needs roughly two rows of height;
+  // weight the row slots so it doesn't collide with the next message.
+  const weights = valid.map((m) => (m.from === m.to ? 2.2 : 1));
+  const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+  const unit = (bottom - top) / Math.max(1, totalWeight);
+
+  let acc = 0;
   const laidMessages: LaidMessage[] = valid.map((m, k) => {
-    const y = top + (k + 0.5) * rowStep;
+    const w = weights[k];
+    const y = top + (acc + w / 2) * unit;
+    acc += w;
     return {
       from: m.from,
       to: m.to,
