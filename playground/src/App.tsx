@@ -46,7 +46,7 @@ import type {
   BrandConfig,
 } from 'goldenchart';
 
-import { InteractiveChart } from 'goldenchart/interactive';
+import { InteractivityShowcase } from './InteractivityShowcase';
 
 const PRESETS = Object.keys(VIBE_PRESETS) as VibePreset[];
 
@@ -330,13 +330,6 @@ export function App() {
   const [roughness, setRoughness] = useState(VIBE_PRESETS[preset].roughness);
   const [query, setQuery] = useState('revenue by month as a line in pencil');
 
-  // Interactivity demo controls (opt-in goldenchart/interactive layer).
-  const [ixTooltip, setIxTooltip] = useState(true);
-  const [ixHighlight, setIxHighlight] = useState(true);
-  const [ixSelectable, setIxSelectable] = useState(true);
-  const [ixCrosshair, setIxCrosshair] = useState(false);
-  const [ixLog, setIxLog] = useState('hover or click a bar…');
-
   // Branding controls — layered on top of the vibe.
   const [brandOn, setBrandOn] = useState(true);
   const [primary, setPrimary] = useState(BRAND_KITS.Acme.primary);
@@ -536,28 +529,9 @@ export function App() {
         </div>
       </section>
 
-      <main className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2">
-        <Panel title="Interactivity (goldenchart/interactive)">
-          <div className="mb-2 flex flex-wrap gap-3 text-sm">
-            <label><input type="checkbox" checked={ixTooltip} onChange={(e) => setIxTooltip(e.target.checked)} /> tooltip</label>
-            <label><input type="checkbox" checked={ixHighlight} onChange={(e) => setIxHighlight(e.target.checked)} /> highlight</label>
-            <label><input type="checkbox" checked={ixSelectable} onChange={(e) => setIxSelectable(e.target.checked)} /> selectable</label>
-            <label><input type="checkbox" checked={ixCrosshair} onChange={(e) => setIxCrosshair(e.target.checked)} /> crosshair</label>
-          </div>
-          <InteractiveChart
-            vibe={vibe}
-            tooltip={ixTooltip}
-            highlight={ixHighlight}
-            selectable={ixSelectable}
-            crosshair={ixCrosshair}
-            onHover={(m) => m && setIxLog(`hover: ${m.label} = ${String(m.value)}`)}
-            onSelect={(m, keys) => setIxLog(`select: ${m.label} (${keys.length} selected)`)}
-          >
-            <BarChart width={460} height={300} vibe={vibe} brand={brand} data={BAR_DATA} title="Weekly visits" />
-          </InteractiveChart>
-          <pre className="mt-2 rounded bg-slate-100 p-2 text-xs">{ixLog}</pre>
-        </Panel>
+      <InteractivityShowcase vibe={vibe} brand={brand} />
 
+      <main className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2">
         <Panel title="BarChart">
           <BarChart width={460} height={300} vibe={vibe} brand={brand} data={BAR_DATA} title="Weekly visits" />
         </Panel>
