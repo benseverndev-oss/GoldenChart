@@ -4,6 +4,7 @@ import { axisAngle, polarToCartesian, polygonPath } from '../core/polar';
 import { linearScale } from '../core/scales';
 import { getPlotArea } from '../core/geometry';
 import { colorAt } from '../core/palette';
+import { resolveBrand } from '../brand/resolveBrand';
 import { layoutLegend } from '../core/legend';
 import type { LegendItem } from '../core/legend';
 import { resolveVibe } from '../vibe/resolveVibe';
@@ -42,6 +43,7 @@ export function RadarChart({
   height,
   margin,
   vibe,
+  brand,
   title,
   description,
   ariaLabel,
@@ -56,8 +58,9 @@ export function RadarChart({
 }: RadarChartProps) {
   const fullPlot = getPlotArea(width, height, margin);
   const rv = resolveVibe(vibe);
+  const palette = resolveBrand(brand).palette;
   const legendItems: LegendItem[] =
-    showLegend && series.length > 1 ? series.map((s, i) => ({ label: s.id, color: s.color ?? colorAt(i) })) : [];
+    showLegend && series.length > 1 ? series.map((s, i) => ({ label: s.id, color: s.color ?? colorAt(i, palette) })) : [];
   const legendModel = legendItems.length
     ? layoutLegend(legendItems, fullPlot.width, { fontSize: rv.fontSize, fontFamily: rv.fontFamily })
     : null;
@@ -99,6 +102,7 @@ export function RadarChart({
       width={width}
       height={height}
       vibe={vibe}
+      brand={brand}
       title={title}
       description={description}
       ariaLabel={ariaLabel}
@@ -118,15 +122,15 @@ export function RadarChart({
               series tangles into noise); a single series keeps its fill. */}
           <RoughPath
             d={s.path}
-            stroke={s.color ?? colorAt(i)}
-            fill={series.length > 1 ? null : (s.color ?? colorAt(i))}
+            stroke={s.color ?? colorAt(i, palette)}
+            fill={series.length > 1 ? null : (s.color ?? colorAt(i, palette))}
             vibe={{ fillStyle: 'hachure', fillWeight: 1 }}
             style={{ opacity: series.length > 1 ? 1 : 0.85 }}
             seed={i + 1}
           />
           {showDots &&
             s.points.map((p, j) => (
-              <RoughCircle key={j} cx={p.x} cy={p.y} diameter={7} fill={s.color ?? colorAt(i)} seed={i * 10 + j + 1} />
+              <RoughCircle key={j} cx={p.x} cy={p.y} diameter={7} fill={s.color ?? colorAt(i, palette)} seed={i * 10 + j + 1} />
             ))}
         </g>
       ))}

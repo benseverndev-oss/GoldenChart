@@ -29,6 +29,7 @@ export function Timeline({
   height,
   margin,
   vibe,
+  brand,
   title,
   description,
   ariaLabel,
@@ -55,6 +56,7 @@ export function Timeline({
       width={width}
       height={height}
       vibe={vibe}
+      brand={brand}
       title={title}
       description={description}
       ariaLabel={ariaLabel}

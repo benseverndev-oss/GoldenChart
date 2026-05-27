@@ -35,6 +35,7 @@ export function Diagram({
   height,
   margin,
   vibe,
+  brand,
   title,
   description,
   ariaLabel,
@@ -125,6 +126,7 @@ export function Diagram({
       width={width}
       height={height}
       vibe={vibe}
+      brand={brand}
       title={title}
       description={description}
       ariaLabel={ariaLabel}

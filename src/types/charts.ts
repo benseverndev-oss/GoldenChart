@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 import type { Margin } from './geometry';
 import type { VibeConfig } from './vibe';
+import type { BrandConfig } from './brand';
 
 /** A single (category, value) datum for the standard cartesian charts. */
 export interface ChartDatum {
@@ -40,6 +41,12 @@ export interface BaseChartProps {
   margin?: Partial<Margin>;
   /** Aesthetic for the whole chart. Provided to descendants via context. */
   vibe?: VibeConfig;
+  /**
+   * Brand identity (palette, primary/ink/page colours, font, logo) layered on
+   * top of the vibe. Recolours the chart while the vibe keeps the hand-drawn
+   * feel; explicit `vibe` overrides still win over the brand.
+   */
+  brand?: BrandConfig;
   /** Accessible label rendered as `<title>` / aria-label on the surface. */
   title?: string;
   /** Longer accessible description, rendered as `<desc>`. */

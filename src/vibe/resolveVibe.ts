@@ -1,4 +1,4 @@
-import type { ResolvedVibe, RoughOptions, VibeConfig } from '../types/vibe';
+import type { ResolvedVibe, RoughOptions, VibeConfig, VibeOverrides } from '../types/vibe';
 import { DEFAULT_VIBE, VIBE_PRESETS } from './presets';
 
 /**
@@ -21,38 +21,54 @@ function presetOrDefault(preset: string | undefined): ResolvedVibe {
   return found;
 }
 
-/**
- * Collapse any `VibeConfig` (a bare preset name, or a preset + overrides, or
- * just overrides) into a fully-resolved vibe. This is the single boundary
- * between the loose user-facing config and the strict internal shape.
- */
-export function resolveVibe(config?: VibeConfig): ResolvedVibe {
-  if (config === undefined) {
-    return VIBE_PRESETS[DEFAULT_VIBE];
-  }
-
-  if (typeof config === 'string') {
-    return presetOrDefault(config);
-  }
-
-  const base = presetOrDefault(config.preset);
-
-  // Only spread keys the caller actually set, so `undefined` never clobbers a
-  // preset value. `fill` is handled explicitly because `null` is meaningful.
-  const { preset: _preset, fill, ...overrides } = config;
-  const merged: ResolvedVibe = { ...base };
-  const mutable = merged as unknown as Record<string, unknown>;
-  const source = overrides as Record<string, unknown>;
-
+/** Copy each defined key of `source` onto `target`, skipping `undefined`. */
+function applyDefined(target: ResolvedVibe, source: Record<string, unknown>): void {
+  const mutable = target as unknown as Record<string, unknown>;
   for (const key of Object.keys(source)) {
     const value = source[key];
     if (value !== undefined) {
       mutable[key] = value;
     }
   }
+}
 
-  if (fill !== undefined) {
-    merged.fill = fill;
+/**
+ * Collapse any `VibeConfig` (a bare preset name, or a preset + overrides, or
+ * just overrides) into a fully-resolved vibe. This is the single boundary
+ * between the loose user-facing config and the strict internal shape.
+ *
+ * `brandOverrides` (colour/font knobs derived from a `Brand`) layer between the
+ * preset defaults and the caller's explicit overrides, giving the precedence:
+ * preset → brand → explicit vibe overrides. A brand thus recolours any vibe
+ * while an explicit per-call override still wins.
+ */
+export function resolveVibe(config?: VibeConfig, brandOverrides?: Partial<VibeOverrides>): ResolvedVibe {
+  const hasBrand = brandOverrides !== undefined && Object.keys(brandOverrides).length > 0;
+
+  // Fast path: a bare/absent config with no brand returns the shared preset.
+  if (config === undefined && !hasBrand) {
+    return VIBE_PRESETS[DEFAULT_VIBE];
+  }
+  if (typeof config === 'string' && !hasBrand) {
+    return presetOrDefault(config);
+  }
+
+  const base = typeof config === 'string' || config === undefined ? presetOrDefault(config) : presetOrDefault(config.preset);
+  const merged: ResolvedVibe = { ...base };
+
+  // Brand colour/font knobs first, so explicit overrides win over them.
+  if (hasBrand) {
+    applyDefined(merged, brandOverrides as Record<string, unknown>);
+  }
+
+  // Then the caller's explicit overrides (only when config is the object form).
+  if (typeof config === 'object' && config !== undefined) {
+    // `fill` is handled explicitly because `null` ("no fill") is meaningful.
+    const { preset: _preset, fill, ...overrides } = config;
+    applyDefined(merged, overrides as Record<string, unknown>);
+    if (fill !== undefined) {
+      merged.fill = fill;
+    }
   }
 
   return merged;

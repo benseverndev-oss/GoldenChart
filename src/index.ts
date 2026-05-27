@@ -13,6 +13,10 @@ export {
 } from './vibe';
 export type { VibeProviderProps } from './vibe';
 
+// Brand engine
+export { resolveBrand, brandVibeOverrides, BrandProvider, useBrand } from './brand';
+export type { BrandProviderProps } from './brand';
+
 // Calculation layer (D3, DOM-free)
 export * from './core';
 

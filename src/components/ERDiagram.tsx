@@ -27,6 +27,7 @@ export function ERDiagram({
   height,
   margin,
   vibe,
+  brand,
   title,
   description,
   ariaLabel,
@@ -47,6 +48,7 @@ export function ERDiagram({
       width={width}
       height={height}
       vibe={vibe}
+      brand={brand}
       title={title}
       description={description}
       ariaLabel={ariaLabel}

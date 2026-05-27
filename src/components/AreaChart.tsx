@@ -6,6 +6,7 @@ import { areaPath, linePath } from '../core/shapes';
 import type { CurveName } from '../core/shapes';
 import { getPlotArea } from '../core/geometry';
 import { colorAt } from '../core/palette';
+import { resolveBrand } from '../brand/resolveBrand';
 import { seriesTable } from '../core/dataTable';
 import { layoutLegend } from '../core/legend';
 import type { LegendItem } from '../core/legend';
@@ -45,6 +46,7 @@ export function AreaChart({
   height,
   margin,
   vibe,
+  brand,
   title,
   description,
   ariaLabel,
@@ -65,8 +67,9 @@ export function AreaChart({
 }: AreaChartProps) {
   const fullPlot = getPlotArea(width, height, margin);
   const rv = resolveVibe(vibe);
+  const palette = resolveBrand(brand).palette;
   const legendItems: LegendItem[] =
-    showLegend && series.length > 1 ? series.map((s, i) => ({ label: s.id, color: s.color ?? colorAt(i) })) : [];
+    showLegend && series.length > 1 ? series.map((s, i) => ({ label: s.id, color: s.color ?? colorAt(i, palette) })) : [];
   const legendModel = legendItems.length
     ? layoutLegend(legendItems, fullPlot.width, { fontSize: rv.fontSize, fontFamily: rv.fontFamily })
     : null;
@@ -91,7 +94,7 @@ export function AreaChart({
         const fill =
           `M${top.map((p) => `${p.x},${p.y}`).join(' L')} ` +
           `L${[...bottom].reverse().map((p) => `${p.x},${p.y}`).join(' L')} Z`;
-        return { id: s.id, color: s.color ?? colorAt(i), fill, line: linePath(top, curve) };
+        return { id: s.id, color: s.color ?? colorAt(i, palette), fill, line: linePath(top, curve) };
       });
 
       return { x: xScale, y: yScale, areas: computed };
@@ -105,20 +108,21 @@ export function AreaChart({
       const pixels = s.points.map((p) => ({ x: xScale(p.x), y: yScale(p.y) }));
       return {
         id: s.id,
-        color: s.color ?? colorAt(i),
+        color: s.color ?? colorAt(i, palette),
         fill: areaPath(pixels, y0, curve),
         line: linePath(pixels, curve),
       };
     });
 
     return { x: xScale, y: yScale, areas: computed };
-  }, [series, curve, baseline, stacked, plot.x, plot.y, plot.width, plot.height, xAxis, yAxis]);
+  }, [series, curve, baseline, stacked, plot.x, plot.y, plot.width, plot.height, xAxis, yAxis, palette]);
 
   return (
     <Surface
       width={width}
       height={height}
       vibe={vibe}
+      brand={brand}
       title={title}
       description={description}
       ariaLabel={ariaLabel}

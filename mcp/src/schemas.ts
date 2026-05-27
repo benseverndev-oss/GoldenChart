@@ -51,6 +51,26 @@ export const VibeOverridesSchema = z.object({
 /** A bare preset name or a preset + targeted overrides. */
 export const VibeConfigSchema = z.union([z.enum(VIBE_PRESET_NAMES), VibeOverridesSchema]);
 
+/** A corner logo / wordmark; mirrors `BrandLogo` in goldenchart. */
+export const BrandLogoSchema = z.object({
+  src: z.string(),
+  position: z.enum(['top-left', 'top-right', 'bottom-left', 'bottom-right']).optional(),
+  width: z.number().positive().optional(),
+  height: z.number().positive().optional(),
+  opacity: z.number().min(0).max(1).optional(),
+  margin: z.number().nonnegative().optional(),
+});
+
+/** Brand identity layered on top of the vibe; mirrors `Brand` in goldenchart. */
+export const BrandConfigSchema = z.object({
+  palette: z.array(z.string()).optional(),
+  primary: z.string().optional(),
+  ink: z.string().optional(),
+  page: z.string().optional(),
+  font: z.string().optional(),
+  logo: BrandLogoSchema.optional(),
+});
+
 /** Data-shaping transform ops; mirrors `Transform` in goldenchart core. */
 export const TransformSchema = z.discriminatedUnion('op', [
   z.object({ op: z.literal('sort'), by: z.string(), dir: z.enum(['asc', 'desc']).optional() }),
@@ -351,6 +371,7 @@ export const baseChartShape = {
   height: z.number().positive(),
   margin: MarginSchema.optional(),
   vibe: VibeConfigSchema.optional(),
+  brand: BrandConfigSchema.optional(),
   title: z.string().optional(),
   description: z.string().optional(),
   ariaLabel: z.string().optional(),
