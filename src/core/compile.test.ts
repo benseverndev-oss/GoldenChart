@@ -38,6 +38,20 @@ describe('compileChart', () => {
     expect((c.props.links as unknown[]).length).toBe(2);
   });
 
+  it('plots a categorical x as evenly-spaced indices, not all-zero', () => {
+    const c = compileChart(
+      [
+        { month: 'Jan', revenue: 12 },
+        { month: 'Feb', revenue: 19 },
+        { month: 'Mar', revenue: 7 },
+      ],
+      { chartType: 'line', encoding: { x: 'month', y: 'revenue' }, confidence: 0.7, rationale: '' },
+    );
+    const series = c.props.series as Series[];
+    const xs = series[0].points.map((p) => p.x);
+    expect(xs).toEqual([0, 1, 2]);
+  });
+
   it('groups a second category into multi-series bars', () => {
     const c = compileChart(
       [

@@ -541,3 +541,27 @@ export const VIBE_PRESETS: Record<VibePreset, ResolvedVibe> = {
 };
 
 export const DEFAULT_VIBE: VibePreset = 'messy_sketch';
+
+/**
+ * Matte / physical-media presets get a faint paper-grain background so they
+ * don't read as a flat fill. Digital or deliberately-crisp presets (blueprint,
+ * neon, terminal, midnight, synthwave, amber_crt, whiteboard, …) stay clean.
+ */
+const PAPER_TEXTURED: VibePreset[] = [
+  'messy_sketch',
+  'chaotic_notebook',
+  'pencil',
+  'crayon',
+  'davinci_journal',
+  'chalkboard',
+  'watercolor',
+  'newsprint',
+  'kraft',
+  'botanical',
+  'risograph',
+  'sticky_note',
+  'typewriter',
+];
+for (const p of PAPER_TEXTURED) {
+  VIBE_PRESETS[p].texture = 'paper';
+}

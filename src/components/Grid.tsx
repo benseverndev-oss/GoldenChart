@@ -14,14 +14,19 @@ export interface GridProps {
 
 /**
  * Faint gridlines aligned to axis ticks. Derives a calmer vibe from context so
- * the grid never competes with the data — same preset, less roughness, muted
- * stroke.
+ * the grid never competes with the data — same preset, a muted stroke, and a
+ * touch less roughness than the data while still reading as hand-drawn (not
+ * ruled).
  */
 export function Grid({ plot, xScale, yScale, ticks }: GridProps) {
   const vibe = useVibeContext();
   const gridVibe: VibeConfig = {
     preset: vibe.preset,
-    roughness: Math.min(vibe.roughness, 0.6),
+    // Always visibly hand-drawn, regardless of how crisp the preset is: floor at
+    // 1.0 so even low-roughness presets get a sketched grid, capped at 1.4 so it
+    // never overpowers the data. (A proportional nudge only moved high-roughness
+    // presets like chalkboard; this is consistent across every vibe.)
+    roughness: Math.min(Math.max(vibe.roughness, 1.0), 1.4),
     strokeWidth: 0.75,
     stroke: '#d1d5db',
   };

@@ -16,6 +16,22 @@ export function getRoughGenerator(): RoughGenerator {
   return generator;
 }
 
+/**
+ * Whether every coordinate is a finite number. Primitives call this before
+ * handing geometry to Rough.js: a NaN/Infinity width or radius sends Rough.js'
+ * hachure fill into an unbounded loop (it steps by `hachureGap` across an
+ * infinite span), so we skip drawing degenerate shapes instead.
+ */
+export function allFinite(...nums: number[]): boolean {
+  return nums.every((n) => Number.isFinite(n));
+}
+
+/** Whether a path string is safe to draw — non-empty and free of NaN/Infinity. */
+export function pathIsRenderable(d: string): boolean {
+  if (d.trim() === '') return false;
+  return !/NaN|Infinity/.test(d);
+}
+
 /** Whether a path is the sketch outline or part of the fill/hatching. */
 export type RoughPathKind = 'stroke' | 'fill';
 

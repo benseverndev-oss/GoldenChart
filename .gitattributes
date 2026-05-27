@@ -1,0 +1,4 @@
+# Vitest snapshots are authored with LF. Without this, autocrlf rewrites them
+# on checkout and `npm test` reports spurious line-ending-only diffs that get
+# committed by accident. Scoped to .snap only to avoid renormalizing the repo.
+*.snap text eol=lf

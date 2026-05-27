@@ -3,6 +3,7 @@ import type { VibeConfig } from '../types/vibe';
 import type { DataTableModel } from '../types/charts';
 import { VibeProvider } from '../vibe/VibeProvider';
 import { resolveVibe } from '../vibe/resolveVibe';
+import { PaperTexture } from './PaperTexture';
 
 export type { DataTableModel };
 
@@ -105,6 +106,9 @@ export function Surface({
       {description ? <desc>{description}</desc> : null}
       {drawOn ? <style dangerouslySetInnerHTML={{ __html: drawOnCss(duration) }} /> : null}
       {resolved.background ? <rect x={0} y={0} width={width} height={height} fill={resolved.background} /> : null}
+      {resolved.texture === 'paper' ? (
+        <PaperTexture width={width} height={height} seed={resolved.seed} background={resolved.background} />
+      ) : null}
       {body}
     </svg>
   );
