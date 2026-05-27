@@ -45,3 +45,5 @@ export type { BrushOverlayProps } from './interactive/Brush';
 export { useDataTransition, prefersReducedMotion } from './interactive/useDataTransition';
 export { LinkedCharts, useLinkGroup } from './interactive/LinkedCharts';
 export type { LinkGroupValue } from './interactive/LinkedCharts';
+export { interactiveEmbed } from './interactive/embed';
+export type { InteractiveEmbedOptions } from './interactive/embed';
