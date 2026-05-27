@@ -106,6 +106,30 @@ Each preset ships with a matching open-source font. Rendering is environment-awa
 Rasterizers that load fonts explicitly (e.g. resvg) can use `FONT_TTF_BASE64` from
 `goldenchart/fonts`. See `src/assets/fonts/ATTRIBUTION.md` for sources and licences.
 
+## Branding
+
+Layer a `brand` on top of any vibe to recolour a chart to your own identity while
+keeping the hand-drawn feel. The vibe controls *how* a chart is drawn; the brand
+sets *identity* — `palette`, `primary` / `ink` / `page` colours, `font`, and a
+corner `logo`. Every field is optional, and an explicit `vibe` override still wins
+over the brand.
+
+```tsx
+<BarChart
+  vibe="pencil"
+  brand={{
+    palette: ['#ff6b35', '#f7b801', '#7a9e7e', '#ef476f', '#118ab2'],
+    primary: '#ff6b35',
+    ink: '#3a2317',
+    page: '#fff8ef',
+    logo: { src: logoUrl, position: 'bottom-right', width: 88 },
+  }}
+  data={data}
+/>;
+```
+
+Full field reference and precedence rules: [`docs/API.md#branding`](./docs/API.md#branding).
+
 ## Components
 
 - **Charts:** `BarChart` (single/grouped/stacked), `LineChart`, `AreaChart` (+ stacked),
@@ -145,6 +169,20 @@ import { AutoChart } from 'goldenchart';
   ]}
 />;
 ```
+
+Or just describe what you want — `visualize` / `AutoChart` also accept a
+plain-English `query` that picks the chart type, maps fields to roles, and selects
+a vibe from the sentence. Any explicit prop you pass still wins.
+
+```tsx
+import { visualize } from 'goldenchart';
+
+// "revenue by month as a line in pencil"
+visualize(data, { query: 'revenue by month as a line in pencil', width: 480, height: 300 });
+```
+
+See the [natural-language query reference](./docs/API.md#natural-language-queries)
+for the full grammar (chart types, intents, field roles, vibes).
 
 ## Diagrams
 
