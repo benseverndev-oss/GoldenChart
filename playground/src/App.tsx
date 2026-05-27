@@ -43,9 +43,57 @@ import type {
   TimelineEventInput,
   VibeConfig,
   VibePreset,
+  BrandConfig,
 } from 'goldenchart';
 
 const PRESETS = Object.keys(VIBE_PRESETS) as VibePreset[];
+
+type LogoPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+
+/** Build a tiny wordmark logo as an inline SVG data-URI (renders in <image href>). */
+function wordmark(text: string, bg: string, fg: string): string {
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="56" viewBox="0 0 160 56">` +
+    `<rect x="2" y="2" width="156" height="52" rx="12" fill="${bg}"/>` +
+    `<text x="80" y="36" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" ` +
+    `font-size="26" font-weight="700" fill="${fg}">${text}</text></svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+/** Named brand kits the playground can apply in one click. */
+const BRAND_KITS: Record<string, { primary: string; ink: string; page: string; palette: string; font: string; logo: string }> = {
+  Acme: {
+    primary: '#0b3d91',
+    ink: '#1d2433',
+    page: '#f7f9fc',
+    palette: '#0b3d91, #2a9d8f, #e9c46a, #e76f51, #8d99ae',
+    font: '"IBM Plex Sans", system-ui, sans-serif',
+    logo: 'ACME',
+  },
+  Mango: {
+    primary: '#ff6b35',
+    ink: '#3a2317',
+    page: '#fff8ef',
+    palette: '#ff6b35, #f7b801, #7a9e7e, #ef476f, #118ab2',
+    font: '"IBM Plex Sans", system-ui, sans-serif',
+    logo: 'MANGO',
+  },
+  Forest: {
+    primary: '#2d6a4f',
+    ink: '#1b2d22',
+    page: '#f3f7f2',
+    palette: '#2d6a4f, #95d5b2, #d9a566, #6a4c93, #b5838d',
+    font: '"EB Garamond", Georgia, serif',
+    logo: 'FOREST',
+  },
+};
+
+const FONT_OPTIONS = [
+  { label: 'IBM Plex Sans', value: '"IBM Plex Sans", system-ui, sans-serif' },
+  { label: 'EB Garamond (serif)', value: '"EB Garamond", Georgia, serif' },
+  { label: 'Caveat (handwritten)', value: '"Caveat", "Segoe Print", cursive' },
+  { label: 'Inherit from vibe', value: '' },
+];
 
 const BAR_DATA: ChartDatum[] = [
   { label: 'Mon', value: 12 },
@@ -280,7 +328,41 @@ export function App() {
   const [roughness, setRoughness] = useState(VIBE_PRESETS[preset].roughness);
   const [query, setQuery] = useState('revenue by month as a line in pencil');
 
+  // Branding controls — layered on top of the vibe.
+  const [brandOn, setBrandOn] = useState(true);
+  const [primary, setPrimary] = useState(BRAND_KITS.Acme.primary);
+  const [ink, setInk] = useState(BRAND_KITS.Acme.ink);
+  const [page, setPage] = useState(BRAND_KITS.Acme.page);
+  const [paletteText, setPaletteText] = useState(BRAND_KITS.Acme.palette);
+  const [brandFont, setBrandFont] = useState(BRAND_KITS.Acme.font);
+  const [showLogo, setShowLogo] = useState(true);
+  const [logoText, setLogoText] = useState(BRAND_KITS.Acme.logo);
+  const [logoPos, setLogoPos] = useState<LogoPosition>('top-right');
+
+  const applyKit = (name: keyof typeof BRAND_KITS) => {
+    const k = BRAND_KITS[name];
+    setPrimary(k.primary);
+    setInk(k.ink);
+    setPage(k.page);
+    setPaletteText(k.palette);
+    setBrandFont(k.font);
+    setLogoText(k.logo);
+    setBrandOn(true);
+  };
+
   const vibe: VibeConfig = { preset, roughness };
+
+  const palette = paletteText.split(',').map((s) => s.trim()).filter(Boolean);
+  const brand: BrandConfig | undefined = brandOn
+    ? {
+        primary,
+        ink,
+        page,
+        palette: palette.length ? palette : undefined,
+        font: brandFont || undefined,
+        logo: showLogo ? { src: wordmark(logoText, primary, '#ffffff'), position: logoPos, width: 72 } : undefined,
+      }
+    : undefined;
 
   // Re-derive the interpretation for display (AutoChart re-parses internally).
   const plan = planChart(NL_DATA, { query });
@@ -290,7 +372,7 @@ export function App() {
       <header className="mx-auto mb-8 max-w-5xl">
         <h1 className="text-3xl font-bold tracking-tight">GoldenChart Playground</h1>
         <p className="mt-1 text-gray-600">
-          D3 computes the geometry, Rough.js draws it, the Vibe engine sets the mood.
+          D3 computes the geometry, Rough.js draws it, the Vibe engine sets the mood, and a Brand layers on your identity.
         </p>
       </header>
 
@@ -329,6 +411,90 @@ export function App() {
       </section>
 
       <section className="mx-auto mb-8 max-w-5xl rounded-lg border border-gray-300 bg-white p-4 shadow-sm">
+        <div className="mb-3 flex flex-wrap items-center gap-4">
+          <label className="flex items-center gap-2 font-medium">
+            <input type="checkbox" checked={brandOn} onChange={(e) => setBrandOn(e.target.checked)} />
+            Apply brand
+          </label>
+          <span className="text-sm text-gray-500">Quick kits:</span>
+          {(Object.keys(BRAND_KITS) as (keyof typeof BRAND_KITS)[]).map((name) => (
+            <button
+              key={name}
+              type="button"
+              onClick={() => applyKit(name)}
+              className="rounded border border-gray-300 px-2 py-1 text-sm hover:bg-gray-50"
+            >
+              {name}
+            </button>
+          ))}
+          <span className="text-xs text-gray-500">
+            The brand recolours any vibe; the vibe keeps its hand-drawn texture.
+          </span>
+        </div>
+
+        <div className={`flex flex-wrap items-center gap-5 ${brandOn ? '' : 'pointer-events-none opacity-40'}`}>
+          <label className="flex items-center gap-2 text-sm">
+            <span className="font-medium">Primary</span>
+            <input type="color" value={primary} onChange={(e) => setPrimary(e.target.value)} />
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <span className="font-medium">Ink</span>
+            <input type="color" value={ink} onChange={(e) => setInk(e.target.value)} />
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <span className="font-medium">Page</span>
+            <input type="color" value={page} onChange={(e) => setPage(e.target.value)} />
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <span className="font-medium">Font</span>
+            <select
+              className="rounded border border-gray-300 px-2 py-1"
+              value={brandFont}
+              onChange={(e) => setBrandFont(e.target.value)}
+            >
+              {FONT_OPTIONS.map((f) => (
+                <option key={f.label} value={f.value}>
+                  {f.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <span className="font-medium">Palette</span>
+            <input
+              type="text"
+              className="w-72 rounded border border-gray-300 px-2 py-1"
+              value={paletteText}
+              onChange={(e) => setPaletteText(e.target.value)}
+              placeholder="#0b3d91, #2a9d8f, …"
+            />
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={showLogo} onChange={(e) => setShowLogo(e.target.checked)} />
+            <span className="font-medium">Logo</span>
+          </label>
+          <input
+            type="text"
+            className="w-28 rounded border border-gray-300 px-2 py-1 text-sm"
+            value={logoText}
+            onChange={(e) => setLogoText(e.target.value)}
+            disabled={!showLogo}
+          />
+          <select
+            className="rounded border border-gray-300 px-2 py-1 text-sm"
+            value={logoPos}
+            onChange={(e) => setLogoPos(e.target.value as LogoPosition)}
+            disabled={!showLogo}
+          >
+            <option value="top-left">top-left</option>
+            <option value="top-right">top-right</option>
+            <option value="bottom-left">bottom-left</option>
+            <option value="bottom-right">bottom-right</option>
+          </select>
+        </div>
+      </section>
+
+      <section className="mx-auto mb-8 max-w-5xl rounded-lg border border-gray-300 bg-white p-4 shadow-sm">
         <label className="block">
           <span className="font-medium">Describe your chart</span>
           <input
@@ -344,7 +510,7 @@ export function App() {
           <code>revenue by region as a pie</code> or <code>compare revenue across region in chalkboard</code>.
         </p>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <AutoChart width={460} height={280} query={query} data={NL_DATA} />
+          <AutoChart width={460} height={280} query={query} data={NL_DATA} brand={brand} />
           <div className="text-sm text-gray-700">
             <p className="font-medium">Interpretation</p>
             <ul className="mt-1 space-y-1">
@@ -363,25 +529,25 @@ export function App() {
 
       <main className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2">
         <Panel title="BarChart">
-          <BarChart width={460} height={300} vibe={vibe} data={BAR_DATA} title="Weekly visits" />
+          <BarChart width={460} height={300} vibe={vibe} brand={brand} data={BAR_DATA} title="Weekly visits" />
         </Panel>
 
         <Panel title="LineChart (multi-series)">
-          <LineChart width={460} height={300} vibe={vibe} series={SERIES} curve="catmullRom" showPoints />
+          <LineChart width={460} height={300} vibe={vibe} brand={brand} series={SERIES} curve="catmullRom" showPoints />
         </Panel>
 
         <Panel title="AreaChart">
-          <AreaChart width={460} height={300} vibe={vibe} series={[SERIES[0]]} curve="basis" />
+          <AreaChart width={460} height={300} vibe={vibe} brand={brand} series={[SERIES[0]]} curve="basis" />
         </Panel>
 
         <Panel title="ScatterPlot (bubble)">
-          <ScatterPlot width={460} height={300} vibe={vibe} data={SCATTER} />
+          <ScatterPlot width={460} height={300} vibe={vibe} brand={brand} data={SCATTER} />
         </Panel>
 
         <Panel title="PieChart / Donut">
           <div className="flex gap-2">
-            <PieChart width={220} height={220} vibe={vibe} data={BAR_DATA} />
-            <PieChart width={220} height={220} vibe={vibe} data={BAR_DATA} innerRadius={45} />
+            <PieChart width={220} height={220} vibe={vibe} brand={brand} data={BAR_DATA} />
+            <PieChart width={220} height={220} vibe={vibe} brand={brand} data={BAR_DATA} innerRadius={45} />
           </div>
         </Panel>
 
@@ -389,7 +555,7 @@ export function App() {
           <Flowchart
             width={460}
             height={300}
-            vibe={vibe}
+            vibe={vibe} brand={brand}
             nodes={FLOW_NODES}
             edges={FLOW_EDGES}
             direction="LR"
@@ -400,7 +566,7 @@ export function App() {
           <Flowchart
             width={460}
             height={300}
-            vibe={vibe}
+            vibe={vibe} brand={brand}
             nodes={FLOW_NODES}
             edges={FLOW_EDGES}
             direction="TB"
@@ -412,7 +578,7 @@ export function App() {
           <Flowchart
             width={460}
             height={320}
-            vibe={vibe}
+            vibe={vibe} brand={brand}
             nodes={DAG_NODES}
             edges={DAG_EDGES}
             direction="TB"
@@ -421,31 +587,31 @@ export function App() {
         </Panel>
 
         <Panel title="MindMap (radial tree)">
-          <MindMap width={460} height={360} vibe={vibe} nodes={MIND_NODES} />
+          <MindMap width={460} height={360} vibe={vibe} brand={brand} nodes={MIND_NODES} />
         </Panel>
 
         <Panel title="OrgChart (hierarchy of boxes)">
-          <OrgChart width={460} height={300} vibe={vibe} nodes={ORG_NODES} />
+          <OrgChart width={460} height={300} vibe={vibe} brand={brand} nodes={ORG_NODES} />
         </Panel>
 
         <Panel title="ArchitectureDiagram (zones + routed links)">
-          <ArchitectureDiagram width={460} height={360} vibe={vibe} nodes={ARCH_NODES} edges={ARCH_EDGES} />
+          <ArchitectureDiagram width={460} height={360} vibe={vibe} brand={brand} nodes={ARCH_NODES} edges={ARCH_EDGES} />
         </Panel>
 
         <Panel title="SequenceDiagram (actors + messages)">
-          <SequenceDiagram width={460} height={360} vibe={vibe} actors={SEQ_ACTORS} messages={SEQ_MESSAGES} />
+          <SequenceDiagram width={460} height={360} vibe={vibe} brand={brand} actors={SEQ_ACTORS} messages={SEQ_MESSAGES} />
         </Panel>
 
         <Panel title="ERDiagram (entities + cardinality)">
-          <ERDiagram width={460} height={340} vibe={vibe} entities={ER_ENTITIES} relationships={ER_RELS} />
+          <ERDiagram width={460} height={340} vibe={vibe} brand={brand} entities={ER_ENTITIES} relationships={ER_RELS} />
         </Panel>
 
         <Panel title="Timeline (events along an axis)">
-          <Timeline width={460} height={240} vibe={vibe} events={TIMELINE_EVENTS} />
+          <Timeline width={460} height={240} vibe={vibe} brand={brand} events={TIMELINE_EVENTS} />
         </Panel>
 
         <Panel title="Chart critique (suggest_improvements)">
-          <AutoChart width={460} height={200} vibe={vibe} data={CRITIQUE_DATA} />
+          <AutoChart width={460} height={200} vibe={vibe} brand={brand} data={CRITIQUE_DATA} />
           <ul className="mt-3 space-y-1 text-xs text-gray-700">
             {CRITIQUES.map((c) => (
               <li key={c.rule}>
@@ -463,47 +629,47 @@ export function App() {
         </Panel>
 
         <Panel title="Mermaid → diagram (renderDiagram + parseMermaid)">
-          {renderDiagram(parseMermaid(MERMAID_SRC), { width: 460, height: 300, vibe })}
+          {renderDiagram(parseMermaid(MERMAID_SRC), { width: 460, height: 300, vibe, brand })}
         </Panel>
 
         <Panel title="Sankey (weighted flow)">
-          <SankeyChart width={460} height={300} vibe={vibe} nodes={SANKEY_NODES} links={SANKEY_LINKS} showValues />
+          <SankeyChart width={460} height={300} vibe={vibe} brand={brand} nodes={SANKEY_NODES} links={SANKEY_LINKS} showValues />
         </Panel>
 
         <Panel title="Treemap">
-          <TreemapChart width={460} height={300} vibe={vibe} data={TREEMAP_DATA} />
+          <TreemapChart width={460} height={300} vibe={vibe} brand={brand} data={TREEMAP_DATA} />
         </Panel>
 
         <Panel title="Heatmap (viridis)">
-          <HeatmapChart width={460} height={280} vibe={vibe} data={HEATMAP_DATA} showValues />
+          <HeatmapChart width={460} height={280} vibe={vibe} brand={brand} data={HEATMAP_DATA} showValues />
         </Panel>
 
         <Panel title="Radar (multi-series)">
-          <RadarChart width={360} height={320} vibe={vibe} axes={RADAR_AXES} series={RADAR_SERIES} />
+          <RadarChart width={360} height={320} vibe={vibe} brand={brand} axes={RADAR_AXES} series={RADAR_SERIES} />
         </Panel>
 
         <Panel title="Grouped bars (multi-series)">
-          <BarChart width={460} height={280} vibe={vibe} data={MULTI_BARS} mode="grouped" />
+          <BarChart width={460} height={280} vibe={vibe} brand={brand} data={MULTI_BARS} mode="grouped" />
         </Panel>
 
         <Panel title="Stacked bars (multi-series)">
-          <BarChart width={460} height={280} vibe={vibe} data={MULTI_BARS} mode="stacked" />
+          <BarChart width={460} height={280} vibe={vibe} brand={brand} data={MULTI_BARS} mode="stacked" />
         </Panel>
 
         <Panel title="Stacked area">
-          <AreaChart width={460} height={260} vibe={vibe} series={SERIES} stacked />
+          <AreaChart width={460} height={260} vibe={vibe} brand={brand} series={SERIES} stacked />
         </Panel>
 
         <Panel title="Line chart with annotations">
-          <LineChart width={460} height={260} vibe={vibe} series={[SERIES[0]]} annotations={ANNOTATIONS} />
+          <LineChart width={460} height={260} vibe={vibe} brand={brand} series={[SERIES[0]]} annotations={ANNOTATIONS} />
         </Panel>
 
         <Panel title="AutoChart (visualize — picks the chart from the data)">
-          <AutoChart width={460} height={280} vibe={vibe} data={AUTO_RECORDS} />
+          <AutoChart width={460} height={280} vibe={vibe} brand={brand} data={AUTO_RECORDS} />
         </Panel>
 
         <Panel title="Composed primitives (RoughPath + RoughCircle)">
-          <Surface width={460} height={160} vibe={vibe} title="Sparkline">
+          <Surface width={460} height={160} vibe={vibe} brand={brand} title="Sparkline">
             <RoughPath d={linePath(SPARK_POINTS, 'catmullRom')} fill={null} />
             {SPARK_POINTS.map((p, i) => (
               <RoughCircle key={i} cx={p.x} cy={p.y} diameter={10} seed={i + 1} />
