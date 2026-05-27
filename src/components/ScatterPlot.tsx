@@ -44,6 +44,7 @@ export function ScatterPlot({
   height,
   margin,
   vibe,
+  brand,
   title,
   className,
   style,
@@ -90,6 +91,7 @@ export function ScatterPlot({
       width={width}
       height={height}
       vibe={vibe}
+      brand={brand}
       title={title}
       description={description}
       ariaLabel={ariaLabel}

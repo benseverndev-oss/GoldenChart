@@ -29,6 +29,7 @@ export function TreemapChart({
   height,
   margin,
   vibe,
+  brand,
   title,
   description,
   ariaLabel,
@@ -59,6 +60,7 @@ export function TreemapChart({
       width={width}
       height={height}
       vibe={vibe}
+      brand={brand}
       title={title}
       description={description}
       ariaLabel={ariaLabel}

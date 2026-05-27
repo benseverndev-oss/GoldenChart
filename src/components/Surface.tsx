@@ -1,8 +1,12 @@
+import { useMemo } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import type { VibeConfig } from '../types/vibe';
+import type { BrandConfig, ResolvedBrandLogo } from '../types/brand';
 import type { DataTableModel } from '../types/charts';
 import { VibeProvider } from '../vibe/VibeProvider';
 import { resolveVibe } from '../vibe/resolveVibe';
+import { BrandProvider } from '../brand/BrandProvider';
+import { resolveBrand } from '../brand/resolveBrand';
 import { PaperTexture } from './PaperTexture';
 
 export type { DataTableModel };
@@ -11,6 +15,8 @@ export interface SurfaceProps {
   width: number;
   height: number;
   vibe?: VibeConfig;
+  /** Brand identity (palette/colours/font/logo) layered on top of the vibe. */
+  brand?: BrandConfig;
   title?: string;
   /** Longer accessible description, rendered as `<desc>`. */
   description?: string;
@@ -76,6 +82,7 @@ export function Surface({
   width,
   height,
   vibe,
+  brand,
   title,
   description,
   ariaLabel,
@@ -86,7 +93,8 @@ export function Surface({
   children,
   bare = false,
 }: SurfaceProps) {
-  const resolved = resolveVibe(vibe);
+  const resolvedBrand = useMemo(() => resolveBrand(brand), [brand]);
+  const resolved = resolveVibe(vibe, resolvedBrand.vibeOverrides);
   const drawOn = resolved.animate?.drawOn ?? false;
   const duration = resolved.animate?.durationMs ?? 800;
 
@@ -110,20 +118,49 @@ export function Surface({
         <PaperTexture width={width} height={height} seed={resolved.seed} background={resolved.background} />
       ) : null}
       {body}
+      {/* Logo sits above the data and outside the draw-on group so it never animates. */}
+      {resolvedBrand.logo ? <BrandLogoMark logo={resolvedBrand.logo} surfaceWidth={width} surfaceHeight={height} /> : null}
     </svg>
   );
 
   return (
-    <VibeProvider vibe={vibe}>
-      {bare ? (
-        svg
-      ) : (
-        <div className={className} style={style}>
-          {svg}
-          {dataTable ? <DataTable model={dataTable} /> : null}
-        </div>
-      )}
-    </VibeProvider>
+    <BrandProvider brand={brand}>
+      <VibeProvider vibe={vibe} brandOverrides={resolvedBrand.vibeOverrides}>
+        {bare ? (
+          svg
+        ) : (
+          <div className={className} style={style}>
+            {svg}
+            {dataTable ? <DataTable model={dataTable} /> : null}
+          </div>
+        )}
+      </VibeProvider>
+    </BrandProvider>
+  );
+}
+
+/** Pin the brand logo into a corner, inset by its margin, scaled to fit undistorted. */
+function BrandLogoMark({
+  logo,
+  surfaceWidth,
+  surfaceHeight,
+}: {
+  logo: ResolvedBrandLogo;
+  surfaceWidth: number;
+  surfaceHeight: number;
+}) {
+  const x = logo.position.endsWith('right') ? surfaceWidth - logo.width - logo.margin : logo.margin;
+  const y = logo.position.startsWith('bottom') ? surfaceHeight - logo.height - logo.margin : logo.margin;
+  return (
+    <image
+      href={logo.src}
+      x={x}
+      y={y}
+      width={logo.width}
+      height={logo.height}
+      opacity={logo.opacity}
+      preserveAspectRatio="xMidYMid meet"
+    />
   );
 }
 

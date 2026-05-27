@@ -4,6 +4,7 @@ import type { SankeyLinkInput, SankeyNodeInput, SankeyOrientation } from '../cor
 import { computeSankey } from '../core/sankey';
 import { getPlotArea } from '../core/geometry';
 import { colorAt } from '../core/palette';
+import { resolveBrand } from '../brand/resolveBrand';
 import { measureText } from '../core/text';
 import { resolveVibe } from '../vibe/resolveVibe';
 import { Surface } from './Surface';
@@ -32,6 +33,7 @@ export function SankeyChart({
   height,
   margin,
   vibe,
+  brand,
   title,
   description,
   ariaLabel,
@@ -59,17 +61,19 @@ export function SankeyChart({
     [nodes, links, direction, nodeWidth, nodePadding, layoutWidth, plot.height],
   );
 
+  const palette = resolveBrand(brand).palette;
   const colorOf = useMemo(() => {
     const map = new Map<string, string>();
-    layout.nodes.forEach((n, i) => map.set(n.id, n.color ?? colorAt(i)));
+    layout.nodes.forEach((n, i) => map.set(n.id, n.color ?? colorAt(i, palette)));
     return map;
-  }, [layout.nodes]);
+  }, [layout.nodes, palette]);
 
   return (
     <Surface
       width={width}
       height={height}
       vibe={vibe}
+      brand={brand}
       title={title}
       description={description}
       ariaLabel={ariaLabel}

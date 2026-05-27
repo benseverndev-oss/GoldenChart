@@ -6,6 +6,7 @@ import { linePath } from '../core/shapes';
 import type { CurveName } from '../core/shapes';
 import { getPlotArea } from '../core/geometry';
 import { colorAt } from '../core/palette';
+import { resolveBrand } from '../brand/resolveBrand';
 import { seriesTable } from '../core/dataTable';
 import { layoutLegend } from '../core/legend';
 import type { LegendItem } from '../core/legend';
@@ -43,6 +44,7 @@ export function LineChart({
   height,
   margin,
   vibe,
+  brand,
   title,
   description,
   ariaLabel,
@@ -62,8 +64,9 @@ export function LineChart({
 }: LineChartProps) {
   const fullPlot = getPlotArea(width, height, margin);
   const rv = resolveVibe(vibe);
+  const palette = resolveBrand(brand).palette;
   const legendItems: LegendItem[] =
-    showLegend && series.length > 1 ? series.map((s, i) => ({ label: s.id, color: s.color ?? colorAt(i) })) : [];
+    showLegend && series.length > 1 ? series.map((s, i) => ({ label: s.id, color: s.color ?? colorAt(i, palette) })) : [];
   const legendModel = legendItems.length
     ? layoutLegend(legendItems, fullPlot.width, { fontSize: rv.fontSize, fontFamily: rv.fontFamily })
     : null;
@@ -83,20 +86,21 @@ export function LineChart({
       const pixels = s.points.map((p) => ({ x: xScale(p.x), y: yScale(p.y) }));
       return {
         id: s.id,
-        color: s.color ?? colorAt(i),
+        color: s.color ?? colorAt(i, palette),
         d: linePath(pixels, curve),
         pixels,
       };
     });
 
     return { x: xScale, y: yScale, lines: computed };
-  }, [series, curve, plot.x, plot.y, plot.width, plot.height, xAxis, yAxis]);
+  }, [series, curve, plot.x, plot.y, plot.width, plot.height, xAxis, yAxis, palette]);
 
   return (
     <Surface
       width={width}
       height={height}
       vibe={vibe}
+      brand={brand}
       title={title}
       description={description}
       ariaLabel={ariaLabel}

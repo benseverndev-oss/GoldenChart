@@ -48,6 +48,7 @@ export function HeatmapChart({
   height,
   margin,
   vibe,
+  brand,
   title,
   description,
   ariaLabel,
@@ -100,6 +101,7 @@ export function HeatmapChart({
       width={width}
       height={height}
       vibe={vibe}
+      brand={brand}
       title={title}
       description={description}
       ariaLabel={ariaLabel}

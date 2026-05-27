@@ -3,6 +3,7 @@ import type { BaseChartProps, ChartDatum } from '../types/charts';
 import { getPlotArea } from '../core/geometry';
 import { computePie } from '../core/arc';
 import { colorAt } from '../core/palette';
+import { resolveBrand } from '../brand/resolveBrand';
 import { datumTable } from '../core/dataTable';
 import { resolveVibe } from '../vibe/resolveVibe';
 import { Surface } from './Surface';
@@ -27,6 +28,7 @@ export function PieChart({
   height,
   margin,
   vibe,
+  brand,
   title,
   description,
   ariaLabel,
@@ -45,6 +47,7 @@ export function PieChart({
   // Labels sit over the (hachured, coloured) slices; give them a page-colour
   // halo so they stay legible regardless of vibe/slice colour.
   const haloColor = resolveVibe(vibe).background ?? '#ffffff';
+  const palette = resolveBrand(brand).palette;
 
   const slices = useMemo(
     () => computePie(data, outerRadius, innerRadius, padAngle),
@@ -56,6 +59,7 @@ export function PieChart({
       width={width}
       height={height}
       vibe={vibe}
+      brand={brand}
       title={title}
       description={description}
       ariaLabel={ariaLabel}
@@ -69,7 +73,7 @@ export function PieChart({
           <g key={slice.datum.label}>
             <RoughPath
               d={slice.path}
-              fill={slice.datum.color ?? colorAt(slice.index)}
+              fill={slice.datum.color ?? colorAt(slice.index, palette)}
               seed={slice.index + 1}
             />
             {showLabels && slice.endAngle - slice.startAngle > 0.15 && (

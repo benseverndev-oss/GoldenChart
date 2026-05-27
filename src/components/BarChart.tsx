@@ -4,6 +4,7 @@ import { bandScale, linearScale, extentOf } from '../core/scales';
 import { resolveDomain, tickFormatter } from '../core/axisFormat';
 import { getPlotArea } from '../core/geometry';
 import { colorAt } from '../core/palette';
+import { resolveBrand } from '../brand/resolveBrand';
 import { datumTable } from '../core/dataTable';
 import { groupMax, seriesKeysOf, stackLayout, stackMax } from '../core/stack';
 import { Surface } from './Surface';
@@ -55,6 +56,7 @@ export function BarChart({
   height,
   margin,
   vibe,
+  brand,
   title,
   description,
   ariaLabel,
@@ -73,6 +75,7 @@ export function BarChart({
 }: BarChartProps) {
   const fullPlot = getPlotArea(width, height, margin);
   const resolved = resolveVibe(vibe);
+  const palette = resolveBrand(brand).palette;
 
   // Legend items depend only on the series, so compute them (and the legend's
   // height) up front and reserve a band at the bottom — the plot shrinks so the
@@ -80,8 +83,8 @@ export function BarChart({
   const legendItems = useMemo<LegendItem[]>(() => {
     if (mode === 'single' || !showLegend) return [];
     const ids = seriesKeys ?? seriesKeysOf(data as MultiSeriesDatum[]);
-    return ids.map((k, i) => ({ label: k, color: colorAt(i) }));
-  }, [mode, showLegend, seriesKeys, data]);
+    return ids.map((k, i) => ({ label: k, color: colorAt(i, palette) }));
+  }, [mode, showLegend, seriesKeys, data, palette]);
   const legendModel = legendItems.length
     ? layoutLegend(legendItems, fullPlot.width, { fontSize: resolved.fontSize, fontFamily: resolved.fontFamily })
     : null;
@@ -113,7 +116,7 @@ export function BarChart({
     const multi = data as MultiSeriesDatum[];
     const seriesIds = seriesKeys ?? seriesKeysOf(multi);
     const xScale = bandScale(multi.map((d) => d.label), [plot.x, plot.x + plot.width]);
-    const colorByKey = (k: string) => colorAt(seriesIds.indexOf(k));
+    const colorByKey = (k: string) => colorAt(seriesIds.indexOf(k), palette);
 
     let computed: LaidBar[];
     let yScale: ReturnType<typeof linearScale>;
@@ -155,7 +158,7 @@ export function BarChart({
       bars: computed,
       keys: seriesIds,
     };
-  }, [data, mode, seriesKeys, plot.x, plot.y, plot.width, plot.height, yAxis]);
+  }, [data, mode, seriesKeys, plot.x, plot.y, plot.width, plot.height, yAxis, palette]);
 
   const table: DataTableModel | undefined = useMemo(() => {
     if (!dataTable) return undefined;
@@ -173,6 +176,7 @@ export function BarChart({
       width={width}
       height={height}
       vibe={vibe}
+      brand={brand}
       title={title}
       description={description}
       ariaLabel={ariaLabel}

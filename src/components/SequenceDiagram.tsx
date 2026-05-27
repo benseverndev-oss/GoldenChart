@@ -32,6 +32,7 @@ export function SequenceDiagram({
   height,
   margin,
   vibe,
+  brand,
   title,
   description,
   ariaLabel,
@@ -52,6 +53,7 @@ export function SequenceDiagram({
       width={width}
       height={height}
       vibe={vibe}
+      brand={brand}
       title={title}
       description={description}
       ariaLabel={ariaLabel}

@@ -27,6 +27,27 @@ describe('resolveVibe', () => {
     expect(resolved.bowing).toBe(VIBE_PRESETS.messy_sketch.bowing);
   });
 
+  describe('brand overrides', () => {
+    it('layers brand colour/font between the preset and explicit overrides', () => {
+      const resolved = resolveVibe('ink', { stroke: '#brand', fill: '#bf', fontFamily: 'Brand Sans' });
+      expect(resolved.stroke).toBe('#brand');
+      expect(resolved.fill).toBe('#bf');
+      expect(resolved.fontFamily).toBe('Brand Sans');
+      // Untouched preset knobs survive.
+      expect(resolved.roughness).toBe(VIBE_PRESETS.ink.roughness);
+    });
+
+    it('lets an explicit vibe override beat the brand', () => {
+      const resolved = resolveVibe({ preset: 'ink', stroke: '#explicit' }, { stroke: '#brand', fill: '#bf' });
+      expect(resolved.stroke).toBe('#explicit');
+      expect(resolved.fill).toBe('#bf');
+    });
+
+    it('ignores an empty brand-overrides object (returns the shared preset)', () => {
+      expect(resolveVibe('clean_blueprint', {})).toBe(VIBE_PRESETS.clean_blueprint);
+    });
+  });
+
   describe('unknown preset', () => {
     afterEach(() => {
       vi.restoreAllMocks();
