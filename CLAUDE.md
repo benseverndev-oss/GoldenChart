@@ -19,7 +19,12 @@ Hand-drawn React charts (D3 math + Rough.js + a Vibe engine). Root package = the
 - `mcp/` resolves `goldenchart` from the built `dist/` via `file:..`. After changing `src/`, rebuild root then refresh the copy: `npm run build` then `rm -rf mcp/node_modules/goldenchart && (cd mcp && npm install --install-links)` (plain symlink is unreliable on Windows).
 - The library `exports` map omits `./package.json` — `require('goldenchart/package.json')` throws `ERR_PACKAGE_PATH_NOT_EXPORTED`; use `fs.readFileSync` instead.
 
+## Branding & vibe
+- `vibe` = how it's drawn (texture/roughness); `brand` (palette/primary/ink/page/font/logo) = identity, layered on top. `resolveVibe(config, brandOverrides?)` precedence: preset < brand < explicit vibe.
+- `Surface` paints `brand.page`, renders the logo `<image>`, and threads brand colour/font through `VibeProvider`. Charts read categorical colours via `resolveBrand(brand).palette` in their own body — NOT context — because the chart body renders above `Surface`'s providers (only descendant primitives see brand/vibe context).
+
 ## Tests / output
+- CI (`.github/workflows/ci.yml`) runs the full gates on every PR — `library` (typecheck/test/build/check:bundle) and `mcp` (build lib → install → typecheck/test/build). Prefer pushing a PR to verify; the whole vitest suite is heavy to run locally.
 - Output-affecting changes ship a carried-forward `cd mcp && npm run compare` render.
 - MCP render tools are golden-snapshotted; `mcp/vitest.setup.ts` masks font bytes as `<font-bytes>`.
 - Local quirk: `cd mcp && npm test` re-dirties `mcp/src/__snapshots__/{charts,diagrams,extraCharts}.test.ts.snap` with line-ending-only changes (autocrlf). `git checkout --` them; don't commit. (A repo-wide `.gitattributes` `*.snap text eol=lf` would fix it.)
