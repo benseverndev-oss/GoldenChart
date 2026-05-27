@@ -1,6 +1,6 @@
 {
   "name": "goldenchart",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Hand-drawn, sketchy React charts and flowcharts. D3 does the math, Rough.js does the drawing, and a Vibe engine dials in the aesthetic.",
   "author": "Ben Severn",
   "repository": {
