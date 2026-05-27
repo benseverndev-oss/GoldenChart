@@ -11,6 +11,7 @@ IntelliSense reflects the exact props. Import everything from `goldenchart`
 - [Diagrams](#diagrams)
 - [Auto-charting](#auto-charting)
 - [Vibe engine](#vibe-engine)
+- [Branding](#branding)
 - [Surface & primitives](#surface--primitives)
 - [Headless rendering](#headless-rendering)
 - [Calculation layer](#calculation-layer)
@@ -34,6 +35,7 @@ Shared by every chart and diagram component:
 | `height` | `number` | Required. |
 | `margin` | `Partial<{ top; right; bottom; left }>` | Per-chart defaults otherwise. |
 | `vibe` | `VibeConfig` | Preset name or `{ preset, ...overrides }`. |
+| `brand` | `BrandConfig` | Palette / colours / font / logo layered on the vibe. See [Branding](#branding). |
 | `title` | `string` | Accessible label → `<title>` / aria-label. |
 | `description` | `string` | Longer description → `<desc>`. |
 | `ariaLabel` | `string` | Explicit aria-label; falls back to `title`. |
@@ -125,9 +127,48 @@ Thin wrappers over `Diagram` with a preset layout. Take `nodes` / `edges` (and
 
 - `visualize(data: Record<string, unknown>[], opts): ReactElement` — profiles the
   data, picks a chart, compiles props, and renders. `opts` extends `BaseChartProps`
-  with `intent?: Intent`.
-- `AutoChart` — component form: `{ data, intent?, ...BaseChartProps }`.
+  with `intent?: Intent` and `query?: string`.
+- `AutoChart` — component form: `{ data, intent?, query?, ...BaseChartProps }`.
 - `Intent` = `'trend' | 'compare' | 'composition' | 'distribution' | 'correlation' | 'flow' | 'hierarchy'`.
+
+### Natural-language queries
+
+Pass a plain-English `query` to `visualize` / `AutoChart` and it picks the chart
+type, maps fields to roles, and selects a vibe from the sentence. The parser only
+*nudges* the same recommender used for `intent`, so the two can't disagree — and
+any explicit prop you also pass (`width`, `vibe`, …) still wins over what the
+query inferred.
+
+```tsx
+import { visualize } from 'goldenchart';
+
+visualize(data, { query: 'revenue by month as a line in pencil', width: 460, height: 300 });
+// → LineChart, x=month, y=revenue, vibe=pencil
+visualize(data, { query: 'revenue by region as a donut in watercolor', width: 360, height: 360 });
+// → PieChart with innerRadius (donut), vibe=watercolor
+```
+
+What the query understands (all optional, order-free, fuzzy-matched):
+
+- **Chart type** — `bar`/`column`, `line`, `area`, `pie`, `donut`/`doughnut`,
+  `scatter`/`bubble`, `heatmap`/`matrix`, `sankey`, `treemap`, `radar`/`spider`.
+- **Intent** — words like `over time`/`trend`, `compare`/`ranking`, `breakdown`/
+  `share`, `distribution`, `correlation`/`vs`, `flow`/`funnel`, `hierarchy`/`tree`.
+- **Field roles** — `by`/`per`/`across X` (x or, after `split`/`grouped`/`stacked`,
+  a series), `X vs Y` / `X against Y`, `between A and B`, `from A to B`
+  (source/target). Bare field names fill remaining roles by type. Field matching
+  is case-insensitive with singular/prefix/substring fallbacks.
+- **Vibe** — any preset name (fuzzy, underscores ↔ spaces) or a mood word
+  (`professional`, `playful`, `dark`, `retro`, `sketchy`, …).
+
+For programmatic use, the layer underneath is exported and pure:
+
+- `planChart(data, { query?, intent? }): ChartPlan` — the orchestrator
+  `visualize` calls. Returns `{ hints, recommendation, alternatives, compiled }`,
+  so you can inspect or tweak the plan before rendering.
+- `parseChartQuery(query, profile): ChartHints` — just the parse step. Returns
+  `{ intent?, chartType?, roles?, vibe?, props?, unresolved, confidence }`;
+  `unresolved` lists words it couldn't map (for explainability). Never throws.
 
 ## Vibe engine
 
@@ -142,6 +183,50 @@ Presets: `messy_sketch`, `clean_blueprint`, `chaotic_notebook`, `pencil`, `marke
 `midnight`, `art_deco`, `manga`, `highlighter`, `kraft`, `synthwave`, `botanical`,
 `risograph`, `sticky_note`, `amber_crt`. Add `animate: { drawOn: true }` for a
 hand-drawn reveal (honors `prefers-reduced-motion`).
+
+## Branding
+
+A `brand` (`BrandConfig`) layers identity on top of a `vibe`. The vibe controls
+*how* a chart is drawn (texture, roughness, the hand-drawn feel); the brand
+controls *identity* (colours, font, logo). Every field is optional — omit one to
+inherit the vibe's value. Precedence is **preset < brand < explicit `vibe`
+overrides**: a brand recolours any vibe, and an explicit per-call `vibe` override
+still wins over the brand.
+
+| Field | Type | Maps to vibe | Notes |
+| --- | --- | --- | --- |
+| `palette` | `string[]` | — | Categorical hues for multi-series / pie. Replaces the default palette. |
+| `primary` | `string` | `fill` | Single-series bars, accents. |
+| `ink` | `string` | `stroke` | Line / stroke colour. |
+| `page` | `string` | `background` | Page / canvas colour. |
+| `font` | `string` | `fontFamily` | Font family for all chart text. |
+| `logo` | `BrandLogo` | — | Optional corner wordmark / logo. |
+
+`BrandLogo` = `{ src, position?, width?, height?, opacity?, margin? }`. `src` is a
+URL or data-URI (the library never bundles image bytes). `position` is one of
+`'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'` (default
+`'bottom-right'`); `width` defaults to `64`, `height` to `width`, `opacity` to `1`
+(clamped 0–1), `margin` (inset from the surface edge) to `12`. The image keeps its
+aspect ratio inside the box.
+
+`resolveBrand(brand?): ResolvedBrand` collapses a brand into the pieces the
+renderer consumes — `{ palette, logo?, vibeOverrides }` — the boundary between
+loose config and the strict internal shape, mirroring `resolveVibe`.
+
+```tsx
+<BarChart
+  vibe="pencil"                         // brand recolours, vibe keeps the sketch feel
+  brand={{
+    palette: ['#ff6b35', '#f7b801', '#7a9e7e', '#ef476f', '#118ab2'],
+    primary: '#ff6b35',
+    ink: '#3a2317',
+    page: '#fff8ef',
+    font: '"IBM Plex Sans", system-ui, sans-serif',
+    logo: { src: logoDataUri, position: 'bottom-right', width: 88 },
+  }}
+  data={data}
+/>
+```
 
 ## Surface & primitives
 

@@ -27,7 +27,7 @@ Hand-drawn React charts (D3 math + Rough.js + a Vibe engine). Root package = the
 - CI (`.github/workflows/ci.yml`) runs the full gates on every PR — `library` (typecheck/test/build/check:bundle) and `mcp` (build lib → install → typecheck/test/build). Prefer pushing a PR to verify; the whole vitest suite is heavy to run locally.
 - Output-affecting changes ship a carried-forward `cd mcp && npm run compare` render.
 - MCP render tools are golden-snapshotted; `mcp/vitest.setup.ts` masks font bytes as `<font-bytes>`.
-- Local quirk: `cd mcp && npm test` re-dirties `mcp/src/__snapshots__/{charts,diagrams,extraCharts}.test.ts.snap` with line-ending-only changes (autocrlf). `git checkout --` them; don't commit. (A repo-wide `.gitattributes` `*.snap text eol=lf` would fix it.)
+- Snapshot line endings are pinned to LF via root `.gitattributes` (`*.snap text eol=lf`), so `cd mcp && npm test` no longer re-dirties `mcp/src/__snapshots__/*.snap` with autocrlf line-ending churn. If a snap ever shows a line-ending-only diff again, that rule (or a one-off `git add --renormalize .`) is the fix — don't commit the churn.
 
 ## Releases (tag-triggered, npm provenance)
 - `v*` tag → publish `goldenchart`; `mcp-v*` tag → publish `goldenchart-mcp`; push to `main` → deploy the playground to GitHub Pages.
