@@ -1,7 +1,18 @@
 {
   "name": "goldenchart-mcp",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "MCP server that renders GoldenChart sketchy charts and flowcharts as SVG.",
+  "author": "Ben Severn",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benseverndev-oss/GoldenChart.git",
+    "directory": "mcp"
+  },
+  "homepage": "https://github.com/benseverndev-oss/GoldenChart/tree/main/mcp#readme",
+  "bugs": {
+    "url": "https://github.com/benseverndev-oss/GoldenChart/issues"
+  },
+  "keywords": ["mcp", "model-context-protocol", "goldenchart", "charts", "svg", "ai", "llm"],
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -10,9 +21,14 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsup",
+    "prepublishOnly": "npm run build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "assets": "node scripts/generate-assets.mjs",
