@@ -42,6 +42,16 @@ describe('computeSequence', () => {
     const layout = computeSequence(ACTORS, [{ from: 'user', to: 'ghost' }], [400, 200]);
     expect(layout.messages).toHaveLength(0);
   });
+
+  it('gives a self-message extra vertical room so its loop clears the next message', () => {
+    const layout = computeSequence(ACTORS, MESSAGES, [480, 320]);
+    const ys = layout.messages.map((m) => m.y);
+    // index 2 is the 'validate' self-message; its gap to the next message should
+    // exceed the gap between two ordinary messages.
+    const selfGap = ys[3] - ys[2];
+    const normalGap = ys[1] - ys[0];
+    expect(selfGap).toBeGreaterThan(normalGap);
+  });
 });
 
 describe('SequenceDiagram', () => {
