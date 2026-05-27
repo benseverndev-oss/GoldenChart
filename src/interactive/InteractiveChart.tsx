@@ -5,6 +5,7 @@ import type { MarkMeta } from '../types/interaction';
 import type { VibeConfig } from '../types/vibe';
 import { VibeProvider } from '../vibe/VibeProvider';
 import { Tooltip, type TooltipRenderer } from './Tooltip';
+import { markAriaLabel } from './defaultTooltipFormat';
 import { HOVER_ATTR, CURRENT_ATTR, hoverCss } from './hoverStyle';
 
 export interface InteractiveChartProps {
@@ -36,6 +37,18 @@ export function markFromEvent(
   const mark = readMark(target);
   if (!mark) return null;
   return { mark, x: mark.cx, y: mark.cy };
+}
+
+/** Make every tagged mark keyboard-focusable with an accessible label, so the
+ *  hover path is reachable without a pointer. Idempotent (safe to re-run). */
+export function enhanceMarks(svg: SVGSVGElement): void {
+  svg.querySelectorAll('[data-gc-mark]').forEach((el) => {
+    const mark = readMark(el);
+    if (!mark) return;
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('role', 'img');
+    el.setAttribute('aria-label', markAriaLabel(mark));
+  });
 }
 
 /**
@@ -89,6 +102,7 @@ export function InteractiveChart({ children, tooltip = true, highlight = true, o
     const svg = (node?.querySelector('svg') as SVGSVGElement | null) ?? null;
     svgRef.current = svg;
     setViewBox(svg?.getAttribute('viewBox') ?? undefined);
+    if (svg) enhanceMarks(svg);
   }, []);
 
   useEffect(() => {

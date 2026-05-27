@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { defaultTooltipFormat } from './defaultTooltipFormat';
+import { defaultTooltipFormat, markAriaLabel } from './defaultTooltipFormat';
 
 describe('defaultTooltipFormat', () => {
   it('uses the label as title and value as a single row', () => {
@@ -13,5 +13,12 @@ describe('defaultTooltipFormat', () => {
     const out = defaultTooltipFormat({ kind: 'point', series: 's1', index: 2, value: { x: 1, y: 3 }, cx: 0, cy: 0 });
     expect(out.title).toBe('s1');
     expect(out.rows).toEqual([['x', '1'], ['y', '3']]);
+  });
+});
+
+describe('markAriaLabel', () => {
+  it('flattens title + rows into a comma-joined label', () => {
+    expect(markAriaLabel({ kind: 'bar', index: 0, label: 'Q1', value: 12, cx: 0, cy: 0 })).toBe('Q1, value 12');
+    expect(markAriaLabel({ kind: 'point', series: 's1', index: 0, value: { x: 1, y: 3 }, cx: 0, cy: 0 })).toBe('s1, x 1, y 3');
   });
 });
