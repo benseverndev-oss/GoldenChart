@@ -55,6 +55,24 @@ export function sequentialColor(name: ColorScaleName, domain: [number, number]):
   return (v: number) => interpolateRamp(stops, (v - min) / span);
 }
 
+/** Lighten a hex colour toward white by `t` in [0,1]. */
+function lighten(hex: string, t: number): string {
+  const [r, g, b] = hexToRgb(hex);
+  return rgbToHex(r + (255 - r) * t, g + (255 - g) * t, b + (255 - b) * t);
+}
+
+/**
+ * A monochrome sequential scale built from a single theme colour, so a heatmap
+ * reads in the vibe's own hue (graphite for `pencil`, teal for a blueprint, …)
+ * rather than a generic scientific ramp. Ramps a light tint → the strong colour.
+ */
+export function vibeColorScale(strong: string, domain: [number, number]): (v: number) => string {
+  const stops = [lighten(strong, 0.85), lighten(strong, 0.5), strong];
+  const [min, max] = domain;
+  const span = max - min || 1;
+  return (v: number) => interpolateRamp(stops, (v - min) / span);
+}
+
 /** Map a 3-stop domain `[min,mid,max]` onto a diverging ramp, centered on `mid`. */
 export function divergingColor(
   name: ColorScaleName,

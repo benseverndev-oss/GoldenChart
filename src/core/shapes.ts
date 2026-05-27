@@ -35,6 +35,19 @@ export function areaPath(points: Point[], y0: number, curve: CurveName = 'linear
 
 export type LinkOrientation = 'vertical' | 'horizontal';
 
+/**
+ * The point on the border of a centred box where the ray from its centre toward
+ * `toward` exits. Used to stop connector lines at a node's edge instead of
+ * running into its centre.
+ */
+export function boxEdgePoint(center: Point, width: number, height: number, toward: Point): Point {
+  const dx = toward.x - center.x;
+  const dy = toward.y - center.y;
+  if (dx === 0 && dy === 0) return { x: center.x, y: center.y };
+  const scale = 1 / Math.max(Math.abs(dx) / (width / 2), Math.abs(dy) / (height / 2));
+  return { x: center.x + dx * scale, y: center.y + dy * scale };
+}
+
 /** SVG path for a smooth cubic link between two points (flowchart edges). */
 export function linkPath(from: Point, to: Point, orientation: LinkOrientation = 'vertical'): string {
   if (orientation === 'horizontal') {

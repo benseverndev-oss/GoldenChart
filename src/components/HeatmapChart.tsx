@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import type { BaseChartProps } from '../types/charts';
 import type { ColorScaleName } from '../core/colorScales';
-import { sequentialColor } from '../core/colorScales';
+import { sequentialColor, vibeColorScale } from '../core/colorScales';
+import { resolveVibe } from '../vibe/resolveVibe';
 import { bandScale } from '../core/scales';
 import { getPlotArea } from '../core/geometry';
 import { Surface } from './Surface';
@@ -55,11 +56,15 @@ export function HeatmapChart({
   bare,
   xLabels,
   yLabels,
-  colorScale = 'viridis',
+  colorScale,
   showValues = false,
   showAxes = true,
 }: HeatmapChartProps) {
   const plot = getPlotArea(width, height, margin);
+  // Default to a monochrome ramp in the vibe's own hue so the heatmap matches
+  // the theme; an explicit `colorScale` (named or function) still wins.
+  const resolved = resolveVibe(vibe);
+  const themeColor = resolved.fill ?? resolved.stroke;
 
   const { cells, x, y } = useMemo(() => {
     const xDomain = xLabels ? xLabels.map(String) : uniqueInOrder(data.map((d) => d.x));
@@ -70,7 +75,12 @@ export function HeatmapChart({
     const values = data.map((d) => d.value);
     const min = values.length ? Math.min(...values) : 0;
     const max = values.length ? Math.max(...values) : 1;
-    const color = typeof colorScale === 'function' ? colorScale : sequentialColor(colorScale, [min, max]);
+    const color =
+      typeof colorScale === 'function'
+        ? colorScale
+        : colorScale
+          ? sequentialColor(colorScale, [min, max])
+          : vibeColorScale(themeColor, [min, max]);
 
     const computed = data.map((d) => ({
       key: `${d.x}:${d.y}`,
@@ -83,7 +93,7 @@ export function HeatmapChart({
     }));
 
     return { cells: computed, x: xScale, y: yScale };
-  }, [data, xLabels, yLabels, colorScale, plot.x, plot.y, plot.width, plot.height]);
+  }, [data, xLabels, yLabels, colorScale, themeColor, plot.x, plot.y, plot.width, plot.height]);
 
   return (
     <Surface

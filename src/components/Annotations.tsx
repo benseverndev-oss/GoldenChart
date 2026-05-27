@@ -17,7 +17,10 @@ export interface AnnotationsProps {
   yScale?: (value: number) => number;
 }
 
-const LINE_COLOR = '#ef4444';
+// A muted slate so reference lines/callouts read as chart furniture, distinct
+// from the (palette-coloured) data series. Reference lines are also dashed.
+const LINE_COLOR = '#64748b';
+const REF_DASH = { strokeDasharray: '6 5' } as const;
 const BAND_VIBE = { roughness: 0.8, fillStyle: 'hachure', fillWeight: 0.5 } as const;
 
 /**
@@ -36,7 +39,7 @@ export function Annotations({ annotations, plot, xScale, yScale }: AnnotationsPr
           const y = yScale(a.value);
           return (
             <g key={i}>
-              <RoughLine x1={plot.x} y1={y} x2={plot.x + plot.width} y2={y} stroke={color} seed={seed} />
+              <RoughLine x1={plot.x} y1={y} x2={plot.x + plot.width} y2={y} stroke={color} style={REF_DASH} seed={seed} />
               {a.label && (
                 <RoughText x={plot.x + plot.width} y={y - 4} anchor="end" baseline="auto" fill={color}>
                   {a.label}
@@ -50,7 +53,7 @@ export function Annotations({ annotations, plot, xScale, yScale }: AnnotationsPr
           const x = xScale(a.value);
           return (
             <g key={i}>
-              <RoughLine x1={x} y1={plot.y} x2={x} y2={plot.y + plot.height} stroke={color} seed={seed} />
+              <RoughLine x1={x} y1={plot.y} x2={x} y2={plot.y + plot.height} stroke={color} style={REF_DASH} seed={seed} />
               {a.label && (
                 <RoughText x={x + 4} y={plot.y + 4} anchor="start" baseline="hanging" fill={color}>
                   {a.label}

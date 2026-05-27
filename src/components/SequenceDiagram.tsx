@@ -88,14 +88,23 @@ export function SequenceDiagram({
           const key = `${m.from}->${m.to}-${i}`;
           if (m.self) {
             const x = m.x1;
+            // Clamp the loop so it stays well within the actor's own column and
+            // can't reach the next lifeline to the right.
+            const rightX = layout.actors
+              .map((a) => a.x)
+              .filter((ax) => ax > x + 1)
+              .sort((a, b) => a - b)[0];
+            const loopW = rightX != null ? Math.min(SELF_LOOP_WIDTH, (rightX - x) * 0.32) : SELF_LOOP_WIDTH;
             const yb = m.y + SELF_LOOP_HEIGHT;
-            const d = `M${x},${m.y} L${x + SELF_LOOP_WIDTH},${m.y} L${x + SELF_LOOP_WIDTH},${yb} L${x},${yb}`;
+            const d = `M${x},${m.y} L${x + loopW},${m.y} L${x + loopW},${yb} L${x},${yb}`;
             return (
               <g key={key}>
                 <RoughPath d={d} fill={null} style={m.dashed ? DASHED : undefined} seed={i + 1} />
-                <RoughPath d={arrowHeadPath({ x: x + SELF_LOOP_WIDTH, y: yb }, { x, y: yb })} fill={null} />
+                <RoughPath d={arrowHeadPath({ x: x + loopW, y: yb }, { x, y: yb })} fill={null} />
                 {m.label && (
-                  <RoughText x={x + SELF_LOOP_WIDTH + 6} y={m.y + SELF_LOOP_HEIGHT / 2} anchor="start" baseline="middle">
+                  // Label sits above the loop (centred over it), so it stays in
+                  // the column and never crosses the neighbouring lifeline.
+                  <RoughText x={x + loopW / 2} y={m.y - 6} anchor="middle" baseline="auto">
                     {m.label}
                   </RoughText>
                 )}

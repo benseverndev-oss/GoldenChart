@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import type { BaseChartProps, EdgeRouting, FlowEdge, FlowNode } from '../types/charts';
 import { getPlotArea } from '../core/geometry';
 import type { DiagramOrientation, LaidGroup, LaidOutEdge, LaidOutNode, LayoutEngine } from '../core/diagram';
-import { arrowHeadPath, diamondPath, ellipsePath, linkPath, orthogonalPath, orthogonalPoints } from '../core/shapes';
+import { arrowHeadPath, boxEdgePoint, diamondPath, ellipsePath, linkPath, orthogonalPath, orthogonalPoints } from '../core/shapes';
 import { measureText } from '../core/text';
 import { nodeSize } from '../core/nodeSize';
 import { Surface } from './Surface';
@@ -98,6 +98,28 @@ export function Diagram({
     return `translate(${tx}, ${ty}) scale(${s})`;
   }, [scene, plot.x, plot.y, plot.width, plot.height]);
 
+  // Stop each connector at the node's border instead of its centre, so lines
+  // don't run into the shapes.
+  const trimmedEdges = useMemo(() => {
+    const byId = new Map(scene.nodes.map((n) => [n.id, n]));
+    return scene.edges.map((e) => {
+      const s = byId.get(e.from);
+      const t = byId.get(e.to);
+      if (!s || !t) return e;
+      const sc = { x: s.x, y: s.y };
+      const tc = { x: t.x, y: t.y };
+      const sp = boxEdgePoint(sc, s.width, s.height, tc);
+      const tp = boxEdgePoint(tc, t.width, t.height, sc);
+      let points = e.points;
+      if (points && points.length >= 2) {
+        points = [...points];
+        points[0] = boxEdgePoint(sc, s.width, s.height, points[1]);
+        points[points.length - 1] = boxEdgePoint(tc, t.width, t.height, points[points.length - 2]);
+      }
+      return { ...e, sx: sp.x, sy: sp.y, tx: tp.x, ty: tp.y, points };
+    });
+  }, [scene]);
+
   return (
     <Surface
       width={width}
@@ -112,7 +134,7 @@ export function Diagram({
     >
       <g transform={fit}>
         {scene.groups?.map((g) => <DiagramGroup key={g.id} group={g} />)}
-        {scene.edges.map((e) => (
+        {trimmedEdges.map((e) => (
           <DiagramEdge
             key={`${e.from}->${e.to}`}
             edge={e}
