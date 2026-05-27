@@ -19,6 +19,7 @@ import { Annotations } from './Annotations';
 import type { Annotation } from './Annotations';
 import { RoughPath } from '../primitives/RoughPath';
 import { markAttrs } from '../core/interaction';
+import { useSeriesVisibility } from './SeriesVisibilityContext';
 
 export interface AreaChartProps extends BaseChartProps {
   series: Series[];
@@ -69,6 +70,7 @@ export function AreaChart({
   const fullPlot = getPlotArea(width, height, margin);
   const rv = resolveVibe(vibe);
   const palette = resolveBrand(brand).palette;
+  const { hidden } = useSeriesVisibility();
   const legendItems: LegendItem[] =
     showLegend && series.length > 1 ? series.map((s, i) => ({ label: s.id, color: s.color ?? colorAt(i, palette) })) : [];
   const legendModel = legendItems.length
@@ -77,18 +79,22 @@ export function AreaChart({
   const plot = legendModel ? { ...fullPlot, height: Math.max(1, fullPlot.height - legendModel.height - 36) } : fullPlot;
 
   const { x, y, areas } = useMemo(() => {
-    const allPoints = series.flatMap((s) => s.points);
+    // Lay out, stack and rescale to the visible series only; colour stays tied to
+    // each series' original index so hiding one never recolours the rest.
+    const visible = series.filter((s) => !hidden.has(s.id));
+    const allPoints = visible.flatMap((s) => s.points);
     const xs = allPoints.map((p) => p.x);
     const xScale = linearScale(resolveDomain(xs, extentOf(xs, false), xAxis), [plot.x, plot.x + plot.width]);
 
     if (stacked) {
-      const count = Math.max(0, ...series.map((s) => s.points.length));
+      const count = Math.max(0, ...visible.map((s) => s.points.length));
       const cumulative = new Array<number>(count).fill(0);
       const totals = new Array<number>(count).fill(0);
-      for (const s of series) s.points.forEach((p, idx) => (totals[idx] += p.y));
+      for (const s of visible) s.points.forEach((p, idx) => (totals[idx] += p.y));
       const yScale = linearScale([0, Math.max(1, ...totals)], [plot.y + plot.height, plot.y]);
 
-      const computed = series.map((s, i) => {
+      const computed = visible.map((s) => {
+        const i = series.indexOf(s);
         const top = s.points.map((p, idx) => ({ x: xScale(p.x), y: yScale(cumulative[idx] + p.y) }));
         const bottom = s.points.map((p, idx) => ({ x: xScale(p.x), y: yScale(cumulative[idx]) }));
         s.points.forEach((p, idx) => (cumulative[idx] += p.y));
@@ -105,7 +111,8 @@ export function AreaChart({
     const yScale = linearScale(resolveDomain(yValues, extentOf(yValues), yAxis), [plot.y + plot.height, plot.y]);
     const y0 = yScale(baseline);
 
-    const computed = series.map((s, i) => {
+    const computed = visible.map((s) => {
+      const i = series.indexOf(s);
       const pixels = s.points.map((p) => ({ x: xScale(p.x), y: yScale(p.y) }));
       return {
         id: s.id,
@@ -118,7 +125,7 @@ export function AreaChart({
     });
 
     return { x: xScale, y: yScale, areas: computed };
-  }, [series, curve, baseline, stacked, plot.x, plot.y, plot.width, plot.height, xAxis, yAxis, palette]);
+  }, [series, curve, baseline, stacked, plot.x, plot.y, plot.width, plot.height, xAxis, yAxis, palette, hidden]);
 
   return (
     <Surface

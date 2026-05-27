@@ -22,6 +22,7 @@ import { resolveEmphasis } from '../core/emphasis';
 import { RoughPath } from '../primitives/RoughPath';
 import { RoughCircle } from '../primitives/RoughCircle';
 import { markAttrs } from '../core/interaction';
+import { useSeriesVisibility } from './SeriesVisibilityContext';
 
 export interface LineChartProps extends BaseChartProps {
   series: Series[];
@@ -66,6 +67,7 @@ export function LineChart({
   const fullPlot = getPlotArea(width, height, margin);
   const rv = resolveVibe(vibe);
   const palette = resolveBrand(brand).palette;
+  const { hidden } = useSeriesVisibility();
   const legendItems: LegendItem[] =
     showLegend && series.length > 1 ? series.map((s, i) => ({ label: s.id, color: s.color ?? colorAt(i, palette) })) : [];
   const legendModel = legendItems.length
@@ -77,13 +79,17 @@ export function LineChart({
   const overlay = emphasis ? [...(annotations ?? []), ...resolved.annotations] : annotations;
 
   const { x, y, lines } = useMemo(() => {
-    const allPoints = series.flatMap((s) => s.points);
+    // Lay out and rescale to the visible series only; keep colour tied to each
+    // series' original index so hiding one never recolours the rest.
+    const visible = series.filter((s) => !hidden.has(s.id));
+    const allPoints = visible.flatMap((s) => s.points);
     const xs = allPoints.map((p) => p.x);
     const ys = allPoints.map((p) => p.y);
     const xScale = linearScale(resolveDomain(xs, extentOf(xs, false), xAxis), [plot.x, plot.x + plot.width]);
     const yScale = linearScale(resolveDomain(ys, extentOf(ys), yAxis), [plot.y + plot.height, plot.y]);
 
-    const computed = series.map((s, i) => {
+    const computed = visible.map((s) => {
+      const i = series.indexOf(s);
       const pixels = s.points.map((p) => ({ x: xScale(p.x), y: yScale(p.y) }));
       return {
         id: s.id,
@@ -95,7 +101,7 @@ export function LineChart({
     });
 
     return { x: xScale, y: yScale, lines: computed };
-  }, [series, curve, plot.x, plot.y, plot.width, plot.height, xAxis, yAxis, palette]);
+  }, [series, curve, plot.x, plot.y, plot.width, plot.height, xAxis, yAxis, palette, hidden]);
 
   return (
     <Surface

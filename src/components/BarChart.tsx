@@ -19,6 +19,7 @@ import type { Annotation } from './Annotations';
 import { RoughRectangle } from '../primitives/RoughRectangle';
 import { useVibeContext } from '../vibe/VibeProvider';
 import { markAttrs } from '../core/interaction';
+import { useSeriesVisibility } from './SeriesVisibilityContext';
 
 export type BarMode = 'single' | 'grouped' | 'stacked';
 
@@ -80,6 +81,7 @@ export function BarChart({
   const fullPlot = getPlotArea(width, height, margin);
   const resolved = resolveVibe(vibe);
   const palette = resolveBrand(brand).palette;
+  const { hidden } = useSeriesVisibility();
 
   // Legend items depend only on the series, so compute them (and the legend's
   // height) up front and reserve a band at the bottom — the plot shrinks so the
@@ -120,9 +122,12 @@ export function BarChart({
     }
 
     const multi = data as MultiSeriesDatum[];
-    const seriesIds = seriesKeys ?? seriesKeysOf(multi);
+    // Color from the full id list so hiding a series never recolors the others;
+    // lay out only the visible ones.
+    const allIds = seriesKeys ?? seriesKeysOf(multi);
+    const seriesIds = allIds.filter((k) => !hidden.has(k));
     const xScale = bandScale(multi.map((d) => d.label), [plot.x, plot.x + plot.width]);
-    const colorByKey = (k: string) => colorAt(seriesIds.indexOf(k), palette);
+    const colorByKey = (k: string) => colorAt(allIds.indexOf(k), palette);
 
     let computed: LaidBar[];
     let yScale: ReturnType<typeof linearScale>;
@@ -170,7 +175,7 @@ export function BarChart({
       bars: computed,
       keys: seriesIds,
     };
-  }, [data, mode, seriesKeys, plot.x, plot.y, plot.width, plot.height, yAxis, palette]);
+  }, [data, mode, seriesKeys, plot.x, plot.y, plot.width, plot.height, yAxis, palette, hidden]);
 
   const table: DataTableModel | undefined = useMemo(() => {
     if (!dataTable) return undefined;

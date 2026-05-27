@@ -1,12 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import { readMark } from './readMark';
 import type { MarkMeta } from '../types/interaction';
 import type { VibeConfig } from '../types/vibe';
 import { VibeProvider } from '../vibe/VibeProvider';
+import { SeriesVisibilityProvider, type SeriesVisibility } from '../components/SeriesVisibilityContext';
+import { markKey, toggleSelection } from '../core/seriesVisibility';
 import { Tooltip, type TooltipRenderer } from './Tooltip';
+import { Crosshair } from './Crosshair';
 import { markAriaLabel } from './defaultTooltipFormat';
 import { HOVER_ATTR, CURRENT_ATTR, hoverCss } from './hoverStyle';
+import { SELECTED_ATTR, CHOSEN_ATTR, selectCss } from './selectStyle';
 
 export interface InteractiveChartProps {
   children: ReactElement;
@@ -15,6 +19,17 @@ export interface InteractiveChartProps {
   /** Dim non-hovered marks while hovering (render-free). Default `true`. */
   highlight?: boolean;
   onHover?: (mark: MarkMeta | null) => void;
+  /** Enable click/keyboard selection of marks. Default `false`. */
+  selectable?: boolean;
+  /** Controlled selection (mark keys). When set, internal state is ignored. */
+  selected?: string | string[] | null;
+  defaultSelected?: string | string[] | null;
+  multiSelect?: boolean;
+  onSelect?: (mark: MarkMeta, selectedKeys: string[]) => void;
+  /** Make the chart's legend toggle series visibility. Default `true`. */
+  legendToggle?: boolean;
+  /** Draw a sketched vertical focus line snapped to the hovered mark. Default `false`. */
+  crosshair?: boolean;
   /** Mirrors the wrapped chart's vibe so the tooltip is sketched to match. */
   vibe?: VibeConfig;
 }
@@ -40,7 +55,7 @@ export function markFromEvent(
 }
 
 /** Make every tagged mark keyboard-focusable with an accessible label, so the
- *  hover path is reachable without a pointer. Idempotent (safe to re-run). */
+ *  hover/selection path is reachable without a pointer. Idempotent. */
 export function enhanceMarks(svg: SVGSVGElement): void {
   svg.querySelectorAll('[data-gc-mark]').forEach((el) => {
     const mark = readMark(el);
@@ -51,16 +66,53 @@ export function enhanceMarks(svg: SVGSVGElement): void {
   });
 }
 
+function toSet(v: string | string[] | null | undefined): Set<string> {
+  return new Set(v == null ? [] : Array.isArray(v) ? v : [v]);
+}
+
 /**
  * Client-only boundary that makes a wrapped GoldenChart interactive via event
- * delegation on its `<svg>`. The chart body never re-renders on hover — emphasis
- * is applied imperatively and the tooltip lives in a sibling overlay `<svg>`.
+ * delegation on its `<svg>`: hover tooltips + emphasis (Phase 1), click/keyboard
+ * selection, and a legend that toggles series visibility (Phase 2). Hover and
+ * selection are render-free (imperative attributes); legend toggles re-render the
+ * wrapped chart through the SeriesVisibility context.
  */
-export function InteractiveChart({ children, tooltip = true, highlight = true, onHover, vibe }: InteractiveChartProps) {
+export function InteractiveChart({
+  children,
+  tooltip = true,
+  highlight = true,
+  onHover,
+  selectable = false,
+  selected,
+  defaultSelected,
+  multiSelect = false,
+  onSelect,
+  legendToggle = true,
+  crosshair = false,
+  vibe,
+}: InteractiveChartProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const currentRef = useRef<Element | null>(null);
   const [hover, setHover] = useState<HoverState | null>(null);
   const [viewBox, setViewBox] = useState<string | undefined>(undefined);
+
+  const [internalSel, setInternalSel] = useState<Set<string>>(() => toSet(defaultSelected));
+  const selectedKeys = selected !== undefined ? toSet(selected) : internalSel;
+  const selSig = [...selectedKeys].sort().join('|');
+
+  const [hidden, setHidden] = useState<ReadonlySet<string>>(new Set());
+  const toggle = useCallback((series: string) => {
+    setHidden((prev) => {
+      const next = new Set(prev);
+      if (next.has(series)) next.delete(series);
+      else next.add(series);
+      return next;
+    });
+  }, []);
+  const visibility = useMemo<SeriesVisibility>(
+    () => ({ hidden, toggle, interactive: legendToggle }),
+    [hidden, toggle, legendToggle],
+  );
 
   const clear = useCallback(() => {
     const svg = svgRef.current;
@@ -98,12 +150,48 @@ export function InteractiveChart({ children, tooltip = true, highlight = true, o
     [highlight, onHover, clear],
   );
 
+  const activate = useCallback(
+    (target: Element | null) => {
+      if (!selectable || !target) return;
+      const mark = readMark(target);
+      if (!mark) return;
+      const next = toggleSelection(selectedKeys, markKey(mark), multiSelect);
+      if (selected === undefined) setInternalSel(next);
+      onSelect?.(mark, [...next]);
+    },
+    [selectable, multiSelect, selected, onSelect, selSig], // selSig: stable signature of selectedKeys
+  );
+
+  const onClick = useCallback((e: Event) => activate(e.target as Element | null), [activate]);
+  const onKey = useCallback(
+    (e: Event) => {
+      const ke = e as KeyboardEvent;
+      if (ke.key !== 'Enter' && ke.key !== ' ') return;
+      ke.preventDefault?.();
+      activate(e.target as Element | null);
+    },
+    [activate],
+  );
+
   const attach = useCallback((node: HTMLDivElement | null) => {
     const svg = (node?.querySelector('svg') as SVGSVGElement | null) ?? null;
     svgRef.current = svg;
     setViewBox(svg?.getAttribute('viewBox') ?? undefined);
     if (svg) enhanceMarks(svg);
   }, []);
+
+  // Reflect the current selection onto the DOM (render-free emphasis).
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    if (selectedKeys.size > 0) svg.setAttribute(SELECTED_ATTR, '');
+    else svg.removeAttribute(SELECTED_ATTR);
+    svg.querySelectorAll('[data-gc-mark]').forEach((el) => {
+      const m = readMark(el);
+      if (m && selectedKeys.has(markKey(m))) el.setAttribute(CHOSEN_ATTR, '');
+      else el.removeAttribute(CHOSEN_ATTR);
+    });
+  }, [selSig]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const svg = svgRef.current;
@@ -112,26 +200,37 @@ export function InteractiveChart({ children, tooltip = true, highlight = true, o
     svg.addEventListener('pointerleave', clear);
     svg.addEventListener('focusin', onMove);
     svg.addEventListener('focusout', clear);
+    svg.addEventListener('click', onClick);
+    svg.addEventListener('keydown', onKey);
     return () => {
       svg.removeEventListener('pointermove', onMove);
       svg.removeEventListener('pointerleave', clear);
       svg.removeEventListener('focusin', onMove);
       svg.removeEventListener('focusout', clear);
+      svg.removeEventListener('click', onClick);
+      svg.removeEventListener('keydown', onKey);
     };
-  }, [onMove, clear]);
+  }, [onMove, clear, onClick, onKey]);
 
   const renderTooltip = typeof tooltip === 'function' ? tooltip : undefined;
+  const vbHeight = viewBox ? Number(viewBox.split(/[\s,]+/)[3]) : undefined;
   return (
     <div ref={attach} style={{ position: 'relative', display: 'inline-block' }}>
-      {children}
+      <SeriesVisibilityProvider value={visibility}>{children}</SeriesVisibilityProvider>
       {highlight ? <style>{hoverCss()}</style> : null}
-      {tooltip && hover ? (
+      {selectable ? <style>{selectCss()}</style> : null}
+      {hover && (tooltip || crosshair) ? (
         <svg
           viewBox={viewBox}
           style={{ position: 'absolute', inset: 0, pointerEvents: 'none', width: '100%', height: '100%' }}
         >
           <VibeProvider vibe={vibe}>
-            {renderTooltip ? renderTooltip(hover.mark) : <Tooltip mark={hover.mark} x={hover.x} y={hover.y} />}
+            {crosshair && vbHeight !== undefined ? <Crosshair x={hover.x} height={vbHeight} /> : null}
+            {tooltip
+              ? renderTooltip
+                ? renderTooltip(hover.mark)
+                : <Tooltip mark={hover.mark} x={hover.x} y={hover.y} />
+              : null}
           </VibeProvider>
         </svg>
       ) : null}

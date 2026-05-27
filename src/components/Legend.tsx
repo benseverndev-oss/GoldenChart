@@ -1,6 +1,8 @@
+import type { KeyboardEvent } from 'react';
 import { layoutLegend } from '../core/legend';
 import type { LegendItem } from '../core/legend';
 import { useResolvedVibe } from '../vibe/VibeProvider';
+import { useSeriesVisibility } from './SeriesVisibilityContext';
 import { RoughRectangle } from '../primitives/RoughRectangle';
 import { RoughText } from '../primitives/RoughText';
 
@@ -25,6 +27,7 @@ const SWATCH_GAP = 6;
  */
 export function Legend({ items, x, y, width }: LegendProps) {
   const resolved = useResolvedVibe();
+  const { hidden, toggle, interactive } = useSeriesVisibility();
   const layout = layoutLegend(items, width, {
     swatchSize: SWATCH,
     swatchGap: SWATCH_GAP,
@@ -33,14 +36,34 @@ export function Legend({ items, x, y, width }: LegendProps) {
   });
   return (
     <g>
-      {layout.rows.map((it, i) => (
-        <g key={it.label}>
-          <RoughRectangle x={x + it.x} y={y + it.y - SWATCH / 2} width={SWATCH} height={SWATCH} fill={it.color} seed={i + 1} />
-          <RoughText x={x + it.x + SWATCH + SWATCH_GAP} y={y + it.y} anchor="start" baseline="middle">
-            {it.label}
-          </RoughText>
-        </g>
-      ))}
+      {layout.rows.map((it, i) => {
+        const isHidden = hidden.has(it.label);
+        // Interactive attributes are gated so the static (non-interactive) render
+        // is byte-identical; dimming is keyed on `hidden`, empty by default.
+        const interactiveProps = interactive
+          ? {
+              role: 'button' as const,
+              tabIndex: 0,
+              'aria-pressed': !isHidden,
+              style: { cursor: 'pointer' as const },
+              onClick: () => toggle(it.label),
+              onKeyDown: (e: KeyboardEvent) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  toggle(it.label);
+                }
+              },
+            }
+          : {};
+        return (
+          <g key={it.label} opacity={isHidden ? 0.4 : undefined} {...interactiveProps}>
+            <RoughRectangle x={x + it.x} y={y + it.y - SWATCH / 2} width={SWATCH} height={SWATCH} fill={it.color} seed={i + 1} />
+            <RoughText x={x + it.x + SWATCH + SWATCH_GAP} y={y + it.y} anchor="start" baseline="middle">
+              {it.label}
+            </RoughText>
+          </g>
+        );
+      })}
     </g>
   );
 }
