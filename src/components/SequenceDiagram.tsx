@@ -4,9 +4,7 @@ import type { SequenceActorInput, SequenceMessageInput } from '../core/sequence'
 import { computeSequence, SELF_LOOP_WIDTH } from '../core/sequence';
 import { getPlotArea } from '../core/geometry';
 import { arrowHeadPath } from '../core/shapes';
-import { measureText } from '../core/text';
 import { Surface } from './Surface';
-import { useResolvedVibe } from '../vibe/VibeProvider';
 import { RoughRectangle } from '../primitives/RoughRectangle';
 import { RoughLine } from '../primitives/RoughLine';
 import { RoughPath } from '../primitives/RoughPath';
@@ -43,7 +41,6 @@ export function SequenceDiagram({
   actorHeight,
 }: SequenceDiagramProps) {
   const plot = getPlotArea(width, height, margin);
-  const resolved = useResolvedVibe(vibe);
 
   const layout = useMemo(
     () => computeSequence(actors, messages, [plot.width, plot.height], { actorHeight }),
@@ -91,29 +88,25 @@ export function SequenceDiagram({
           const key = `${m.from}->${m.to}-${i}`;
           if (m.self) {
             const x = m.x1;
-            // Clamp the loop so it can't reach the next lifeline to the right.
+            // Clamp the loop so it stays well within the actor's own column and
+            // can't reach the next lifeline to the right.
             const rightX = layout.actors
               .map((a) => a.x)
               .filter((ax) => ax > x + 1)
               .sort((a, b) => a - b)[0];
-            const loopW = rightX != null ? Math.min(SELF_LOOP_WIDTH, (rightX - x) * 0.4) : SELF_LOOP_WIDTH;
+            const loopW = rightX != null ? Math.min(SELF_LOOP_WIDTH, (rightX - x) * 0.32) : SELF_LOOP_WIDTH;
             const yb = m.y + SELF_LOOP_HEIGHT;
             const d = `M${x},${m.y} L${x + loopW},${m.y} L${x + loopW},${yb} L${x},${yb}`;
-            const lm = m.label ? measureText(m.label, resolved.fontSize, resolved.fontFamily) : null;
-            const lx = x + loopW + 6;
-            const ly = m.y + SELF_LOOP_HEIGHT / 2;
             return (
               <g key={key}>
                 <RoughPath d={d} fill={null} style={m.dashed ? DASHED : undefined} seed={i + 1} />
                 <RoughPath d={arrowHeadPath({ x: x + loopW, y: yb }, { x, y: yb })} fill={null} />
-                {m.label && lm && (
-                  <>
-                    {/* Knockout so the label reads over any lifeline it sits near. */}
-                    <rect x={lx - 2} y={ly - lm.height / 2 - 1} width={lm.width + 4} height={lm.height + 2} fill={resolved.background ?? '#ffffff'} />
-                    <RoughText x={lx} y={ly} anchor="start" baseline="middle">
-                      {m.label}
-                    </RoughText>
-                  </>
+                {m.label && (
+                  // Label sits above the loop (centred over it), so it stays in
+                  // the column and never crosses the neighbouring lifeline.
+                  <RoughText x={x + loopW / 2} y={m.y - 6} anchor="middle" baseline="auto">
+                    {m.label}
+                  </RoughText>
                 )}
               </g>
             );
