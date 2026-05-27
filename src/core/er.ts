@@ -71,9 +71,9 @@ export interface EROptions {
   direction?: FlowDirection;
 }
 
-const HEADER_H = 28;
-const ROW_H = 20;
-const PAD_X = 14;
+const HEADER_H = 30;
+const ROW_H = 24;
+const PAD_X = 16;
 const FONT = 13;
 const FAMILY = 'sans-serif';
 
