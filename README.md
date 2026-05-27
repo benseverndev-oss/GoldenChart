@@ -186,6 +186,28 @@ const spec = parseMermaid('graph TD; A-->B; B-->C;');
 renderDiagram(spec, { width: 400, height: 240, vibe: 'pencil' });
 ```
 
+## Interactivity (opt-in)
+
+Interactivity is a progressive enhancement behind the `goldenchart/interactive`
+subpath — the static `goldenchart` entry stays untouched and font-free. Wrap any
+chart in `<InteractiveChart>` for sketched, vibe-matched tooltips, hover/selection,
+an interactive legend, semantic zoom/pan, brushing, animated data transitions, and
+linked crossfilter:
+
+```tsx
+import { BarChart } from 'goldenchart';
+import { InteractiveChart } from 'goldenchart/interactive';
+
+<InteractiveChart tooltip selectable>
+  <BarChart width={480} height={300} vibe="pencil" data={data} />
+</InteractiveChart>;
+```
+
+Charts emit an inert `data-gc-*` mark contract that the client layer reads, so the
+server/MCP SVG is identical with or without it. `interactiveEmbed(svg)` (and the
+MCP `export_interactive_html` tool) wrap a static SVG into a self-contained
+hover-interactive HTML file. See [`docs/INTERACTIVITY.md`](./docs/INTERACTIVITY.md).
+
 ## Rendering quality
 
 The sketchy look never gets in the way of reading the chart:
