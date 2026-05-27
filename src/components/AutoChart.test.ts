@@ -44,4 +44,32 @@ describe('visualize', () => {
     const svg = renderToSVGString(el);
     expect(svg).toContain('<path');
   });
+
+  describe('natural-language query', () => {
+    const sales = [
+      { region: 'NA', sales: 3 },
+      { region: 'EU', sales: 7 },
+    ];
+
+    it('honors a chart-type override in the query', () => {
+      const el = visualize(sales, { query: 'sales by region as a pie', width: 240, height: 160, bare: true });
+      expect(name(el)).toBe('PieChart');
+    });
+
+    it('threads a vibe parsed from the query', () => {
+      const el = visualize(sales, { query: 'sales by region in pencil', width: 240, height: 160, bare: true });
+      expect((el.props as { vibe?: unknown }).vibe).toBe('pencil');
+    });
+
+    it('lets an explicit option win over the query', () => {
+      const el = visualize(sales, {
+        query: 'sales by region in pencil',
+        vibe: 'ink',
+        width: 240,
+        height: 160,
+        bare: true,
+      });
+      expect((el.props as { vibe?: unknown }).vibe).toBe('ink');
+    });
+  });
 });

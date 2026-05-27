@@ -24,6 +24,8 @@ export * from './dataTable';
 export * from './profile';
 export * from './recommend';
 export * from './compile';
+export * from './queryParse';
+export * from './planChart';
 export * from './critique';
 export * from './transform';
 export * from './format';

@@ -13,6 +13,7 @@ import {
   TreemapChart,
   compileChart,
   critiqueChart,
+  planChart,
   profileData,
   recommendChart,
 } from 'goldenchart';
@@ -46,9 +47,13 @@ export const visualizeTools: ToolDef[] = [
     config: {
       title: 'Visualize Data',
       description:
-        'Profile raw records, auto-pick the best-fit chart, and render it as SVG. Returns the chosen chart with its rationale plus ranked alternatives.',
+        'Profile raw records, auto-pick the best-fit chart, and render it as SVG. Optionally pass a plain-English `query` (e.g. "revenue by month as a line in pencil") to steer the chart type, field roles, and vibe. Returns the chosen chart with its rationale, ranked alternatives, and — when a query is given — how the query was interpreted.',
       inputSchema: {
         data: z.array(z.record(z.unknown())).min(1),
+        query: z
+          .string()
+          .optional()
+          .describe('Plain-English description, e.g. "compare revenue by region as a pie".'),
         intent: z
           .enum(['trend', 'compare', 'composition', 'distribution', 'correlation', 'flow', 'hierarchy'])
           .optional(),
@@ -60,26 +65,40 @@ export const visualizeTools: ToolDef[] = [
         svg: z.string(),
         chosen: z.object({ chartType: z.string(), rationale: z.string(), confidence: z.number() }),
         alternatives: z.array(z.object({ chartType: z.string(), rationale: z.string(), confidence: z.number() })),
+        interpretation: z
+          .object({
+            intent: z.string().optional(),
+            chartType: z.string().optional(),
+            roles: z.record(z.string()).optional(),
+            vibe: z.unknown().optional(),
+            unresolved: z.array(z.string()),
+            confidence: z.number(),
+          })
+          .optional(),
       },
     },
     handler: async (args) => {
       const data = args.data as Record<string, unknown>[];
-      const recs = recommendChart(profileData(data), args.intent as Intent | undefined);
-      const rec = recs[0];
-      const compiled = compileChart(data, rec);
+      const plan = planChart(data, {
+        query: args.query as string | undefined,
+        intent: args.intent as Intent | undefined,
+      });
+      const { compiled, recommendation, alternatives, hints } = plan;
       const svg = renderToSVGString(
         createElement(REGISTRY[compiled.component], {
           ...compiled.props,
           width: args.width as number,
           height: args.height as number,
-          vibe: args.vibe as VibeConfig | undefined,
+          // explicit vibe arg wins over a vibe parsed from the query
+          vibe: (args.vibe as VibeConfig | undefined) ?? (compiled.props.vibe as VibeConfig | undefined),
           bare: true,
         }),
       );
       const structuredContent = {
         svg,
-        chosen: summarize(rec),
-        alternatives: recs.slice(1, 4).map(summarize),
+        chosen: summarize(recommendation),
+        alternatives: alternatives.slice(0, 3).map(summarize),
+        ...(args.query ? { interpretation: hints } : {}),
       };
       return { content: [{ type: 'text', text: svg }], structuredContent };
     },
