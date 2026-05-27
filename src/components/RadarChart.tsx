@@ -67,7 +67,7 @@ export function RadarChart({
     const n = axes.length;
     const cx = plot.x + plot.width / 2;
     const cy = plot.y + plot.height / 2;
-    const radius = Math.max(0, Math.min(plot.width, plot.height) / 2 - 16);
+    const radius = Math.max(0, Math.min(plot.width, plot.height) / 2 - 28);
 
     const dataMax = Math.max(1, ...series.flatMap((s) => s.values));
     const max = maxValue ?? dataMax;
@@ -81,7 +81,7 @@ export function RadarChart({
     const spokes = Array.from({ length: n }, (_, i) => polarToCartesian(cx, cy, radius, axisAngle(i, n)));
     const labels = Array.from({ length: n }, (_, i) => ({
       label: axes[i],
-      ...polarToCartesian(cx, cy, radius + 12, axisAngle(i, n)),
+      ...polarToCartesian(cx, cy, radius + 18, axisAngle(i, n)),
     }));
 
     const seriesGeom = series.map((s) => {
@@ -114,12 +114,14 @@ export function RadarChart({
       ))}
       {geom.seriesGeom.map((s, i) => (
         <g key={s.id}>
+          {/* Multiple series overlap, so draw outline-only (filled hachure of two
+              series tangles into noise); a single series keeps its fill. */}
           <RoughPath
             d={s.path}
             stroke={s.color ?? colorAt(i)}
-            fill={s.color ?? colorAt(i)}
+            fill={series.length > 1 ? null : (s.color ?? colorAt(i))}
             vibe={{ fillStyle: 'hachure', fillWeight: 1 }}
-            style={{ opacity: 0.85 }}
+            style={{ opacity: series.length > 1 ? 1 : 0.85 }}
             seed={i + 1}
           />
           {showDots &&

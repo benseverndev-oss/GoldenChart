@@ -63,6 +63,11 @@ export interface RoughTextProps extends RoughPrimitiveProps {
   rotate?: number;
   /** Overrides the vibe stroke as the text fill color. */
   fill?: string;
+  /**
+   * Force a page-colour halo behind the glyphs (a soft knockout, not a box) so
+   * the label stays legible over a fill even when the vibe has no background.
+   */
+  haloColor?: string;
   /** When set, wrap the text to this pixel width across multiple lines. */
   maxWidth?: number;
 }

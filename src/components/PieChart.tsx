@@ -4,6 +4,7 @@ import { getPlotArea } from '../core/geometry';
 import { computePie } from '../core/arc';
 import { colorAt } from '../core/palette';
 import { datumTable } from '../core/dataTable';
+import { resolveVibe } from '../vibe/resolveVibe';
 import { Surface } from './Surface';
 import { RoughPath } from '../primitives/RoughPath';
 import { RoughText } from '../primitives/RoughText';
@@ -41,6 +42,9 @@ export function PieChart({
   const cx = plot.x + plot.width / 2;
   const cy = plot.y + plot.height / 2;
   const outerRadius = Math.max(0, Math.min(plot.width, plot.height) / 2 - 2);
+  // Labels sit over the (hachured, coloured) slices; give them a page-colour
+  // halo so they stay legible regardless of vibe/slice colour.
+  const haloColor = resolveVibe(vibe).background ?? '#ffffff';
 
   const slices = useMemo(
     () => computePie(data, outerRadius, innerRadius, padAngle),
@@ -69,7 +73,13 @@ export function PieChart({
               seed={slice.index + 1}
             />
             {showLabels && slice.endAngle - slice.startAngle > 0.15 && (
-              <RoughText x={slice.centroid[0]} y={slice.centroid[1]} anchor="middle" baseline="middle">
+              <RoughText
+                x={slice.centroid[0]}
+                y={slice.centroid[1]}
+                anchor="middle"
+                baseline="middle"
+                haloColor={haloColor}
+              >
                 {slice.datum.label}
               </RoughText>
             )}

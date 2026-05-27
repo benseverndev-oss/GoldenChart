@@ -4,6 +4,7 @@ import type { TreemapDatum, TreemapTile } from '../core/treemap';
 import { computeTreemap } from '../core/treemap';
 import { getPlotArea } from '../core/geometry';
 import { ordinalColor } from '../core/colorScales';
+import { resolveVibe } from '../vibe/resolveVibe';
 import { Surface } from './Surface';
 import { RoughRectangle } from '../primitives/RoughRectangle';
 import { RoughText } from '../primitives/RoughText';
@@ -47,6 +48,12 @@ export function TreemapChart({
 
   const colorOf = useMemo(() => ordinalColor(leaves.map((l) => l.groupId)), [leaves]);
 
+  // Airier hachure so the cell labels read clearly over the fill (the default
+  // dense fill competes with the text). Spread the resolved vibe so the theme is
+  // preserved — a bare override object would reset to the default preset.
+  const rv = resolveVibe(vibe);
+  const cellVibe = { ...rv, hachureGap: Math.max(rv.hachureGap, 7), fillWeight: Math.min(rv.fillWeight, 0.7) };
+
   return (
     <Surface
       width={width}
@@ -72,6 +79,7 @@ export function TreemapChart({
                 width={w}
                 height={h}
                 fill={leaf.color ?? colorOf(leaf.groupId)}
+                vibe={cellVibe}
                 seed={i + 1}
               />
               {labelFits && (
