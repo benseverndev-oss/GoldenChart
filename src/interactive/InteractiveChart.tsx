@@ -1,6 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { cloneElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import { readMark } from './readMark';
+import { useZoomPan, chartXExtent } from './useZoomPan';
+import type { Domain } from '../core/zoom';
+import { Brush } from './Brush';
+import { clientToViewBox, brushRect, marksInPixelRange } from '../core/brush';
+import { useDataTransition } from './useDataTransition';
+import { useLinkGroup } from './LinkedCharts';
 import type { MarkMeta } from '../types/interaction';
 import type { VibeConfig } from '../types/vibe';
 import { VibeProvider } from '../vibe/VibeProvider';
@@ -30,6 +36,17 @@ export interface InteractiveChartProps {
   legendToggle?: boolean;
   /** Draw a sketched vertical focus line snapped to the hovered mark. Default `false`. */
   crosshair?: boolean;
+  /** Wheel-zoom the continuous x-axis (line/area/scatter), re-sketching at the new domain. */
+  zoom?: boolean;
+  /** Drag to pan the zoomed x-axis. Implies a zoomable chart. Default `false`. */
+  pan?: boolean;
+  /** Drag a sketched x-range selection; emits the brushed marks. Takes precedence over pan. */
+  brush?: boolean;
+  onBrush?: (marks: MarkMeta[]) => void;
+  /** Animate the chart's data prop when it changes (snaps under reduced-motion). */
+  transition?: boolean | { durationMs?: number };
+  /** This chart's source id within a surrounding `<LinkedCharts>` group (crossfilter). */
+  linkGroup?: string;
   /** Mirrors the wrapped chart's vibe so the tooltip is sketched to match. */
   vibe?: VibeConfig;
 }
@@ -89,8 +106,15 @@ export function InteractiveChart({
   onSelect,
   legendToggle = true,
   crosshair = false,
+  zoom = false,
+  pan = false,
+  brush = false,
+  onBrush,
+  transition = false,
+  linkGroup,
   vibe,
 }: InteractiveChartProps) {
+  const link = useLinkGroup();
   const svgRef = useRef<SVGSVGElement | null>(null);
   const currentRef = useRef<Element | null>(null);
   const [hover, setHover] = useState<HoverState | null>(null);
@@ -113,6 +137,39 @@ export function InteractiveChart({
     () => ({ hidden, toggle, interactive: legendToggle }),
     [hidden, toggle, legendToggle],
   );
+
+  // Semantic zoom/pan: track a view domain and re-sketch the chart at it by
+  // cloning with a controlled `xAxis.domain` (re-scale, never a CSS transform).
+  const zoomBounds = useMemo<Domain | null>(
+    () => (zoom ? chartXExtent(children.props as Record<string, unknown>) : null),
+    [zoom, children],
+  );
+  const zp = useZoomPan(zoomBounds, { pan: pan && !brush });
+
+  // Animate the chart's data prop on change (line/area use `series`, others `data`).
+  const childProps = children.props as { xAxis?: Record<string, unknown>; data?: unknown; series?: unknown };
+  const dataKey: 'series' | 'data' | null = Array.isArray(childProps.series)
+    ? 'series'
+    : Array.isArray(childProps.data)
+      ? 'data'
+      : null;
+  const transitionOn = !!transition && dataKey != null;
+  const durationMs = typeof transition === 'object' ? transition.durationMs ?? 500 : 500;
+  const animatedData = useDataTransition(dataKey ? childProps[dataKey] : undefined, durationMs, transitionOn);
+
+  // Re-sketch the wrapped chart with a controlled view domain and/or animated
+  // data by cloning it (re-scale, never a transform).
+  const overrides: Record<string, unknown> = {};
+  if (zp.domain) overrides.xAxis = { ...(childProps.xAxis ?? {}), domain: zp.domain };
+  if (transitionOn && dataKey) overrides[dataKey] = animatedData;
+  const content = Object.keys(overrides).length
+    ? cloneElement(children as ReactElement<Record<string, unknown>>, overrides)
+    : children;
+
+  // x-axis brush: track a drag rect in viewBox space; on release, emit the marks
+  // whose anchors fall inside it (via the pure marksInPixelRange helper).
+  const [brushPx, setBrushPx] = useState<{ a: number; b: number } | null>(null);
+  const brushing = useRef(false);
 
   const clear = useCallback(() => {
     const svg = svgRef.current;
@@ -158,8 +215,9 @@ export function InteractiveChart({
       const next = toggleSelection(selectedKeys, markKey(mark), multiSelect);
       if (selected === undefined) setInternalSel(next);
       onSelect?.(mark, [...next]);
+      if (linkGroup) link?.publish(linkGroup, [...next]);
     },
-    [selectable, multiSelect, selected, onSelect, selSig], // selSig: stable signature of selectedKeys
+    [selectable, multiSelect, selected, onSelect, selSig, linkGroup, link], // selSig: stable signature of selectedKeys
   );
 
   const onClick = useCallback((e: Event) => activate(e.target as Element | null), [activate]);
@@ -180,18 +238,95 @@ export function InteractiveChart({
     if (svg) enhanceMarks(svg);
   }, []);
 
-  // Reflect the current selection onto the DOM (render-free emphasis).
+  // Reflect emphasis onto the DOM (render-free): this chart's own selection plus
+  // any incoming filter from a surrounding LinkedCharts group (crossfilter).
+  const linkSig = linkGroup && link ? link.filter.join('|') : '';
   useEffect(() => {
     const svg = svgRef.current;
     if (!svg) return;
-    if (selectedKeys.size > 0) svg.setAttribute(SELECTED_ATTR, '');
+    const emphasized = new Set<string>([...selectedKeys, ...(linkGroup && link ? link.filter : [])]);
+    if (emphasized.size > 0) svg.setAttribute(SELECTED_ATTR, '');
     else svg.removeAttribute(SELECTED_ATTR);
     svg.querySelectorAll('[data-gc-mark]').forEach((el) => {
       const m = readMark(el);
-      if (m && selectedKeys.has(markKey(m))) el.setAttribute(CHOSEN_ATTR, '');
+      if (m && emphasized.has(markKey(m))) el.setAttribute(CHOSEN_ATTR, '');
       else el.removeAttribute(CHOSEN_ATTR);
     });
-  }, [selSig]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selSig, linkSig]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Zoom (wheel) + optional pan (drag), attached with passive:false so the
+  // wheel can preventDefault. Kept separate from the hover/selection listeners.
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg || !(zoom || pan)) return;
+    const wheel = (e: Event) => zp.onWheel(e as unknown as WheelEvent);
+    const down = (e: Event) => zp.onPointerDown(e as unknown as PointerEvent);
+    const move = (e: Event) => zp.onPointerMove(e as unknown as PointerEvent);
+    const up = () => zp.onPointerUp();
+    svg.addEventListener('wheel', wheel, { passive: false });
+    if (pan && !brush) {
+      svg.addEventListener('pointerdown', down);
+      svg.addEventListener('pointermove', move);
+      svg.addEventListener('pointerup', up);
+      svg.addEventListener('pointerleave', up);
+    }
+    return () => {
+      svg.removeEventListener('wheel', wheel);
+      svg.removeEventListener('pointerdown', down);
+      svg.removeEventListener('pointermove', move);
+      svg.removeEventListener('pointerup', up);
+      svg.removeEventListener('pointerleave', up);
+    };
+  }, [zoom, pan, brush, zp.onWheel, zp.onPointerDown, zp.onPointerMove, zp.onPointerUp]);
+
+  // Brush drag (takes precedence over pan). Coordinates are converted to viewBox
+  // space so they compare directly against the marks' baked data-gc anchors.
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg || !brush) return;
+    const vb = (viewBox ?? '0 0 0 0').split(/[\s,]+/).map(Number);
+    const toVb = (clientX: number) => {
+      const r = svg.getBoundingClientRect();
+      return clientToViewBox(clientX, r.left, r.width, vb[0] ?? 0, vb[2] ?? 0);
+    };
+    const down = (e: Event) => {
+      brushing.current = true;
+      const x = toVb((e as PointerEvent).clientX);
+      setBrushPx({ a: x, b: x });
+    };
+    const move = (e: Event) => {
+      if (!brushing.current) return;
+      const x = toVb((e as PointerEvent).clientX);
+      setBrushPx((p) => (p ? { a: p.a, b: x } : null));
+    };
+    const up = () => {
+      if (!brushing.current) return;
+      brushing.current = false;
+      setBrushPx((p) => {
+        if (p && svgRef.current) {
+          const tagged: { meta: MarkMeta; key: string; cx: number; cy: number }[] = [];
+          svgRef.current.querySelectorAll('[data-gc-mark]').forEach((el) => {
+            const m = readMark(el);
+            if (m) tagged.push({ meta: m, key: markKey(m), cx: m.cx, cy: m.cy });
+          });
+          const hit = marksInPixelRange(tagged, [p.a, p.b], 'x').map((t) => t.meta);
+          onBrush?.(hit);
+          if (linkGroup) link?.publish(linkGroup, hit.map(markKey));
+        }
+        return null;
+      });
+    };
+    svg.addEventListener('pointerdown', down);
+    svg.addEventListener('pointermove', move);
+    svg.addEventListener('pointerup', up);
+    svg.addEventListener('pointerleave', up);
+    return () => {
+      svg.removeEventListener('pointerdown', down);
+      svg.removeEventListener('pointermove', move);
+      svg.removeEventListener('pointerup', up);
+      svg.removeEventListener('pointerleave', up);
+    };
+  }, [brush, viewBox, onBrush, linkGroup, link]);
 
   useEffect(() => {
     const svg = svgRef.current;
@@ -215,10 +350,23 @@ export function InteractiveChart({
   const renderTooltip = typeof tooltip === 'function' ? tooltip : undefined;
   const vbHeight = viewBox ? Number(viewBox.split(/[\s,]+/)[3]) : undefined;
   return (
-    <div ref={attach} style={{ position: 'relative', display: 'inline-block' }}>
-      <SeriesVisibilityProvider value={visibility}>{children}</SeriesVisibilityProvider>
+    <div
+      ref={attach}
+      style={{ position: 'relative', display: 'inline-block', overflow: zoom || pan ? 'hidden' : undefined }}
+    >
+      <SeriesVisibilityProvider value={visibility}>{content}</SeriesVisibilityProvider>
       {highlight ? <style>{hoverCss()}</style> : null}
-      {selectable ? <style>{selectCss()}</style> : null}
+      {selectable || linkGroup ? <style>{selectCss()}</style> : null}
+      {brush && brushPx && vbHeight !== undefined ? (
+        <svg
+          viewBox={viewBox}
+          style={{ position: 'absolute', inset: 0, pointerEvents: 'none', width: '100%', height: '100%' }}
+        >
+          <VibeProvider vibe={vibe}>
+            <Brush start={brushRect(brushPx.a, brushPx.b).start} length={brushRect(brushPx.a, brushPx.b).length} height={vbHeight} />
+          </VibeProvider>
+        </svg>
+      ) : null}
       {hover && (tooltip || crosshair) ? (
         <svg
           viewBox={viewBox}
