@@ -34,7 +34,8 @@ This makes the published tarball declare `^<the lib version it was built/tested 
 - Add `homepage`: `https://github.com/benseverndev-oss/GoldenChart/tree/main/mcp#readme`.
 - Add `bugs`: `{ "url": "https://github.com/benseverndev-oss/GoldenChart/issues" }`.
 - Add `publishConfig`: `{ "access": "public", "provenance": true }`.
-- Add script `prepublishOnly: "npm run build"` (so `dist/` — including the `bin` — is fresh on any publish path).
+- Add script `prepublishOnly: "npm run build"` (so `dist/` — including the `bin` — is fresh on any publish path). Note: the release workflow also builds explicitly; the resulting double-build is idempotent and intentional.
+- Add `keywords`: `["mcp", "model-context-protocol", "goldenchart", "charts", "svg", "ai", "llm"]` (npm search is the primary discovery path for MCP servers).
 - Do NOT change `name`, `license`, `bin`, `files`, `type`, dependencies (the `file:..` stays committed), devDependencies, or the other scripts.
 
 ### 3. `mcp/LICENSE`
@@ -59,6 +60,7 @@ This is a NEW workflow file; `release.yml` and `ci.yml` are unchanged.
 - `npm run build` (root) → `cd mcp && npm install` → `npm run build && npm run typecheck && npm test` all green.
 - Locally simulate the pin step: confirm `node -p "require('goldenchart/package.json').version"` (from mcp) returns `0.1.0` and that `npm pkg set` would write `^0.1.0` — but **do not commit** the rewritten dep; verify then `git checkout -- mcp/package.json` if a real `npm pkg set` was run locally to test it.
 - `cd mcp && npm pack --dry-run`: tarball contains only `dist/**`, `package.json`, `README.md`, `LICENSE`; `bin` present; `dist/index.js` begins with the `#!/usr/bin/env node` shebang. No `src/`, tests, scripts, or `node_modules`.
+- **Confirm fonts are externalized, not inlined** (resolves the esbuild subpath-external question): after `cd mcp && npm run build`, `grep -c "data:font/ttf;base64" dist/index.js` must be `0` and the bundle ~79 KB (already verified empirically during design — `external: ['goldenchart']` covers `goldenchart/fonts`). If fonts were inlined, the published mcp would carry ~800 KB of duplicated font bytes; the grep guards against a future tsup/esbuild change that breaks subpath externalization.
 - `release-mcp.yml` YAML parses; the tag-guard and pin shell logic validated locally with a simulated `GITHUB_REF_NAME=mcp-v0.1.0`.
 
 ## Manual prerequisites (user actions)
