@@ -32,6 +32,11 @@
       "types": "./dist/fonts.d.ts",
       "import": "./dist/fonts.js",
       "require": "./dist/fonts.cjs"
+    },
+    "./interactive": {
+      "types": "./dist/interactive.d.ts",
+      "import": "./dist/interactive.js",
+      "require": "./dist/interactive.cjs"
     }
   },
   "files": [

@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import type { CSSProperties, MouseEvent, ReactNode } from 'react';
+import type { CSSProperties, MouseEvent, PointerEvent, ReactNode } from 'react';
 import type { RoughPathInfo } from '../render/roughGenerator';
 
 interface SketchPathsProps {
@@ -7,6 +7,13 @@ interface SketchPathsProps {
   className?: string;
   style?: CSSProperties;
   onClick?: (event: MouseEvent<SVGElement>) => void;
+  /** Inert `data-*` attributes (e.g. from `markAttrs`) spread onto the group. */
+  dataAttrs?: Record<string, string>;
+  onPointerEnter?: (event: PointerEvent<SVGElement>) => void;
+  onPointerMove?: (event: PointerEvent<SVGElement>) => void;
+  onPointerLeave?: (event: PointerEvent<SVGElement>) => void;
+  onPointerDown?: (event: PointerEvent<SVGElement>) => void;
+  onPointerUp?: (event: PointerEvent<SVGElement>) => void;
   children?: ReactNode;
   /** Normalize path length to 1 so the draw-on reveal animation can dash it. */
   animate?: boolean;
@@ -24,13 +31,37 @@ interface SketchPathsProps {
  * to the shape (when a `clip` outline is supplied) and, during the draw-on
  * reveal, dashes only the outline while the fill fades in.
  */
-export function SketchPaths({ paths, className, style, onClick, children, animate, clip }: SketchPathsProps) {
+export function SketchPaths({
+  paths,
+  className,
+  style,
+  onClick,
+  dataAttrs,
+  onPointerEnter,
+  onPointerMove,
+  onPointerLeave,
+  onPointerDown,
+  onPointerUp,
+  children,
+  animate,
+  clip,
+}: SketchPathsProps) {
   const rawId = useId();
   const hasFill = paths.some((p) => p.kind === 'fill');
   const clipId = clip && hasFill ? `gc-clip-${rawId.replace(/:/g, '')}` : null;
 
   return (
-    <g className={className} style={style} onClick={onClick}>
+    <g
+      className={className}
+      style={style}
+      onClick={onClick}
+      onPointerEnter={onPointerEnter}
+      onPointerMove={onPointerMove}
+      onPointerLeave={onPointerLeave}
+      onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
+      {...dataAttrs}
+    >
       {clipId ? (
         <clipPath id={clipId}>
           <path d={clip!} />

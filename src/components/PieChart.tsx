@@ -9,6 +9,7 @@ import { resolveVibe } from '../vibe/resolveVibe';
 import { Surface } from './Surface';
 import { RoughPath } from '../primitives/RoughPath';
 import { RoughText } from '../primitives/RoughText';
+import { markAttrs } from '../core/interaction';
 
 export interface PieChartProps extends BaseChartProps {
   data: ChartDatum[];
@@ -75,6 +76,14 @@ export function PieChart({
               d={slice.path}
               fill={slice.datum.color ?? colorAt(slice.index, palette)}
               seed={slice.index + 1}
+              dataAttrs={markAttrs({
+                kind: 'slice',
+                index: slice.index,
+                label: slice.datum.label,
+                value: slice.datum.value,
+                cx: cx + slice.centroid[0],
+                cy: cy + slice.centroid[1],
+              })}
             />
             {showLabels && slice.endAngle - slice.startAngle > 0.15 && (
               <RoughText

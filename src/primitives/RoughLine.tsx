@@ -17,6 +17,12 @@ export function RoughLine({
   className,
   style,
   onClick,
+  dataAttrs,
+  onPointerEnter,
+  onPointerMove,
+  onPointerLeave,
+  onPointerDown,
+  onPointerUp,
 }: RoughLineProps) {
   const resolved = useResolvedVibe(vibe, seed);
 
@@ -28,6 +34,18 @@ export function RoughLine({
   }, [x1, y1, x2, y2, resolved, stroke]);
 
   return (
-    <SketchPaths paths={paths} className={className} style={style} onClick={onClick} animate={!!resolved.animate?.drawOn} />
+    <SketchPaths
+      paths={paths}
+      className={className}
+      style={style}
+      onClick={onClick}
+      dataAttrs={dataAttrs}
+      onPointerEnter={onPointerEnter}
+      onPointerMove={onPointerMove}
+      onPointerLeave={onPointerLeave}
+      onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
+      animate={!!resolved.animate?.drawOn}
+    />
   );
 }

@@ -30,6 +30,12 @@ export function RoughText({
   className,
   style,
   onClick,
+  dataAttrs,
+  onPointerEnter,
+  onPointerMove,
+  onPointerLeave,
+  onPointerDown,
+  onPointerUp,
 }: RoughTextProps) {
   const resolved = useResolvedVibe(vibe, seed);
   const lines = maxWidth ? wrapText(children, maxWidth, resolved.fontSize, resolved.fontFamily) : null;
@@ -70,6 +76,12 @@ export function RoughText({
       className={className}
       style={style}
       onClick={onClick}
+      onPointerEnter={onPointerEnter}
+      onPointerMove={onPointerMove}
+      onPointerLeave={onPointerLeave}
+      onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
+      {...dataAttrs}
     >
       {content}
     </text>

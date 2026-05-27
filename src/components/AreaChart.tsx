@@ -18,6 +18,7 @@ import { Legend } from './Legend';
 import { Annotations } from './Annotations';
 import type { Annotation } from './Annotations';
 import { RoughPath } from '../primitives/RoughPath';
+import { markAttrs } from '../core/interaction';
 
 export interface AreaChartProps extends BaseChartProps {
   series: Series[];
@@ -94,7 +95,7 @@ export function AreaChart({
         const fill =
           `M${top.map((p) => `${p.x},${p.y}`).join(' L')} ` +
           `L${[...bottom].reverse().map((p) => `${p.x},${p.y}`).join(' L')} Z`;
-        return { id: s.id, color: s.color ?? colorAt(i, palette), fill, line: linePath(top, curve) };
+        return { id: s.id, color: s.color ?? colorAt(i, palette), fill, line: linePath(top, curve), pixels: top, points: s.points };
       });
 
       return { x: xScale, y: yScale, areas: computed };
@@ -111,6 +112,8 @@ export function AreaChart({
         color: s.color ?? colorAt(i, palette),
         fill: areaPath(pixels, y0, curve),
         line: linePath(pixels, curve),
+        pixels,
+        points: s.points,
       };
     });
 
@@ -136,6 +139,24 @@ export function AreaChart({
         <g key={a.id}>
           <RoughPath d={a.fill} fill={a.color} seed={i + 1} />
           {showLine && <RoughPath d={a.line} stroke={a.color} fill={null} seed={i + 50} />}
+          {/* Inert transparent hit targets per datum (the area/line is a merged path). */}
+          {a.pixels.map((p, j) => (
+            <circle
+              key={`hit-${j}`}
+              cx={p.x}
+              cy={p.y}
+              r={10}
+              fill="transparent"
+              {...markAttrs({
+                kind: 'point',
+                series: a.id,
+                index: j,
+                value: { x: a.points[j].x, y: a.points[j].y },
+                cx: p.x,
+                cy: p.y,
+              })}
+            />
+          ))}
         </g>
       ))}
       {annotations && <Annotations annotations={annotations} plot={plot} xScale={x} yScale={y} />}

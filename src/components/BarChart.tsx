@@ -18,6 +18,7 @@ import { Annotations } from './Annotations';
 import type { Annotation } from './Annotations';
 import { RoughRectangle } from '../primitives/RoughRectangle';
 import { useVibeContext } from '../vibe/VibeProvider';
+import { markAttrs } from '../core/interaction';
 
 export type BarMode = 'single' | 'grouped' | 'stacked';
 
@@ -43,6 +44,9 @@ interface LaidBar {
   width: number;
   height: number;
   color?: string;
+  label: string;
+  value: number;
+  series?: string;
 }
 
 /**
@@ -108,6 +112,8 @@ export function BarChart({
           y: Math.min(top, baseline),
           width: xScale.bandwidth(),
           height: Math.abs(baseline - top),
+          label: d.label,
+          value: d.value,
         };
       });
       return { x: xScale, y: yScale, bars: computed, keys: [] as string[] };
@@ -132,6 +138,9 @@ export function BarChart({
           y: yScale(s.end),
           width: xScale.bandwidth(),
           height: yScale(s.start) - yScale(s.end),
+          label: s.label,
+          value: s.value,
+          series: s.key,
         }));
     } else {
       yScale = linearScale([0, groupMax(multi, seriesIds)], [plot.y + plot.height, plot.y]);
@@ -147,6 +156,9 @@ export function BarChart({
             y: Math.min(top, baseline),
             width: inner.bandwidth(),
             height: Math.abs(baseline - top),
+            label: d.label,
+            value: d.values[key] ?? 0,
+            series: key,
           };
         }),
       );
@@ -212,6 +224,15 @@ function BarChartBar({ bar, index }: { bar: LaidBar; index: number }) {
       height={bar.height}
       fill={bar.color ?? vibe.fill}
       seed={vibe.seed + index}
+      dataAttrs={markAttrs({
+        kind: 'bar',
+        series: bar.series,
+        index,
+        label: bar.label,
+        value: bar.value,
+        cx: bar.x + bar.width / 2,
+        cy: bar.y,
+      })}
     />
   );
 }

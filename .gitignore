@@ -6,3 +6,5 @@ playground/dist
 coverage
 .vite
 .turbo
+.worktrees
+.firecrawl
