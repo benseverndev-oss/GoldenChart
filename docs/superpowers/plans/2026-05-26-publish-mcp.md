@@ -95,9 +95,16 @@ cd mcp && node -e "const p=require('./package.json'); if(p.version!=='0.1.0')thr
 ```
 Expected: `mcp package.json OK: goldenchart-mcp 0.1.0 dep: file:..` (confirms the dep is STILL `file:..` — it must not be changed here).
 
-- [ ] **Step 6: Commit.**
+- [ ] **Step 6: Sync the lockfile to the new version.** `mcp/package-lock.json` is committed at `0.0.1`; reconcile it to `package.json` without installing/fetching:
 ```bash
-git add mcp/package.json
+cd mcp && npm install --package-lock-only && cd ..
+node -p "require('./mcp/package-lock.json').version"   # expect 0.1.0
+```
+This updates the lockfile's `version` (and `packages[""].version`) to `0.1.0`. It should NOT change the `goldenchart` `file:..` entry or other deps. If it pulls in unrelated changes, inspect `git diff mcp/package-lock.json` and keep only the version bump.
+
+- [ ] **Step 7: Commit** package.json + the synced lockfile together.
+```bash
+git add mcp/package.json mcp/package-lock.json
 git commit -m "Add npm publish metadata, keywords, publishConfig, prepublishOnly to MCP package; bump to 0.1.0"
 ```
 
@@ -217,7 +224,7 @@ node -p "require('./mcp/package.json').dependencies.goldenchart"
 ```
 Expected: `file:..`.
 
-- [ ] **Step 5: Clean tree.** `git status` clean except intended; no `mcp/dist/`, `*.tgz`, or `node_modules/` staged; no `mcp/src/`, `src/`, `release.yml`, or `ci.yml` changes.
+- [ ] **Step 5: Clean tree.** `git status` clean except intended; no `mcp/dist/`, `*.tgz`, or `node_modules/` staged; no `mcp/src/`, `src/`, `release.yml`, or `ci.yml` changes. Note: the Step 1 `npm install` in `mcp/` should not re-dirty `mcp/package-lock.json` (already synced to 0.1.0 in Task 2); if it shows a trivial diff, inspect and revert with `git checkout -- mcp/package-lock.json` if it's not a meaningful change.
 
 No commit in this task (verification only).
 
