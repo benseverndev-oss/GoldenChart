@@ -23,6 +23,7 @@ import {
   HeatmapChart,
   RadarChart,
   AutoChart,
+  planChart,
   Surface,
   RoughPath,
   RoughCircle,
@@ -266,11 +267,23 @@ const CRITIQUES = critiqueChart(compileChart(CRITIQUE_DATA, CRITIQUE_REC), CRITI
 
 const SPARK_POINTS = [3, 7, 4, 9, 6, 11, 8, 14].map((v, i) => ({ x: i * 50, y: 120 - v * 7 }));
 
+// Row records for the natural-language demo — named fields the parser resolves.
+const NL_DATA = [
+  { month: 'Jan', revenue: 12, region: 'NA' },
+  { month: 'Feb', revenue: 19, region: 'EU' },
+  { month: 'Mar', revenue: 7, region: 'NA' },
+  { month: 'Apr', revenue: 24, region: 'EU' },
+];
+
 export function App() {
   const [preset, setPreset] = useState<VibePreset>('messy_sketch');
   const [roughness, setRoughness] = useState(VIBE_PRESETS[preset].roughness);
+  const [query, setQuery] = useState('revenue by month as a line in pencil');
 
   const vibe: VibeConfig = { preset, roughness };
+
+  // Re-derive the interpretation for display (AutoChart re-parses internally).
+  const plan = planChart(NL_DATA, { query });
 
   return (
     <div className="min-h-screen bg-amber-50 p-8 text-gray-900">
@@ -313,6 +326,39 @@ export function App() {
           />
           <span className="w-10 tabular-nums text-gray-600">{roughness.toFixed(1)}</span>
         </label>
+      </section>
+
+      <section className="mx-auto mb-8 max-w-5xl rounded-lg border border-gray-300 bg-white p-4 shadow-sm">
+        <label className="block">
+          <span className="font-medium">Describe your chart</span>
+          <input
+            type="text"
+            className="mt-1 w-full rounded border border-gray-300 px-3 py-2"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder='e.g. "revenue by region as a pie in neon"'
+          />
+        </label>
+        <p className="mt-2 text-xs text-gray-600">
+          Fields: <code>month</code>, <code>revenue</code>, <code>region</code>. Try{' '}
+          <code>revenue by region as a pie</code> or <code>compare revenue across region in chalkboard</code>.
+        </p>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <AutoChart width={460} height={280} query={query} data={NL_DATA} />
+          <div className="text-sm text-gray-700">
+            <p className="font-medium">Interpretation</p>
+            <ul className="mt-1 space-y-1">
+              <li>chart: <code>{plan.recommendation.chartType}</code></li>
+              <li>intent: <code>{plan.hints.intent ?? '—'}</code></li>
+              <li>roles: <code>{plan.hints.roles ? JSON.stringify(plan.hints.roles) : '—'}</code></li>
+              <li>vibe: <code>{String(plan.hints.vibe ?? '—')}</code></li>
+              <li>confidence: <code>{plan.hints.confidence.toFixed(2)}</code></li>
+              {plan.hints.unresolved.length > 0 && (
+                <li>unresolved: <code>{plan.hints.unresolved.join(', ')}</code></li>
+              )}
+            </ul>
+          </div>
+        </div>
       </section>
 
       <main className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2">

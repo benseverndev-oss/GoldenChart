@@ -86,20 +86,32 @@ export interface VibeOverrides {
    * Rough.js knob — consumed by the renderer.
    */
   background?: string;
+  /**
+   * Background micro-texture painted behind the data (e.g. `'paper'` grain) so
+   * matte vibes don't read as a flat fill. Not a Rough.js knob — consumed by the
+   * renderer.
+   */
+  texture?: VibeTexture;
   /** Reveal animation. Not a Rough.js knob — consumed by the renderer. */
   animate?: VibeAnimate;
 }
+
+/** Background micro-texture kinds. */
+export type VibeTexture = 'paper';
 
 /**
  * A preset with every knob filled in. The Vibe engine resolves any `VibeConfig`
  * down to this shape before it ever reaches Rough.js. `fill` and `animate` are
  * handled explicitly (nullable / optional) rather than via `Required`.
  */
-export interface ResolvedVibe extends Required<Omit<VibeOverrides, 'fill' | 'animate' | 'background'>> {
+export interface ResolvedVibe
+  extends Required<Omit<VibeOverrides, 'fill' | 'animate' | 'background' | 'texture'>> {
   preset: VibePreset;
   fill: string | null;
   /** Optional page colour; see `VibeOverrides.background`. */
   background?: string;
+  /** Optional background micro-texture; see `VibeOverrides.texture`. */
+  texture?: VibeTexture;
   animate?: VibeAnimate;
 }
 
