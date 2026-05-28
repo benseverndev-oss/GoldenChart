@@ -24,7 +24,7 @@ export const vibeTools: ToolDef[] = [
       description: 'List every built-in vibe preset with its fully-resolved Rough.js knobs.',
       inputSchema: {},
       outputSchema: {
-        presets: z.array(z.object({ name: z.string(), resolved: z.record(z.unknown()) })),
+        presets: z.array(z.object({ name: z.string(), resolved: z.record(z.string(), z.unknown()) })),
       },
     },
     handler: async () => {
@@ -40,7 +40,7 @@ export const vibeTools: ToolDef[] = [
       description:
         'Resolve a vibe config (preset name or preset + overrides) into the full ResolvedVibe and the Rough.js options it maps to.',
       inputSchema: { vibe: VibeConfigSchema },
-      outputSchema: { resolved: z.record(z.unknown()), roughOptions: z.record(z.unknown()) },
+      outputSchema: { resolved: z.record(z.string(), z.unknown()), roughOptions: z.record(z.string(), z.unknown()) },
     },
     handler: async (args) => {
       const resolved = resolveVibe(args.vibe as VibeConfig);

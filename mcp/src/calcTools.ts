@@ -150,7 +150,7 @@ export const calcTools: ToolDef[] = [
         innerRadius: z.number().optional(),
         padAngle: z.number().optional(),
       },
-      outputSchema: { slices: z.array(z.record(z.unknown())) },
+      outputSchema: { slices: z.array(z.record(z.string(), z.unknown())) },
     },
     handler: async (args) => {
       const slices = computePie(
@@ -174,7 +174,7 @@ export const calcTools: ToolDef[] = [
         edges: z.array(FlowEdgeSchema).optional(),
         direction: FlowDirectionSchema.optional(),
       },
-      outputSchema: { nodes: z.array(z.record(z.unknown())), edges: z.array(z.record(z.unknown())) },
+      outputSchema: { nodes: z.array(z.record(z.string(), z.unknown())), edges: z.array(z.record(z.string(), z.unknown())) },
     },
     handler: async (args) => {
       const layout = layoutTree(
@@ -226,11 +226,11 @@ export const calcTools: ToolDef[] = [
       title: 'Profile Data',
       description:
         'Inspect an array of records and report field types/cardinality and the overall data shape (feeds chart recommendation).',
-      inputSchema: { data: z.array(z.record(z.unknown())).min(1) },
+      inputSchema: { data: z.array(z.record(z.string(), z.unknown())).min(1) },
       outputSchema: {
         rowCount: z.number(),
         shape: z.string(),
-        fields: z.array(z.record(z.unknown())),
+        fields: z.array(z.record(z.string(), z.unknown())),
       },
     },
     handler: async (args) => {
@@ -247,8 +247,8 @@ export const calcTools: ToolDef[] = [
       title: 'Transform Data',
       description:
         'Reshape an array of records with a transform pipeline (sort, filter, topN, aggregate, bin, rolling, pivot) before charting. JSON in, JSON out.',
-      inputSchema: { data: z.array(z.record(z.unknown())), pipeline: z.array(TransformSchema) },
-      outputSchema: { rows: z.array(z.record(z.unknown())) },
+      inputSchema: { data: z.array(z.record(z.string(), z.unknown())), pipeline: z.array(TransformSchema) },
+      outputSchema: { rows: z.array(z.record(z.string(), z.unknown())) },
     },
     handler: async (args) => {
       const rows = applyTransforms(args.data as Row[], args.pipeline as Transform[]);

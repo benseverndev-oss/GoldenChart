@@ -187,7 +187,7 @@ export const ColorScaleNameSchema = z.enum([
 
 export const MultiSeriesDatumSchema = z.object({
   label: z.string(),
-  values: z.record(z.number()),
+  values: z.record(z.string(), z.number()),
 });
 
 export const BarModeSchema = z.enum(['single', 'grouped', 'stacked']);
@@ -558,7 +558,7 @@ export const ChartNodeSchema = z.object({
   width: z.number().positive(),
   height: z.number().positive(),
   /** Chart-specific props (data/series/nodes, options) passed straight through. */
-  props: z.record(z.unknown()).optional(),
+  props: z.record(z.string(), z.unknown()).optional(),
 });
 
 /** A node in a composed scene: a primitive or a positioned chart. */

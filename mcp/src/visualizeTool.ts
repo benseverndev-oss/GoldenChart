@@ -49,7 +49,7 @@ export const visualizeTools: ToolDef[] = [
       description:
         'Profile raw records, auto-pick the best-fit chart, and render it as SVG. Optionally pass a plain-English `query` (e.g. "revenue by month as a line in pencil") to steer the chart type, field roles, and vibe. Returns the chosen chart with its rationale, ranked alternatives, and — when a query is given — how the query was interpreted.',
       inputSchema: {
-        data: z.array(z.record(z.unknown())).min(1),
+        data: z.array(z.record(z.string(), z.unknown())).min(1),
         query: z
           .string()
           .optional()
@@ -69,7 +69,7 @@ export const visualizeTools: ToolDef[] = [
           .object({
             intent: z.string().optional(),
             chartType: z.string().optional(),
-            roles: z.record(z.string()).optional(),
+            roles: z.record(z.string(), z.string()).optional(),
             vibe: z.unknown().optional(),
             unresolved: z.array(z.string()),
             confidence: z.number(),
@@ -110,7 +110,7 @@ export const visualizeTools: ToolDef[] = [
       description:
         'Profile data, pick the best-fit chart, and critique it for common dataviz mistakes (too many categories, label collisions, misleading pies, too many colours, …). Returns actionable critiques (with fix patches) an agent can act on in a refine loop, plus the rendered chart.',
       inputSchema: {
-        data: z.array(z.record(z.unknown())).min(1),
+        data: z.array(z.record(z.string(), z.unknown())).min(1),
         intent: z
           .enum(['trend', 'compare', 'composition', 'distribution', 'correlation', 'flow', 'hierarchy'])
           .optional(),
@@ -126,7 +126,7 @@ export const visualizeTools: ToolDef[] = [
             severity: z.enum(['info', 'warn']),
             rule: z.string(),
             message: z.string(),
-            fix: z.record(z.unknown()).optional(),
+            fix: z.record(z.string(), z.unknown()).optional(),
           }),
         ),
       },
