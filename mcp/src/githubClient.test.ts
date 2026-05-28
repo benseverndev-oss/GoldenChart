@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createGithubClient, GithubFetchError } from './githubClient';
+import { createGithubClient } from './githubClient';
 
 function fakeFetch(responses: Record<string, { status: number; body?: unknown; headers?: Record<string, string> }>) {
   return vi.fn(async (input: string | URL) => {
@@ -72,7 +72,8 @@ describe('githubClient', () => {
     const fetch = vi.fn(async () => new Response(JSON.stringify({ stargazers_count: 1 }), { status: 200 }));
     const c = createGithubClient({ fetch: fetch as unknown as typeof globalThis.fetch, token: 'ghp_xxx' });
     await c.getRepo('o', 'r');
-    const headers = (fetch.mock.calls[0][1] as RequestInit | undefined)?.headers as Record<string, string>;
+    const call = fetch.mock.calls[0] as unknown as [unknown, RequestInit | undefined];
+    const headers = call[1]?.headers as Record<string, string>;
     expect(headers.Authorization).toBe('Bearer ghp_xxx');
     expect(headers['X-GitHub-Api-Version']).toBe('2022-11-28');
   });
