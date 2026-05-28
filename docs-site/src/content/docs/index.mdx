@@ -1,0 +1,44 @@
+---
+title: GoldenChart
+description: Hand-drawn, sketchy React charts and flowcharts.
+template: splash
+hero:
+  tagline: Hand-drawn, sketchy React charts and flowcharts. D3 does the math, Rough.js does the drawing, and a Vibe engine dials in the aesthetic.
+  actions:
+    - text: Quick start
+      link: /start/quick-start/
+      icon: right-arrow
+      variant: primary
+    - text: Live demo
+      link: https://benseverndev-oss.github.io/GoldenChart/
+      icon: external
+    - text: GitHub
+      link: https://github.com/benseverndev-oss/GoldenChart
+      icon: external
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid stagger>
+  <Card title="Calc / render / vibe split" icon="puzzle">
+    Calculation layer (`d3-scale`, `d3-shape`, `d3-hierarchy`) computes coordinates
+    and never touches the DOM. The render layer (`roughjs`) turns those coordinates
+    into hand-drawn SVG. The Vibe engine translates `messy_sketch` into concrete
+    Rough.js parameters.
+  </Card>
+  <Card title="27 vibes, layered with brand" icon="seti:image">
+    Every chart can take a vibe preset (`chaotic_notebook`, `chalkboard`, `neon`, …)
+    plus a brand identity (palette, primary, ink, page, font, logo). Swap either
+    independently.
+  </Card>
+  <Card title="Headless + MCP first-class" icon="seti:python">
+    `goldenchart/server`'s `renderToSVGString` is the seam every server-side and
+    LLM-driven path builds on. The `goldenchart-mcp` package exposes the whole
+    library to agents level by level.
+  </Card>
+  <Card title="Interactive, accessible, exportable" icon="seti:react">
+    Hover/focus tooltips, brush-zoom, linked selection, screen-reader-friendly
+    `<title>` / `<desc>` / SR-only data tables, PNG/SVG client-side export — all
+    opt-in, all under a 75 KB gzipped budget.
+  </Card>
+</CardGrid>
