@@ -50,6 +50,19 @@ export function Sales() {
 }
 ```
 
+Need the chart to fill its parent? Wrap it in `<ResponsiveContainer>` —
+a `ResizeObserver`-backed render-prop that hands the chart `{ width, height }`:
+
+```tsx
+import { BarChart, ResponsiveContainer } from 'goldenchart';
+
+<ResponsiveContainer aspectRatio={16 / 9} maxHeight={400}>
+  {({ width, height }) => (
+    <BarChart width={width} height={height} data={data} />
+  )}
+</ResponsiveContainer>
+```
+
 ## Compose your own
 
 Every chart is built from reusable primitives, so you can draw arbitrary diagrams.

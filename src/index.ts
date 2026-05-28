@@ -28,6 +28,7 @@ export type { RoughPathInfo } from './render/roughGenerator';
 // High-level components
 export {
   Surface,
+  ResponsiveContainer,
   BarChart,
   LineChart,
   AreaChart,
@@ -60,6 +61,8 @@ export {
 } from './components';
 export type {
   SurfaceProps,
+  ResponsiveContainerProps,
+  ResponsiveSize,
   BarChartProps,
   BarMode,
   LineChartProps,
