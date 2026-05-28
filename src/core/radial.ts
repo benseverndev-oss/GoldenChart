@@ -49,7 +49,8 @@ export function radialLayout(): LayoutEngine {
     // nodes at the measured width (the inner rings are usually the binding
     // constraint — few nodes, but a small radius).
     const countByDepth = new Map<number, number>();
-    for (const d of root.descendants()) countByDepth.set(d.depth, (countByDepth.get(d.depth) ?? 0) + 1);
+    for (const d of root.descendants())
+      countByDepth.set(d.depth, (countByDepth.get(d.depth) ?? 0) + 1);
     for (const [d, count] of countByDepth) {
       if (d === 0) continue;
       radius = Math.max(radius, (count * (maxW + gap) * depth) / (2 * Math.PI * d));
@@ -88,7 +89,9 @@ export function radialLayout(): LayoutEngine {
       if (!s || !t) return [];
       const from = { x: s.x, y: s.y };
       const to = { x: t.x, y: t.y };
-      return [{ from: s.id, to: t.id, sx: from.x, sy: from.y, tx: to.x, ty: to.y, points: [from, to] }];
+      return [
+        { from: s.id, to: t.id, sx: from.x, sy: from.y, tx: to.x, ty: to.y, points: [from, to] },
+      ];
     });
 
     return { nodes: laidOutNodes, edges: laidOutEdges, orientation: 'vertical' };

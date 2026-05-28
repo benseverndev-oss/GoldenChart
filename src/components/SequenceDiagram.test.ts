@@ -29,7 +29,13 @@ describe('computeSequence', () => {
     // Lifelines start below the header box.
     expect(layout.actors[0].lifelineTop).toBe(layout.actors[0].boxHeight);
     // Messages keep input order and descend.
-    expect(layout.messages.map((m) => m.label)).toEqual(['click', 'query', 'validate', 'rows', 'render']);
+    expect(layout.messages.map((m) => m.label)).toEqual([
+      'click',
+      'query',
+      'validate',
+      'rows',
+      'render',
+    ]);
     for (let i = 1; i < layout.messages.length; i++) {
       expect(layout.messages[i].y).toBeGreaterThan(layout.messages[i - 1].y);
     }
@@ -57,7 +63,13 @@ describe('computeSequence', () => {
 describe('SequenceDiagram', () => {
   it('renders actors, lifelines and messages as standalone SVG', () => {
     const svg = renderToSVGString(
-      createElement(SequenceDiagram, { actors: ACTORS, messages: MESSAGES, width: 480, height: 320, bare: true }),
+      createElement(SequenceDiagram, {
+        actors: ACTORS,
+        messages: MESSAGES,
+        width: 480,
+        height: 320,
+        bare: true,
+      }),
     );
     expect(svg.startsWith('<svg')).toBe(true);
     expect(svg).toContain('User');

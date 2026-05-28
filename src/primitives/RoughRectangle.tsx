@@ -40,7 +40,9 @@ export function RoughRectangle({
     return drawableToPaths(drawable);
   }, [x, y, width, height, resolved, stroke, fill]);
 
-  const clip = allFinite(x, y, width, height) ? `M${x},${y}h${width}v${height}h${-width}z` : undefined;
+  const clip = allFinite(x, y, width, height)
+    ? `M${x},${y}h${width}v${height}h${-width}z`
+    : undefined;
 
   return (
     <SketchPaths

@@ -34,7 +34,8 @@ export interface ChartRecommendation {
   rationale: string;
 }
 
-const all = (fields: FieldProfile[], type: FieldProfile['type']) => fields.filter((f) => f.type === type);
+const all = (fields: FieldProfile[], type: FieldProfile['type']) =>
+  fields.filter((f) => f.type === type);
 
 /** Intent → chart types it should boost. */
 const INTENT_BOOST: Record<Intent, ChartType[]> = {
@@ -86,8 +87,18 @@ export function recommendChart(profile: DataProfile, intent?: Intent): ChartReco
     });
   } else if (t[0] && q[0]) {
     const enc = { x: t[0].name, y: q[0].name, ...(c[0] ? { series: c[0].name } : {}) };
-    push({ chartType: 'line', encoding: enc, confidence: 0.85, rationale: 'A measure over time is a trend — use a line.' });
-    push({ chartType: 'area', encoding: enc, confidence: 0.6, rationale: 'Area emphasizes magnitude over time.' });
+    push({
+      chartType: 'line',
+      encoding: enc,
+      confidence: 0.85,
+      rationale: 'A measure over time is a trend — use a line.',
+    });
+    push({
+      chartType: 'area',
+      encoding: enc,
+      confidence: 0.6,
+      rationale: 'Area emphasizes magnitude over time.',
+    });
   } else if (q.length >= 2 && c.length === 0) {
     push({
       chartType: 'scatter',
@@ -99,9 +110,13 @@ export function recommendChart(profile: DataProfile, intent?: Intent): ChartReco
     const multi = c.length >= 2;
     push({
       chartType: 'bar',
-      encoding: multi ? { x: c[0].name, series: c[1].name, y: q[0].name } : { x: c[0].name, y: q[0].name },
+      encoding: multi
+        ? { x: c[0].name, series: c[1].name, y: q[0].name }
+        : { x: c[0].name, y: q[0].name },
       confidence: 0.8,
-      rationale: multi ? 'A category split by a second category — grouped/stacked bars.' : 'One category, one measure — a bar chart.',
+      rationale: multi
+        ? 'A category split by a second category — grouped/stacked bars.'
+        : 'One category, one measure — a bar chart.',
     });
     if (!multi && c[0].cardinality <= 6) {
       push({
@@ -124,7 +139,8 @@ export function recommendChart(profile: DataProfile, intent?: Intent): ChartReco
 
   if (intent) {
     const boosted = new Set(INTENT_BOOST[intent]);
-    for (const r of recs) if (boosted.has(r.chartType)) r.confidence = Math.min(1, r.confidence + 0.15);
+    for (const r of recs)
+      if (boosted.has(r.chartType)) r.confidence = Math.min(1, r.confidence + 0.15);
   }
 
   return recs.sort((a, b) => b.confidence - a.confidence);

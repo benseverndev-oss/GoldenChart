@@ -34,7 +34,9 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2})?/;
 
 function isTemporal(values: unknown[]): boolean {
   return values.every(
-    (v) => v instanceof Date || (typeof v === 'string' && ISO_DATE.test(v) && !Number.isNaN(Date.parse(v))),
+    (v) =>
+      v instanceof Date ||
+      (typeof v === 'string' && ISO_DATE.test(v) && !Number.isNaN(Date.parse(v))),
   );
 }
 
@@ -55,7 +57,14 @@ function profileField(name: string, rows: Record<string, unknown>[]): FieldProfi
   if (values.length > 0 && isNumeric(values)) {
     if (ID_NAME.test(name) && allUnique) return { name, type: 'identifier', cardinality, example };
     const nums = values as number[];
-    return { name, type: 'quantitative', cardinality, min: Math.min(...nums), max: Math.max(...nums), example };
+    return {
+      name,
+      type: 'quantitative',
+      cardinality,
+      min: Math.min(...nums),
+      max: Math.max(...nums),
+      example,
+    };
   }
 
   if (values.length > 0 && isTemporal(values)) {
@@ -63,14 +72,16 @@ function profileField(name: string, rows: Record<string, unknown>[]): FieldProfi
   }
 
   // Strings: identifier only for id-like names or large all-unique columns.
-  const type: FieldType = ID_NAME.test(name) || (allUnique && rows.length >= 6) ? 'identifier' : 'categorical';
+  const type: FieldType =
+    ID_NAME.test(name) || (allUnique && rows.length >= 6) ? 'identifier' : 'categorical';
   return { name, type, cardinality, example };
 }
 
 function detectShape(fields: FieldProfile[]): DataShape {
   const names = new Set(fields.map((f) => f.name.toLowerCase()));
 
-  if ((names.has('source') && names.has('target')) || (names.has('from') && names.has('to'))) return 'graph';
+  if ((names.has('source') && names.has('target')) || (names.has('from') && names.has('to')))
+    return 'graph';
   if (names.has('id') && names.has('parent')) return 'hierarchy';
 
   const quantitative = fields.filter((f) => f.type === 'quantitative');
@@ -80,7 +91,8 @@ function detectShape(fields: FieldProfile[]): DataShape {
   if (categorical.length >= 1 && quantitative.length >= 3) return 'matrix';
   // long-format multi-series: an x dimension + a series dimension + one measure
   if (quantitative.length === 1 && categorical.length + temporal.length >= 2) return 'multi-series';
-  if (quantitative.length === 1 && categorical.length + temporal.length === 1) return 'single-series';
+  if (quantitative.length === 1 && categorical.length + temporal.length === 1)
+    return 'single-series';
   return 'flat-records';
 }
 

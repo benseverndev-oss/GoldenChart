@@ -34,7 +34,12 @@ describe('profileData', () => {
   });
 
   it('detects single-series and multi-series', () => {
-    expect(profileData([{ cat: 'a', n: 1 }, { cat: 'b', n: 2 }]).shape).toBe('single-series');
+    expect(
+      profileData([
+        { cat: 'a', n: 1 },
+        { cat: 'b', n: 2 },
+      ]).shape,
+    ).toBe('single-series');
     expect(
       profileData([
         { month: 'Jan', team: 'x', n: 1 },

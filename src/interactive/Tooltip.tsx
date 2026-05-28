@@ -39,7 +39,14 @@ export function Tooltip({ mark, anchor, bounds, format = defaultTooltipFormat }:
       <rect x={0} y={0} width={width} height={height} rx={4} fill={bg} opacity={0.92} />
       <RoughRectangle x={0} y={0} width={width} height={height} fill={null} />
       {lines.map((line, i) => (
-        <RoughText key={i} x={PAD} y={PAD + LINE * (i + 0.7)} anchor="start" baseline="middle" haloColor={bg}>
+        <RoughText
+          key={i}
+          x={PAD}
+          y={PAD + LINE * (i + 0.7)}
+          anchor="start"
+          baseline="middle"
+          haloColor={bg}
+        >
           {line}
         </RoughText>
       ))}

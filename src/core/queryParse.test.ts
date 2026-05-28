@@ -20,7 +20,9 @@ describe('parseChartQuery — intent', () => {
     expect(parseChartQuery('revenue breakdown', profile).intent).toBe('composition');
   });
   it('maps "relationship" to correlation', () => {
-    expect(parseChartQuery('relationship between units and revenue', profile).intent).toBe('correlation');
+    expect(parseChartQuery('relationship between units and revenue', profile).intent).toBe(
+      'correlation',
+    );
   });
 });
 
@@ -34,22 +36,33 @@ describe('parseChartQuery — chart type override', () => {
     expect(Number(hints.props?.innerRadius)).toBeGreaterThan(0);
   });
   it('forces a scatter', () => {
-    expect(parseChartQuery('show units and revenue as a scatter', profile).chartType).toBe('scatter');
+    expect(parseChartQuery('show units and revenue as a scatter', profile).chartType).toBe(
+      'scatter',
+    );
   });
 });
 
 describe('parseChartQuery — field roles', () => {
   it('"revenue by month" resolves x=month, y=revenue', () => {
-    expect(parseChartQuery('revenue by month', profile).roles).toMatchObject({ x: 'month', y: 'revenue' });
+    expect(parseChartQuery('revenue by month', profile).roles).toMatchObject({
+      x: 'month',
+      y: 'revenue',
+    });
   });
   it('"split by region" resolves a series', () => {
     expect(parseChartQuery('revenue split by region', profile).roles?.series).toBe('region');
   });
   it('"units vs revenue" resolves x=units, y=revenue', () => {
-    expect(parseChartQuery('units vs revenue', profile).roles).toMatchObject({ x: 'units', y: 'revenue' });
+    expect(parseChartQuery('units vs revenue', profile).roles).toMatchObject({
+      x: 'units',
+      y: 'revenue',
+    });
   });
   it('matches field names case- and plural-insensitively', () => {
-    expect(parseChartQuery('Revenue by Months', profile).roles).toMatchObject({ x: 'month', y: 'revenue' });
+    expect(parseChartQuery('Revenue by Months', profile).roles).toMatchObject({
+      x: 'month',
+      y: 'revenue',
+    });
   });
 });
 

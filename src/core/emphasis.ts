@@ -22,7 +22,10 @@ export function linearRegression(points: SeriesPoint[]): { slope: number; interc
 }
 
 /** The point a `pick` strategy selects (by y for max/min/peak, by order otherwise). */
-export function pickPoint(points: SeriesPoint[], pick: 'max' | 'min' | 'first' | 'last' | 'peak'): SeriesPoint | undefined {
+export function pickPoint(
+  points: SeriesPoint[],
+  pick: 'max' | 'min' | 'first' | 'last' | 'peak',
+): SeriesPoint | undefined {
   if (points.length === 0) return undefined;
   switch (pick) {
     case 'first':
@@ -85,10 +88,25 @@ export function resolveEmphasis(series: Series[], specs: EmphasisSpec[]): Resolv
       const x2 = Math.max(...xs);
       if (spec.method === 'mean') {
         const mean = points.reduce((s, p) => s + p.y, 0) / points.length;
-        annotations.push({ kind: 'segment', x1, y1: mean, x2, y2: mean, color: spec.color, label: 'mean' });
+        annotations.push({
+          kind: 'segment',
+          x1,
+          y1: mean,
+          x2,
+          y2: mean,
+          color: spec.color,
+          label: 'mean',
+        });
       } else {
         const { slope, intercept } = linearRegression(points);
-        annotations.push({ kind: 'segment', x1, y1: slope * x1 + intercept, x2, y2: slope * x2 + intercept, color: spec.color });
+        annotations.push({
+          kind: 'segment',
+          x1,
+          y1: slope * x1 + intercept,
+          x2,
+          y2: slope * x2 + intercept,
+          color: spec.color,
+        });
       }
     } else if (spec.kind === 'auto-callout') {
       const pt = pickPoint(points, spec.pick);

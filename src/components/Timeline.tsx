@@ -46,7 +46,8 @@ export function Timeline({
   );
 
   const resolved = useResolvedVibe(vibe);
-  const labelWidth = layout.orientation === 'horizontal' ? plot.width / Math.max(1, events.length) - 8 : undefined;
+  const labelWidth =
+    layout.orientation === 'horizontal' ? plot.width / Math.max(1, events.length) - 8 : undefined;
   // The sharp vector text reads as too crisp next to the sketchy axis/markers,
   // so soften it: a touch smaller and slightly muted, letting it recede.
   const textStyle = { fontSize: Math.round(resolved.fontSize * 0.92), opacity: 0.68 };
@@ -65,7 +66,12 @@ export function Timeline({
       bare={bare}
     >
       <g transform={`translate(${plot.x}, ${plot.y})`}>
-        <RoughLine x1={layout.axis.x1} y1={layout.axis.y1} x2={layout.axis.x2} y2={layout.axis.y2} />
+        <RoughLine
+          x1={layout.axis.x1}
+          y1={layout.axis.y1}
+          x2={layout.axis.x2}
+          y2={layout.axis.y2}
+        />
 
         {layout.events.map((e, i) => {
           // Build the label block as a flat list of single lines (date, label,
@@ -85,7 +91,10 @@ export function Timeline({
             const top = e.side === 1 ? e.marker.y + NEAR_GAP : e.marker.y - NEAR_GAP - blockH;
             lineY = (k) => top + (k + 0.5) * LINE_H;
             lineX = e.marker.x;
-            connTo = { x: e.marker.x, y: e.side === 1 ? e.marker.y + NEAR_GAP : e.marker.y - NEAR_GAP };
+            connTo = {
+              x: e.marker.x,
+              y: e.side === 1 ? e.marker.y + NEAR_GAP : e.marker.y - NEAR_GAP,
+            };
           } else {
             // Vertical axis: block to the left/right, vertically centred on the marker.
             const top = e.marker.y - blockH / 2;
@@ -96,9 +105,22 @@ export function Timeline({
           return (
             <g key={i}>
               <RoughLine x1={e.marker.x} y1={e.marker.y} x2={connTo.x} y2={connTo.y} seed={i + 1} />
-              <RoughCircle cx={e.marker.x} cy={e.marker.y} diameter={11} fill="#ffffff" seed={i + 1} />
+              <RoughCircle
+                cx={e.marker.x}
+                cy={e.marker.y}
+                diameter={11}
+                fill="#ffffff"
+                seed={i + 1}
+              />
               {lines.map((ln, k) => (
-                <RoughText key={k} x={lineX} y={lineY(k)} anchor={e.anchor} baseline="middle" style={textStyle}>
+                <RoughText
+                  key={k}
+                  x={lineX}
+                  y={lineY(k)}
+                  anchor={e.anchor}
+                  baseline="middle"
+                  style={textStyle}
+                >
                   {ln}
                 </RoughText>
               ))}

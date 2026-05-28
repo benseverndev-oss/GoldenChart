@@ -85,7 +85,7 @@ function ribbonPath(s: SankeyLaidNode, t: SankeyLaidNode, band: Band, horizontal
   );
 }
 
-const pushTo = <T,>(map: Map<string, T[]>, key: string, value: T): void => {
+const pushTo = <T>(map: Map<string, T[]>, key: string, value: T): void => {
   const list = map.get(key);
   if (list) list.push(value);
   else map.set(key, [value]);
@@ -143,9 +143,11 @@ export function computeSankey(
   byLayer.forEach((layerIds, l) => {
     const thicknessOf = (id: string) => Math.max(throughput(id) * scale, 2);
     const total =
-      layerIds.reduce((s, id) => s + thicknessOf(id), 0) + Math.max(0, layerIds.length - 1) * nodePadding;
+      layerIds.reduce((s, id) => s + thicknessOf(id), 0) +
+      Math.max(0, layerIds.length - 1) * nodePadding;
     let cursor = (breadthExtent - total) / 2;
-    const depthPos = maxLayer === 0 ? (depthExtent - nodeWidth) / 2 : (l / maxLayer) * (depthExtent - nodeWidth);
+    const depthPos =
+      maxLayer === 0 ? (depthExtent - nodeWidth) / 2 : (l / maxLayer) * (depthExtent - nodeWidth);
     for (const id of layerIds) {
       const node = nodeById.get(id)!;
       const thickness = thicknessOf(id);
@@ -174,8 +176,12 @@ export function computeSankey(
     pushTo(outgoing, l.source, l);
     pushTo(incoming, l.target, l);
   }
-  outgoing.forEach((list) => list.sort((a, b) => breadthCenter(a.target) - breadthCenter(b.target)));
-  incoming.forEach((list) => list.sort((a, b) => breadthCenter(a.source) - breadthCenter(b.source)));
+  outgoing.forEach((list) =>
+    list.sort((a, b) => breadthCenter(a.target) - breadthCenter(b.target)),
+  );
+  incoming.forEach((list) =>
+    list.sort((a, b) => breadthCenter(a.source) - breadthCenter(b.source)),
+  );
 
   const bands = new Map<SankeyLinkInput, Band>();
   outgoing.forEach((list, src) => {

@@ -72,11 +72,18 @@ export function AreaChart({
   const palette = resolveBrand(brand).palette;
   const { hidden } = useSeriesVisibility();
   const legendItems: LegendItem[] =
-    showLegend && series.length > 1 ? series.map((s, i) => ({ label: s.id, color: s.color ?? colorAt(i, palette) })) : [];
+    showLegend && series.length > 1
+      ? series.map((s, i) => ({ label: s.id, color: s.color ?? colorAt(i, palette) }))
+      : [];
   const legendModel = legendItems.length
-    ? layoutLegend(legendItems, fullPlot.width, { fontSize: rv.fontSize, fontFamily: rv.fontFamily })
+    ? layoutLegend(legendItems, fullPlot.width, {
+        fontSize: rv.fontSize,
+        fontFamily: rv.fontFamily,
+      })
     : null;
-  const plot = legendModel ? { ...fullPlot, height: Math.max(1, fullPlot.height - legendModel.height - 36) } : fullPlot;
+  const plot = legendModel
+    ? { ...fullPlot, height: Math.max(1, fullPlot.height - legendModel.height - 36) }
+    : fullPlot;
 
   const { x, y, areas } = useMemo(() => {
     // Lay out, stack and rescale to the visible series only; colour stays tied to
@@ -84,7 +91,10 @@ export function AreaChart({
     const visible = series.filter((s) => !hidden.has(s.id));
     const allPoints = visible.flatMap((s) => s.points);
     const xs = allPoints.map((p) => p.x);
-    const xScale = linearScale(resolveDomain(xs, extentOf(xs, false), xAxis), [plot.x, plot.x + plot.width]);
+    const xScale = linearScale(resolveDomain(xs, extentOf(xs, false), xAxis), [
+      plot.x,
+      plot.x + plot.width,
+    ]);
 
     if (stacked) {
       const count = Math.max(0, ...visible.map((s) => s.points.length));
@@ -95,20 +105,36 @@ export function AreaChart({
 
       const computed = visible.map((s) => {
         const i = series.indexOf(s);
-        const top = s.points.map((p, idx) => ({ x: xScale(p.x), y: yScale(cumulative[idx] + p.y) }));
+        const top = s.points.map((p, idx) => ({
+          x: xScale(p.x),
+          y: yScale(cumulative[idx] + p.y),
+        }));
         const bottom = s.points.map((p, idx) => ({ x: xScale(p.x), y: yScale(cumulative[idx]) }));
         s.points.forEach((p, idx) => (cumulative[idx] += p.y));
         const fill =
           `M${top.map((p) => `${p.x},${p.y}`).join(' L')} ` +
-          `L${[...bottom].reverse().map((p) => `${p.x},${p.y}`).join(' L')} Z`;
-        return { id: s.id, color: s.color ?? colorAt(i, palette), fill, line: linePath(top, curve), pixels: top, points: s.points };
+          `L${[...bottom]
+            .reverse()
+            .map((p) => `${p.x},${p.y}`)
+            .join(' L')} Z`;
+        return {
+          id: s.id,
+          color: s.color ?? colorAt(i, palette),
+          fill,
+          line: linePath(top, curve),
+          pixels: top,
+          points: s.points,
+        };
       });
 
       return { x: xScale, y: yScale, areas: computed };
     }
 
     const yValues = [...allPoints.map((p) => p.y), baseline];
-    const yScale = linearScale(resolveDomain(yValues, extentOf(yValues), yAxis), [plot.y + plot.height, plot.y]);
+    const yScale = linearScale(resolveDomain(yValues, extentOf(yValues), yAxis), [
+      plot.y + plot.height,
+      plot.y,
+    ]);
     const y0 = yScale(baseline);
 
     const computed = visible.map((s) => {
@@ -125,7 +151,20 @@ export function AreaChart({
     });
 
     return { x: xScale, y: yScale, areas: computed };
-  }, [series, curve, baseline, stacked, plot.x, plot.y, plot.width, plot.height, xAxis, yAxis, palette, hidden]);
+  }, [
+    series,
+    curve,
+    baseline,
+    stacked,
+    plot.x,
+    plot.y,
+    plot.width,
+    plot.height,
+    xAxis,
+    yAxis,
+    palette,
+    hidden,
+  ]);
 
   return (
     <Surface
@@ -169,11 +208,30 @@ export function AreaChart({
       {annotations && <Annotations annotations={annotations} plot={plot} xScale={x} yScale={y} />}
       {showAxes && (
         <>
-          <Axis scale={x} orientation="bottom" plot={plot} tickFormat={tickFormatter(xAxis)} ticks={xAxis?.tickCount} />
-          <Axis scale={y} orientation="left" plot={plot} tickFormat={tickFormatter(yAxis)} ticks={yAxis?.tickCount} />
+          <Axis
+            scale={x}
+            orientation="bottom"
+            plot={plot}
+            tickFormat={tickFormatter(xAxis)}
+            ticks={xAxis?.tickCount}
+          />
+          <Axis
+            scale={y}
+            orientation="left"
+            plot={plot}
+            tickFormat={tickFormatter(yAxis)}
+            ticks={yAxis?.tickCount}
+          />
         </>
       )}
-      {legendModel && <Legend items={legendItems} x={fullPlot.x} y={plot.y + plot.height + 30} width={fullPlot.width} />}
+      {legendModel && (
+        <Legend
+          items={legendItems}
+          x={fullPlot.x}
+          y={plot.y + plot.height + 30}
+          width={fullPlot.width}
+        />
+      )}
     </Surface>
   );
 }

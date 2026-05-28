@@ -1,5 +1,11 @@
 import { useMemo } from 'react';
-import type { AxisFormat, BaseChartProps, ChartDatum, DataTableModel, MultiSeriesDatum } from '../types/charts';
+import type {
+  AxisFormat,
+  BaseChartProps,
+  ChartDatum,
+  DataTableModel,
+  MultiSeriesDatum,
+} from '../types/charts';
 import { bandScale, linearScale, extentOf } from '../core/scales';
 import { resolveDomain, tickFormatter } from '../core/axisFormat';
 import { getPlotArea } from '../core/geometry';
@@ -92,7 +98,10 @@ export function BarChart({
     return ids.map((k, i) => ({ label: k, color: colorAt(i, palette) }));
   }, [mode, showLegend, seriesKeys, data, palette]);
   const legendModel = legendItems.length
-    ? layoutLegend(legendItems, fullPlot.width, { fontSize: resolved.fontSize, fontFamily: resolved.fontFamily })
+    ? layoutLegend(legendItems, fullPlot.width, {
+        fontSize: resolved.fontSize,
+        fontFamily: resolved.fontFamily,
+      })
     : null;
   const plot = legendModel
     ? { ...fullPlot, height: Math.max(1, fullPlot.height - legendModel.height - 36) }
@@ -101,9 +110,15 @@ export function BarChart({
   const { x, y, bars, keys } = useMemo(() => {
     if (mode === 'single') {
       const single = data as ChartDatum[];
-      const xScale = bandScale(single.map((d) => d.label), [plot.x, plot.x + plot.width]);
+      const xScale = bandScale(
+        single.map((d) => d.label),
+        [plot.x, plot.x + plot.width],
+      );
       const values = single.map((d) => d.value);
-      const yScale = linearScale(resolveDomain(values, extentOf(values), yAxis), [plot.y + plot.height, plot.y]);
+      const yScale = linearScale(resolveDomain(values, extentOf(values), yAxis), [
+        plot.y + plot.height,
+        plot.y,
+      ]);
       const baseline = yScale(0);
       const computed: LaidBar[] = single.map((d) => {
         const top = yScale(d.value);
@@ -126,7 +141,10 @@ export function BarChart({
     // lay out only the visible ones.
     const allIds = seriesKeys ?? seriesKeysOf(multi);
     const seriesIds = allIds.filter((k) => !hidden.has(k));
-    const xScale = bandScale(multi.map((d) => d.label), [plot.x, plot.x + plot.width]);
+    const xScale = bandScale(
+      multi.map((d) => d.label),
+      [plot.x, plot.x + plot.width],
+    );
     const colorByKey = (k: string) => colorAt(allIds.indexOf(k), palette);
 
     let computed: LaidBar[];
@@ -184,7 +202,9 @@ export function BarChart({
     return {
       caption: title,
       columns: ['Label', ...keys],
-      rows: multi.map((d) => [d.label, ...keys.map((k) => d.values[k] ?? 0)] as (string | number)[]),
+      rows: multi.map(
+        (d) => [d.label, ...keys.map((k) => d.values[k] ?? 0)] as (string | number)[],
+      ),
     };
   }, [dataTable, mode, data, keys, title]);
 
@@ -211,11 +231,30 @@ export function BarChart({
       {annotations && <Annotations annotations={annotations} plot={plot} yScale={y} />}
       {showAxes && (
         <>
-          <Axis scale={x} orientation="bottom" plot={plot} tickFormat={tickFormatter(xAxis)} ticks={xAxis?.tickCount} />
-          <Axis scale={y} orientation="left" plot={plot} tickFormat={tickFormatter(yAxis)} ticks={yAxis?.tickCount} />
+          <Axis
+            scale={x}
+            orientation="bottom"
+            plot={plot}
+            tickFormat={tickFormatter(xAxis)}
+            ticks={xAxis?.tickCount}
+          />
+          <Axis
+            scale={y}
+            orientation="left"
+            plot={plot}
+            tickFormat={tickFormatter(yAxis)}
+            ticks={yAxis?.tickCount}
+          />
         </>
       )}
-      {legendModel && <Legend items={legendItems} x={fullPlot.x} y={plot.y + plot.height + 30} width={fullPlot.width} />}
+      {legendModel && (
+        <Legend
+          items={legendItems}
+          x={fullPlot.x}
+          y={plot.y + plot.height + 30}
+          width={fullPlot.width}
+        />
+      )}
     </Surface>
   );
 }

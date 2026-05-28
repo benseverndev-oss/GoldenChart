@@ -21,7 +21,10 @@ export function LinkedCharts({ children }: { children: ReactNode }) {
   const publish = useCallback((source: string, keys: string[]) => {
     setState((s) => setFilter(s, source, keys));
   }, []);
-  const value = useMemo<LinkGroupValue>(() => ({ filter: activeFilter(state), publish }), [state, publish]);
+  const value = useMemo<LinkGroupValue>(
+    () => ({ filter: activeFilter(state), publish }),
+    [state, publish],
+  );
   return <LinkContext.Provider value={value}>{children}</LinkContext.Provider>;
 }
 

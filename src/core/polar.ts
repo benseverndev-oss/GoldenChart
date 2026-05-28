@@ -23,7 +23,8 @@ export function polygonPath(points: Point[]): string {
 
 const TWO_PI = 2 * Math.PI;
 /** Forward (clockwise) angular span in `[0, 2π)`, robust to wrapped/unordered inputs. */
-const forwardSpan = (startRad: number, endRad: number) => (((endRad - startRad) % TWO_PI) + TWO_PI) % TWO_PI;
+const forwardSpan = (startRad: number, endRad: number) =>
+  (((endRad - startRad) % TWO_PI) + TWO_PI) % TWO_PI;
 /** Polygon vertices step from the top (12 o'clock), like `axisAngle`, so rotation 0 points up. */
 const TOP = -Math.PI / 2;
 
@@ -31,7 +32,13 @@ const TOP = -Math.PI / 2;
  * Closed regular n-gon centered at `(cx, cy)`. The first vertex sits at the top
  * (12 o'clock) when `rotationRad` is 0; `rotationRad` rotates clockwise from there.
  */
-export function regularPolygonPath(cx: number, cy: number, r: number, sides: number, rotationRad = 0): string {
+export function regularPolygonPath(
+  cx: number,
+  cy: number,
+  r: number,
+  sides: number,
+  rotationRad = 0,
+): string {
   const points = Array.from({ length: sides }, (_, i) =>
     polarToCartesian(cx, cy, r, TOP + rotationRad + (i / sides) * TWO_PI),
   );
@@ -62,7 +69,13 @@ export function starPath(
  * increasing-angle (clockwise on screen) direction, so wrapped/unordered angles
  * (e.g. 350°→10°) still produce the intended short arc. No fill — unclosed.
  */
-export function arcStrokePath(cx: number, cy: number, r: number, startRad: number, endRad: number): string {
+export function arcStrokePath(
+  cx: number,
+  cy: number,
+  r: number,
+  startRad: number,
+  endRad: number,
+): string {
   const start = polarToCartesian(cx, cy, r, startRad);
   const end = polarToCartesian(cx, cy, r, endRad);
   const largeArc = forwardSpan(startRad, endRad) > Math.PI ? 1 : 0;

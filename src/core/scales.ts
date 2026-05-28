@@ -6,20 +6,34 @@ import type { ScaleBand, ScaleLinear, ScalePoint, ScalePower } from 'd3-scale';
  * return functions mapping data -> coordinates. No DOM, no rendering.
  */
 
-export function linearScale(domain: [number, number], range: [number, number]): ScaleLinear<number, number> {
+export function linearScale(
+  domain: [number, number],
+  range: [number, number],
+): ScaleLinear<number, number> {
   return scaleLinear().domain(domain).range(range);
 }
 
-export function bandScale(domain: string[], range: [number, number], padding = 0.2): ScaleBand<string> {
+export function bandScale(
+  domain: string[],
+  range: [number, number],
+  padding = 0.2,
+): ScaleBand<string> {
   return scaleBand().domain(domain).range(range).padding(padding);
 }
 
-export function pointScale(domain: string[], range: [number, number], padding = 0.5): ScalePoint<string> {
+export function pointScale(
+  domain: string[],
+  range: [number, number],
+  padding = 0.5,
+): ScalePoint<string> {
   return scalePoint().domain(domain).range(range).padding(padding);
 }
 
 /** Square-root scale — the correct mapping for bubble *radii* (area ∝ value). */
-export function sqrtScale(domain: [number, number], range: [number, number]): ScalePower<number, number> {
+export function sqrtScale(
+  domain: [number, number],
+  range: [number, number],
+): ScalePower<number, number> {
   return scaleSqrt().domain(domain).range(range);
 }
 

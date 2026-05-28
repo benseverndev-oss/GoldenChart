@@ -6,8 +6,11 @@ import { RoughText } from '../primitives/RoughText';
 
 const bare = (vibe: unknown) =>
   renderToStaticMarkup(
-    createElement(Surface, { width: 100, height: 100, vibe, bare: true } as any,
-      createElement(RoughText, { x: 10, y: 10, children: 'hi' } as any)),
+    createElement(
+      Surface,
+      { width: 100, height: 100, vibe, bare: true } as any,
+      createElement(RoughText, { x: 10, y: 10, children: 'hi' } as any),
+    ),
   );
 
 describe('Surface', () => {
@@ -22,8 +25,11 @@ describe('Surface', () => {
 
   it('paints the brand page colour as the surface background', () => {
     const svg = renderToStaticMarkup(
-      createElement(Surface, { width: 100, height: 100, brand: { page: '#0d1b2a' }, bare: true } as any,
-        createElement(RoughText, { x: 10, y: 10, children: 'hi' } as any)),
+      createElement(
+        Surface,
+        { width: 100, height: 100, brand: { page: '#0d1b2a' }, bare: true } as any,
+        createElement(RoughText, { x: 10, y: 10, children: 'hi' } as any),
+      ),
     );
     expect(svg).toContain('#0d1b2a');
   });

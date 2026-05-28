@@ -14,7 +14,14 @@ describe('markAttrs', () => {
   });
 
   it('includes series when present and JSON-encodes multi-value', () => {
-    const attrs = markAttrs({ kind: 'point', series: 'revenue', index: 0, value: { x: 1, y: 2 }, cx: 5, cy: 6 });
+    const attrs = markAttrs({
+      kind: 'point',
+      series: 'revenue',
+      index: 0,
+      value: { x: 1, y: 2 },
+      cx: 5,
+      cy: 6,
+    });
     expect(attrs['data-gc-series']).toBe('revenue');
     expect(attrs['data-gc-value']).toBe('{"x":1,"y":2}');
     expect(attrs['data-gc-label']).toBeUndefined();

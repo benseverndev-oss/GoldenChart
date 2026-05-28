@@ -8,7 +8,10 @@ const FONT_FAMILY_ATTR = /font-family="([^"]*)"/g;
 
 /** Decode the HTML entities `renderToStaticMarkup` puts in attribute values. */
 function decodeEntities(value: string): string {
-  return value.replace(/&quot;/g, '"').replace(/&#x27;|&#39;/g, "'").replace(/&amp;/g, '&');
+  return value
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;|&#39;/g, "'")
+    .replace(/&amp;/g, '&');
 }
 
 /**
@@ -23,7 +26,10 @@ function embeddedFontFaces(markup: string): string {
     if (font && !byFamily.has(font.family)) byFamily.set(font.family, fontFaceCss(font));
   }
   if (byFamily.size === 0) return '';
-  const rules = [...byFamily.keys()].sort().map((f) => byFamily.get(f)!).join('');
+  const rules = [...byFamily.keys()]
+    .sort()
+    .map((f) => byFamily.get(f)!)
+    .join('');
   return `<style>${rules}</style>`;
 }
 

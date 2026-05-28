@@ -42,7 +42,10 @@ function applyDefined(target: ResolvedVibe, source: Record<string, unknown>): vo
  * preset → brand → explicit vibe overrides. A brand thus recolours any vibe
  * while an explicit per-call override still wins.
  */
-export function resolveVibe(config?: VibeConfig, brandOverrides?: Partial<VibeOverrides>): ResolvedVibe {
+export function resolveVibe(
+  config?: VibeConfig,
+  brandOverrides?: Partial<VibeOverrides>,
+): ResolvedVibe {
   const hasBrand = brandOverrides !== undefined && Object.keys(brandOverrides).length > 0;
 
   // Fast path: a bare/absent config with no brand returns the shared preset.
@@ -53,7 +56,10 @@ export function resolveVibe(config?: VibeConfig, brandOverrides?: Partial<VibeOv
     return presetOrDefault(config);
   }
 
-  const base = typeof config === 'string' || config === undefined ? presetOrDefault(config) : presetOrDefault(config.preset);
+  const base =
+    typeof config === 'string' || config === undefined
+      ? presetOrDefault(config)
+      : presetOrDefault(config.preset);
   const merged: ResolvedVibe = { ...base };
 
   // Brand colour/font knobs first, so explicit overrides win over them.

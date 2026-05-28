@@ -39,9 +39,23 @@ export function Annotations({ annotations, plot, xScale, yScale }: AnnotationsPr
           const y = yScale(a.value);
           return (
             <g key={i}>
-              <RoughLine x1={plot.x} y1={y} x2={plot.x + plot.width} y2={y} stroke={color} style={REF_DASH} seed={seed} />
+              <RoughLine
+                x1={plot.x}
+                y1={y}
+                x2={plot.x + plot.width}
+                y2={y}
+                stroke={color}
+                style={REF_DASH}
+                seed={seed}
+              />
               {a.label && (
-                <RoughText x={plot.x + plot.width} y={y - 4} anchor="end" baseline="auto" fill={color}>
+                <RoughText
+                  x={plot.x + plot.width}
+                  y={y - 4}
+                  anchor="end"
+                  baseline="auto"
+                  fill={color}
+                >
                   {a.label}
                 </RoughText>
               )}
@@ -53,7 +67,15 @@ export function Annotations({ annotations, plot, xScale, yScale }: AnnotationsPr
           const x = xScale(a.value);
           return (
             <g key={i}>
-              <RoughLine x1={x} y1={plot.y} x2={x} y2={plot.y + plot.height} stroke={color} style={REF_DASH} seed={seed} />
+              <RoughLine
+                x1={x}
+                y1={plot.y}
+                x2={x}
+                y2={plot.y + plot.height}
+                stroke={color}
+                style={REF_DASH}
+                seed={seed}
+              />
               {a.label && (
                 <RoughText x={x + 4} y={plot.y + 4} anchor="start" baseline="hanging" fill={color}>
                   {a.label}
@@ -102,7 +124,14 @@ export function Annotations({ annotations, plot, xScale, yScale }: AnnotationsPr
           const cy = yScale(a.y);
           return (
             <g key={i}>
-              <RoughCircle cx={cx} cy={cy} diameter={a.r * 2} fill={null} stroke={color} seed={seed} />
+              <RoughCircle
+                cx={cx}
+                cy={cy}
+                diameter={a.r * 2}
+                fill={null}
+                stroke={color}
+                seed={seed}
+              />
               {a.label && (
                 <RoughText x={cx} y={cy - a.r - 4} anchor="middle" baseline="auto" fill={color}>
                   {a.label}
@@ -137,8 +166,19 @@ export function Annotations({ annotations, plot, xScale, yScale }: AnnotationsPr
           return (
             <g key={i}>
               <RoughPath d={`M${tx},${ty} L${px},${py}`} stroke={color} fill={null} seed={seed} />
-              <RoughPath d={arrowHeadPath({ x: tx, y: ty }, { x: px, y: py })} stroke={color} fill={null} seed={seed} />
-              <RoughText x={tx} y={ty} anchor={tx >= px ? 'start' : 'end'} baseline="middle" fill={color}>
+              <RoughPath
+                d={arrowHeadPath({ x: tx, y: ty }, { x: px, y: py })}
+                stroke={color}
+                fill={null}
+                seed={seed}
+              />
+              <RoughText
+                x={tx}
+                y={ty}
+                anchor={tx >= px ? 'start' : 'end'}
+                baseline="middle"
+                fill={color}
+              >
                 {a.text}
               </RoughText>
             </g>

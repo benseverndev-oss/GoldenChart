@@ -52,12 +52,20 @@ export function SankeyChart({
   // margin (sized to the widest label + room for the value) so the last column's
   // labels don't run off the canvas.
   const rv = resolveVibe(vibe);
-  const maxLabelW = Math.max(0, ...nodes.map((n) => measureText(n.label ?? n.id, rv.fontSize, rv.fontFamily).width));
+  const maxLabelW = Math.max(
+    0,
+    ...nodes.map((n) => measureText(n.label ?? n.id, rv.fontSize, rv.fontFamily).width),
+  );
   const rightPad = horizontal ? Math.ceil(maxLabelW + (showValues ? 44 : 8) + 6) : 0;
   const layoutWidth = Math.max(1, plot.width - rightPad);
 
   const layout = useMemo(
-    () => computeSankey(nodes, links, [layoutWidth, plot.height], { direction, nodeWidth, nodePadding }),
+    () =>
+      computeSankey(nodes, links, [layoutWidth, plot.height], {
+        direction,
+        nodeWidth,
+        nodePadding,
+      }),
     [nodes, links, direction, nodeWidth, nodePadding, layoutWidth, plot.height],
   );
 

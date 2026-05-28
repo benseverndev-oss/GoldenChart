@@ -37,7 +37,11 @@ export interface DiagramScene extends FlowLayout {
 }
 
 /** Position a node/edge set within `size`. Bound to its options by a factory. */
-export type LayoutEngine = (nodes: FlowNode[], edges: FlowEdge[] | undefined, size: [number, number]) => DiagramScene;
+export type LayoutEngine = (
+  nodes: FlowNode[],
+  edges: FlowEdge[] | undefined,
+  size: [number, number],
+) => DiagramScene;
 
 /** The flowchart layout (tidy tree or layered DAG) as a `LayoutEngine`. */
 export function flowLayout(direction: FlowDirection = 'TB', options?: LayoutOptions): LayoutEngine {

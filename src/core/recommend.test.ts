@@ -17,11 +17,22 @@ describe('recommendChart', () => {
   });
 
   it('recommends a bar for one category + one measure', () => {
-    expect(top([{ region: 'NA', sales: 3 }, { region: 'EU', sales: 7 }]).chartType).toBe('bar');
+    expect(
+      top([
+        { region: 'NA', sales: 3 },
+        { region: 'EU', sales: 7 },
+      ]).chartType,
+    ).toBe('bar');
   });
 
   it('recommends a scatter for two quantitative fields', () => {
-    expect(top([{ x: 1, y: 2 }, { x: 3, y: 4 }, { x: 5, y: 1 }]).chartType).toBe('scatter');
+    expect(
+      top([
+        { x: 1, y: 2 },
+        { x: 3, y: 4 },
+        { x: 5, y: 1 },
+      ]).chartType,
+    ).toBe('scatter');
   });
 
   it('recommends a sankey for graph data', () => {
@@ -33,7 +44,11 @@ describe('recommendChart', () => {
   });
 
   it('intent biases the ranking toward composition charts', () => {
-    const data = [{ region: 'NA', sales: 3 }, { region: 'EU', sales: 7 }, { region: 'APAC', sales: 5 }];
+    const data = [
+      { region: 'NA', sales: 3 },
+      { region: 'EU', sales: 7 },
+      { region: 'APAC', sales: 5 },
+    ];
     const withIntent = recommendChart(profileData(data), 'composition');
     expect(withIntent.some((r) => r.chartType === 'pie')).toBe(true);
   });

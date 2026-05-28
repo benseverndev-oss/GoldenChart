@@ -1,4 +1,10 @@
-import type { BaseChartProps, FlowDirection, FlowEdge, FlowNode, LayoutOptions } from '../types/charts';
+import type {
+  BaseChartProps,
+  FlowDirection,
+  FlowEdge,
+  FlowNode,
+  LayoutOptions,
+} from '../types/charts';
 import { architectureLayout } from '../core/architecture';
 import { Diagram } from './Diagram';
 

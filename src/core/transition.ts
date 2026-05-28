@@ -31,7 +31,8 @@ type Pt = { x: number; y: number };
 type Ser = { id: string; points: Pt[] };
 
 const isDatumArray = (v: unknown): v is Datum[] =>
-  Array.isArray(v) && v.every((d) => d && typeof d.label === 'string' && typeof d.value === 'number');
+  Array.isArray(v) &&
+  v.every((d) => d && typeof d.label === 'string' && typeof d.value === 'number');
 const isSeriesArray = (v: unknown): v is Ser[] =>
   Array.isArray(v) && v.every((s) => s && typeof s.id === 'string' && Array.isArray(s.points));
 
@@ -50,7 +51,10 @@ export function interpolateChartData(from: unknown, to: unknown, t: number): unk
     const prev = new Map(from.map((s) => [s.id, s.points]));
     return to.map((s) => {
       const pp = prev.get(s.id);
-      return { ...s, points: s.points.map((p, i) => ({ x: p.x, y: pp && pp[i] ? lerp(pp[i].y, p.y, t) : p.y })) };
+      return {
+        ...s,
+        points: s.points.map((p, i) => ({ x: p.x, y: pp && pp[i] ? lerp(pp[i].y, p.y, t) : p.y })),
+      };
     });
   }
   return to;

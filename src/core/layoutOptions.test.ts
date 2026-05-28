@@ -72,7 +72,8 @@ describe('layoutFlow engine override', () => {
   it('forces the DAG engine, giving a different layout than the tidy tree', () => {
     const auto = layoutFlow(tree, size, undefined, 'TB', 'auto');
     const dag = layoutFlow(tree, size, undefined, 'TB', 'dag');
-    const coords = (l: typeof auto) => JSON.stringify(l.nodes.map((n) => [Math.round(n.x), Math.round(n.y)]));
+    const coords = (l: typeof auto) =>
+      JSON.stringify(l.nodes.map((n) => [Math.round(n.x), Math.round(n.y)]));
     expect(coords(auto)).not.toBe(coords(dag));
   });
 

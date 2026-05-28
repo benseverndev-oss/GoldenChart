@@ -69,7 +69,12 @@ export function planChart(data: Row[], opts: { query?: string; intent?: Intent }
       rationale: `Requested explicitly as a ${hints.chartType}.`,
     };
   } else {
-    chosen = recs[0] ?? { chartType: 'bar', encoding: {}, confidence: 0.3, rationale: 'Fallback bar chart.' };
+    chosen = recs[0] ?? {
+      chartType: 'bar',
+      encoding: {},
+      confidence: 0.3,
+      rationale: 'Fallback bar chart.',
+    };
   }
 
   // Patch the encoding with parsed field roles, mapped to this chart's keys.

@@ -57,8 +57,20 @@ export function Legend({ items, x, y, width }: LegendProps) {
           : {};
         return (
           <g key={it.label} opacity={isHidden ? 0.4 : undefined} {...interactiveProps}>
-            <RoughRectangle x={x + it.x} y={y + it.y - SWATCH / 2} width={SWATCH} height={SWATCH} fill={it.color} seed={i + 1} />
-            <RoughText x={x + it.x + SWATCH + SWATCH_GAP} y={y + it.y} anchor="start" baseline="middle">
+            <RoughRectangle
+              x={x + it.x}
+              y={y + it.y - SWATCH / 2}
+              width={SWATCH}
+              height={SWATCH}
+              fill={it.color}
+              seed={i + 1}
+            />
+            <RoughText
+              x={x + it.x + SWATCH + SWATCH_GAP}
+              y={y + it.y}
+              anchor="start"
+              baseline="middle"
+            >
               {it.label}
             </RoughText>
           </g>

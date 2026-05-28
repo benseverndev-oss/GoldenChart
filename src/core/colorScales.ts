@@ -31,7 +31,10 @@ function hexToRgb(hex: string): [number, number, number] {
 }
 
 function rgbToHex(r: number, g: number, b: number): string {
-  const c = (n: number) => Math.round(clamp01(n / 255) * 255).toString(16).padStart(2, '0');
+  const c = (n: number) =>
+    Math.round(clamp01(n / 255) * 255)
+      .toString(16)
+      .padStart(2, '0');
   return `#${c(r)}${c(g)}${c(b)}`;
 }
 
@@ -48,7 +51,10 @@ export function interpolateRamp(stops: string[], t: number): string {
 }
 
 /** Map a numeric domain `[min,max]` onto a sequential ramp. */
-export function sequentialColor(name: ColorScaleName, domain: [number, number]): (v: number) => string {
+export function sequentialColor(
+  name: ColorScaleName,
+  domain: [number, number],
+): (v: number) => string {
   const stops = RAMPS[name];
   const [min, max] = domain;
   const span = max - min || 1;
@@ -89,7 +95,10 @@ export function divergingColor(
 }
 
 /** Stable categorical color for a string key (cycles through the palette). */
-export function ordinalColor(values: string[], palette: string[] = DEFAULT_PALETTE): (v: string) => string {
+export function ordinalColor(
+  values: string[],
+  palette: string[] = DEFAULT_PALETTE,
+): (v: string) => string {
   const index = new Map<string, number>();
   for (const v of values) {
     if (!index.has(v)) index.set(v, index.size);

@@ -11,12 +11,20 @@ const rows: Row[] = [
 describe('applyTransforms', () => {
   it('sorts ascending and descending, stably', () => {
     expect(applyTransforms(rows, [{ op: 'sort', by: 'v' }]).map((r) => r.v)).toEqual([1, 3, 6, 10]);
-    expect(applyTransforms(rows, [{ op: 'sort', by: 'v', dir: 'desc' }]).map((r) => r.v)).toEqual([10, 6, 3, 1]);
+    expect(applyTransforms(rows, [{ op: 'sort', by: 'v', dir: 'desc' }]).map((r) => r.v)).toEqual([
+      10, 6, 3, 1,
+    ]);
   });
 
   it('filters with comparators including in', () => {
-    expect(applyTransforms(rows, [{ op: 'filter', field: 'v', cmp: '>=', value: 6 }]).map((r) => r.v)).toEqual([10, 6]);
-    expect(applyTransforms(rows, [{ op: 'filter', field: 'cat', cmp: 'in', value: ['a', 'c'] }]).map((r) => r.cat)).toEqual(['a', 'c']);
+    expect(
+      applyTransforms(rows, [{ op: 'filter', field: 'v', cmp: '>=', value: 6 }]).map((r) => r.v),
+    ).toEqual([10, 6]);
+    expect(
+      applyTransforms(rows, [{ op: 'filter', field: 'cat', cmp: 'in', value: ['a', 'c'] }]).map(
+        (r) => r.cat,
+      ),
+    ).toEqual(['a', 'c']);
   });
 
   it('topN drops the tail', () => {
@@ -24,13 +32,17 @@ describe('applyTransforms', () => {
   });
 
   it('topN group-other rolls the remainder into one bucket', () => {
-    const out = applyTransforms(rows, [{ op: 'topN', by: 'v', n: 2, rest: 'group-other', labelField: 'cat' }]);
+    const out = applyTransforms(rows, [
+      { op: 'topN', by: 'v', n: 2, rest: 'group-other', labelField: 'cat' },
+    ]);
     expect(out).toHaveLength(3);
     expect(out[2]).toEqual({ v: 4, cat: 'Other' }); // 3 + 1
   });
 
   it('aggregates by group with a reducer', () => {
-    const out = applyTransforms(rows, [{ op: 'aggregate', groupBy: ['region'], field: 'v', reducer: 'sum', as: 'total' }]);
+    const out = applyTransforms(rows, [
+      { op: 'aggregate', groupBy: ['region'], field: 'v', reducer: 'sum', as: 'total' },
+    ]);
     expect(out).toEqual([
       { region: 'x', total: 13 },
       { region: 'y', total: 7 },
@@ -38,17 +50,19 @@ describe('applyTransforms', () => {
   });
 
   it('bins a field into equal-width buckets with counts', () => {
-    const out = applyTransforms([{ v: 0 }, { v: 1 }, { v: 2 }, { v: 9 }, { v: 10 }], [
-      { op: 'bin', field: 'v', bins: 2 },
-    ]);
+    const out = applyTransforms(
+      [{ v: 0 }, { v: 1 }, { v: 2 }, { v: 9 }, { v: 10 }],
+      [{ op: 'bin', field: 'v', bins: 2 }],
+    );
     expect(out.map((r) => r.count)).toEqual([3, 2]);
     expect(out).toHaveLength(2);
   });
 
   it('computes a rolling reducer over a window', () => {
-    const out = applyTransforms([{ v: 1 }, { v: 2 }, { v: 3 }, { v: 4 }], [
-      { op: 'rolling', field: 'v', window: 2, reducer: 'mean', as: 'avg' },
-    ]);
+    const out = applyTransforms(
+      [{ v: 1 }, { v: 2 }, { v: 3 }, { v: 4 }],
+      [{ op: 'rolling', field: 'v', window: 2, reducer: 'mean', as: 'avg' }],
+    );
     expect(out.map((r) => r.avg)).toEqual([1, 1.5, 2.5, 3.5]);
   });
 
@@ -58,7 +72,9 @@ describe('applyTransforms', () => {
       { day: 'Mon', series: 'b', val: 2 },
       { day: 'Tue', series: 'a', val: 3 },
     ];
-    const out = applyTransforms(long, [{ op: 'pivot', index: 'day', column: 'series', value: 'val' }]);
+    const out = applyTransforms(long, [
+      { op: 'pivot', index: 'day', column: 'series', value: 'val' },
+    ]);
     expect(out).toEqual([
       { day: 'Mon', a: 1, b: 2 },
       { day: 'Tue', a: 3 },

@@ -151,7 +151,8 @@ export const VIBE_PRESETS: Record<VibePreset, ResolvedVibe> = {
     // rather than a doubled, scratchy one. (Fill hatching is unaffected.)
     disableMultiStroke: true,
     seed: 1452,
-    fontFamily: '"EB Garamond", "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif',
+    fontFamily:
+      '"EB Garamond", "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif',
     fontSize: 14,
     // Aged-parchment page so the ink has somewhere to sit; this also drives the
     // node fill and the gap behind zone labels, so no stark-white seams show.

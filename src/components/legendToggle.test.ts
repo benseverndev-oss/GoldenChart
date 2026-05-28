@@ -11,7 +11,9 @@ const items = [
 
 const render = (value?: SeriesVisibility) => {
   const legend = createElement(Legend, { items, x: 0, y: 0, width: 200 });
-  return renderToStaticMarkup(value ? createElement(SeriesVisibilityProvider, { value }, legend) : legend);
+  return renderToStaticMarkup(
+    value ? createElement(SeriesVisibilityProvider, { value }, legend) : legend,
+  );
 };
 
 describe('Legend toggling', () => {

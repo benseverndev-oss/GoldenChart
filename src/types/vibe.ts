@@ -104,8 +104,9 @@ export type VibeTexture = 'paper';
  * down to this shape before it ever reaches Rough.js. `fill` and `animate` are
  * handled explicitly (nullable / optional) rather than via `Required`.
  */
-export interface ResolvedVibe
-  extends Required<Omit<VibeOverrides, 'fill' | 'animate' | 'background' | 'texture'>> {
+export interface ResolvedVibe extends Required<
+  Omit<VibeOverrides, 'fill' | 'animate' | 'background' | 'texture'>
+> {
   preset: VibePreset;
   fill: string | null;
   /** Optional page colour; see `VibeOverrides.background`. */

@@ -94,14 +94,19 @@ function bandLayout(
 
   const laidBands = order
     .map((key) => {
-      const members = bands.get(key)!.slice().sort((a, b) => crossKey(a) - crossKey(b));
+      const members = bands
+        .get(key)!
+        .slice()
+        .sort((a, b) => crossKey(a) - crossKey(b));
       const group = key.startsWith('__node__:') ? undefined : key;
       return { group, members, flowAt: mean(members.map(flowKey)) };
     })
     .sort((a, b) => a.flowAt - b.flowAt);
 
   // Title gutter on the leading cross-edge, sized to the widest title.
-  const titleDims = laidBands.map((b) => (b.group ? measureText(b.group, LABEL_FONT_PX, LABEL_FONT) : null));
+  const titleDims = laidBands.map((b) =>
+    b.group ? measureText(b.group, LABEL_FONT_PX, LABEL_FONT) : null,
+  );
   const gutter = (() => {
     const dims = titleDims.filter((d): d is { width: number; height: number } => d != null);
     if (dims.length === 0) return 0;
@@ -138,7 +143,9 @@ function bandLayout(
     for (const m of band.members) {
       const crossCenter = crossCursor + crossExt(m) / 2;
       placed.push(
-        horizontal ? { ...m, x: flowCenter, y: crossCenter } : { ...m, x: crossCenter, y: flowCenter },
+        horizontal
+          ? { ...m, x: flowCenter, y: crossCenter }
+          : { ...m, x: crossCenter, y: flowCenter },
       );
       crossCursor += crossExt(m) + memberGap;
     }
@@ -154,7 +161,10 @@ function bandLayout(
       // Title sits in the gutter: centred along the lane for a top gutter
       // (horizontal flow), left-aligned for a side gutter (vertical flow).
       const labelPoint = horizontal
-        ? { x: flowCenter, y: laneCrossStart + LANE_PAD + (gutter - LABEL_MARGIN * 2) / 2 + LABEL_MARGIN }
+        ? {
+            x: flowCenter,
+            y: laneCrossStart + LANE_PAD + (gutter - LABEL_MARGIN * 2) / 2 + LABEL_MARGIN,
+          }
         : { x: laneCrossStart + LANE_PAD + LABEL_MARGIN, y: flowCenter };
       groups.push({
         id: band.group,
@@ -176,7 +186,10 @@ function bandLayout(
  * facing the peer, and connectors leave and arrive square-on via perpendicular
  * stubs.
  */
-export function architectureLayout(direction: FlowDirection = 'TB', options?: LayoutOptions): LayoutEngine {
+export function architectureLayout(
+  direction: FlowDirection = 'TB',
+  options?: LayoutOptions,
+): LayoutEngine {
   return (nodes, edges, size) => {
     const base = layoutFlow(nodes, size, edges, direction);
     const { placed, groups } = bandLayout(base.nodes, direction, size, options);
@@ -211,7 +224,10 @@ export function architectureLayout(direction: FlowDirection = 'TB', options?: La
       const route = routeOrthogonal(sStub, tStub, obstacles, { padding: 10 });
       // The router snaps lattice nodes to 2dp; round the exact ports to match so
       // the perpendicular joins stay precisely axis-aligned (not off by ~1e-9).
-      const snap = (p: Point): Point => ({ x: Math.round(p.x * 100) / 100, y: Math.round(p.y * 100) / 100 });
+      const snap = (p: Point): Point => ({
+        x: Math.round(p.x * 100) / 100,
+        y: Math.round(p.y * 100) / 100,
+      });
       const points = simplify([sPort, ...route, tPort].map(snap));
       return [{ ...e, sx: sPort.x, sy: sPort.y, tx: tPort.x, ty: tPort.y, points }];
     });

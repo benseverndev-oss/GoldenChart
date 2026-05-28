@@ -3,9 +3,14 @@ import { createElement } from 'react';
 import { BarChart } from '../components/BarChart';
 import { renderToSVGString } from './renderToString';
 
-const data = [{ label: 'a', value: 3 }, { label: 'b', value: 6 }];
+const data = [
+  { label: 'a', value: 3 },
+  { label: 'b', value: 6 },
+];
 const render = (vibe: unknown) =>
-  renderToSVGString(createElement(BarChart, { width: 200, height: 140, vibe, data, bare: true } as any));
+  renderToSVGString(
+    createElement(BarChart, { width: 200, height: 140, vibe, data, bare: true } as any),
+  );
 
 describe('renderToSVGString headless font embedding', () => {
   it('embeds the @font-face for a single-quoted family vibe', () => {

@@ -29,7 +29,11 @@ describe('polar helpers', () => {
   });
 
   it('polygonPath is closed', () => {
-    const d = polygonPath([{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 5, y: 8 }]);
+    const d = polygonPath([
+      { x: 0, y: 0 },
+      { x: 10, y: 0 },
+      { x: 5, y: 8 },
+    ]);
     expect(d.startsWith('M')).toBe(true);
     expect(d.endsWith('Z')).toBe(true);
   });

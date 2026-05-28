@@ -96,7 +96,8 @@ export function SequenceDiagram({
               .map((a) => a.x)
               .filter((ax) => ax > x + 1)
               .sort((a, b) => a - b)[0];
-            const loopW = rightX != null ? Math.min(SELF_LOOP_WIDTH, (rightX - x) * 0.32) : SELF_LOOP_WIDTH;
+            const loopW =
+              rightX != null ? Math.min(SELF_LOOP_WIDTH, (rightX - x) * 0.32) : SELF_LOOP_WIDTH;
             const yb = m.y + SELF_LOOP_HEIGHT;
             const d = `M${x},${m.y} L${x + loopW},${m.y} L${x + loopW},${yb} L${x},${yb}`;
             return (
@@ -115,7 +116,14 @@ export function SequenceDiagram({
           }
           return (
             <g key={key}>
-              <RoughLine x1={m.x1} y1={m.y} x2={m.x2} y2={m.y} style={m.dashed ? DASHED : undefined} seed={i + 1} />
+              <RoughLine
+                x1={m.x1}
+                y1={m.y}
+                x2={m.x2}
+                y2={m.y}
+                style={m.dashed ? DASHED : undefined}
+                seed={i + 1}
+              />
               <RoughPath d={arrowHeadPath({ x: m.x1, y: m.y }, { x: m.x2, y: m.y })} fill={null} />
               {m.label && (
                 <RoughText x={(m.x1 + m.x2) / 2} y={m.y - 7} anchor="middle" baseline="auto">

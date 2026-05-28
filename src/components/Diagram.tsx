@@ -1,8 +1,22 @@
 import { useMemo } from 'react';
 import type { BaseChartProps, EdgeRouting, FlowEdge, FlowNode } from '../types/charts';
 import { getPlotArea } from '../core/geometry';
-import type { DiagramOrientation, LaidGroup, LaidOutEdge, LaidOutNode, LayoutEngine } from '../core/diagram';
-import { arrowHeadPath, boxEdgePoint, diamondPath, ellipsePath, linkPath, orthogonalPath, orthogonalPoints } from '../core/shapes';
+import type {
+  DiagramOrientation,
+  LaidGroup,
+  LaidOutEdge,
+  LaidOutNode,
+  LayoutEngine,
+} from '../core/diagram';
+import {
+  arrowHeadPath,
+  boxEdgePoint,
+  diamondPath,
+  ellipsePath,
+  linkPath,
+  orthogonalPath,
+  orthogonalPoints,
+} from '../core/shapes';
 import { measureText } from '../core/text';
 import { nodeSize } from '../core/nodeSize';
 import { Surface } from './Surface';
@@ -135,7 +149,9 @@ export function Diagram({
       bare={bare}
     >
       <g transform={fit}>
-        {scene.groups?.map((g) => <DiagramGroup key={g.id} group={g} />)}
+        {scene.groups?.map((g) => (
+          <DiagramGroup key={g.id} group={g} />
+        ))}
         {trimmedEdges.map((e) => (
           <DiagramEdge
             key={`${e.from}->${e.to}`}
@@ -163,7 +179,13 @@ function DiagramGroup({ group }: { group: LaidGroup }) {
   const tabX = anchor === 'middle' && m ? at.x - m.width / 2 - padX : at.x - padX;
   return (
     <g>
-      <RoughRectangle x={group.x} y={group.y} width={group.width} height={group.height} fill={null} />
+      <RoughRectangle
+        x={group.x}
+        y={group.y}
+        width={group.width}
+        height={group.height}
+        fill={null}
+      />
       {group.label && m && (
         <>
           {/* A page-coloured tab sits behind the title so it stays legible even
@@ -204,7 +226,12 @@ function DiagramEdge({
   let labelAt = { x: (edge.sx + edge.tx) / 2, y: (edge.sy + edge.ty) / 2 };
   if (edge.points && edge.points.length >= 2) {
     const pts = edge.points;
-    d = `M${pts[0].x},${pts[0].y} ` + pts.slice(1).map((p) => `L${p.x},${p.y}`).join(' ');
+    d =
+      `M${pts[0].x},${pts[0].y} ` +
+      pts
+        .slice(1)
+        .map((p) => `L${p.x},${p.y}`)
+        .join(' ');
     arrowTail = pts[pts.length - 2];
     labelAt = pts[Math.floor((pts.length - 1) / 2)];
   } else if (routing === 'orthogonal') {
@@ -246,10 +273,22 @@ function DiagramNode({ node, index }: { node: LaidOutNode; index: number }) {
 
   let outline;
   if (node.shape === 'diamond') {
-    outline = <RoughPath d={diamondPath(node.x, node.y, node.width, node.height)} fill={fill} vibe={vibe} seed={seed} />;
+    outline = (
+      <RoughPath
+        d={diamondPath(node.x, node.y, node.width, node.height)}
+        fill={fill}
+        vibe={vibe}
+        seed={seed}
+      />
+    );
   } else if (node.shape === 'ellipse') {
     outline = (
-      <RoughPath d={ellipsePath(node.x, node.y, node.width / 2, node.height / 2)} fill={fill} vibe={vibe} seed={seed} />
+      <RoughPath
+        d={ellipsePath(node.x, node.y, node.width / 2, node.height / 2)}
+        fill={fill}
+        vibe={vibe}
+        seed={seed}
+      />
     );
   } else {
     outline = (

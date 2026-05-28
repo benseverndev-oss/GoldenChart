@@ -24,7 +24,8 @@ export interface CompiledChart {
 
 type Row = Record<string, unknown>;
 
-const num = (v: unknown): number => (typeof v === 'number' ? v : typeof v === 'string' ? Date.parse(v) || Number(v) || 0 : 0);
+const num = (v: unknown): number =>
+  typeof v === 'number' ? v : typeof v === 'string' ? Date.parse(v) || Number(v) || 0 : 0;
 const str = (v: unknown): string => String(v ?? '');
 
 function groupBy(rows: Row[], key: string): Map<string, Row[]> {
@@ -66,13 +67,19 @@ export function compileChart(data: Row[], rec: ChartRecommendation): CompiledCha
     case 'scatter':
       return {
         component: 'ScatterPlot',
-        props: { data: data.map((r) => ({ x: num(r[e.x]), y: num(r[e.y]) })), title: `${e.y} vs ${e.x}` },
+        props: {
+          data: data.map((r) => ({ x: num(r[e.x]), y: num(r[e.y]) })),
+          title: `${e.y} vs ${e.x}`,
+        },
       };
 
     case 'pie':
       return {
         component: 'PieChart',
-        props: { data: data.map((r) => ({ label: str(r[e.label]), value: num(r[e.value]) })), title: e.value },
+        props: {
+          data: data.map((r) => ({ label: str(r[e.label]), value: num(r[e.value]) })),
+          title: e.value,
+        },
       };
 
     case 'bar': {
@@ -83,11 +90,17 @@ export function compileChart(data: Row[], rec: ChartRecommendation): CompiledCha
           label,
           values: Object.fromEntries(rows.map((r) => [str(r[e.series]), num(r[e.y])])),
         }));
-        return { component: 'BarChart', props: { data: multi, mode: 'grouped', seriesKeys: keys, title: `${e.y} by ${e.x}` } };
+        return {
+          component: 'BarChart',
+          props: { data: multi, mode: 'grouped', seriesKeys: keys, title: `${e.y} by ${e.x}` },
+        };
       }
       return {
         component: 'BarChart',
-        props: { data: data.map((r) => ({ label: str(r[e.x]), value: num(r[e.y]) })), title: `${e.y} by ${e.x}` },
+        props: {
+          data: data.map((r) => ({ label: str(r[e.x]), value: num(r[e.y]) })),
+          title: `${e.y} by ${e.x}`,
+        },
       };
     }
 
@@ -95,8 +108,14 @@ export function compileChart(data: Row[], rec: ChartRecommendation): CompiledCha
       return {
         component: 'SankeyChart',
         props: {
-          nodes: [...new Set(data.flatMap((r) => [str(r[e.source]), str(r[e.target])]))].map((id) => ({ id })),
-          links: data.map((r) => ({ source: str(r[e.source]), target: str(r[e.target]), value: num(r[e.value]) })),
+          nodes: [...new Set(data.flatMap((r) => [str(r[e.source]), str(r[e.target])]))].map(
+            (id) => ({ id }),
+          ),
+          links: data.map((r) => ({
+            source: str(r[e.source]),
+            target: str(r[e.target]),
+            value: num(r[e.value]),
+          })),
         },
       };
 
@@ -122,8 +141,12 @@ export function compileChart(data: Row[], rec: ChartRecommendation): CompiledCha
     case 'heatmap': {
       // Melt the numeric columns of a matrix into (x, y=column, value) cells.
       const xField = e.x;
-      const valueCols = Object.keys(data[0] ?? {}).filter((k) => k !== xField && typeof data[0]?.[k] === 'number');
-      const cells = data.flatMap((r) => valueCols.map((col) => ({ x: str(r[xField]), y: col, value: num(r[col]) })));
+      const valueCols = Object.keys(data[0] ?? {}).filter(
+        (k) => k !== xField && typeof data[0]?.[k] === 'number',
+      );
+      const cells = data.flatMap((r) =>
+        valueCols.map((col) => ({ x: str(r[xField]), y: col, value: num(r[col]) })),
+      );
       return { component: 'HeatmapChart', props: { data: cells } };
     }
   }

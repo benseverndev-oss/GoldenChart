@@ -4,11 +4,15 @@ import { recommendChart } from './recommend';
 import { compileChart } from './compile';
 import type { Series } from '../types/charts';
 
-const compileTop = (data: Record<string, unknown>[]) => compileChart(data, recommendChart(profileData(data))[0]);
+const compileTop = (data: Record<string, unknown>[]) =>
+  compileChart(data, recommendChart(profileData(data))[0]);
 
 describe('compileChart', () => {
   it('compiles a bar chart to label/value data', () => {
-    const c = compileTop([{ region: 'NA', sales: 3 }, { region: 'EU', sales: 7 }]);
+    const c = compileTop([
+      { region: 'NA', sales: 3 },
+      { region: 'EU', sales: 7 },
+    ]);
     expect(c.component).toBe('BarChart');
     expect(c.props.data).toEqual([
       { label: 'NA', value: 3 },
@@ -59,7 +63,12 @@ describe('compileChart', () => {
         { month: 'Jan', team: 'y', n: 2 },
         { month: 'Feb', team: 'x', n: 3 },
       ],
-      { chartType: 'bar', encoding: { x: 'month', series: 'team', y: 'n' }, confidence: 0.8, rationale: '' },
+      {
+        chartType: 'bar',
+        encoding: { x: 'month', series: 'team', y: 'n' },
+        confidence: 0.8,
+        rationale: '',
+      },
     );
     expect(c.props.mode).toBe('grouped');
     expect(c.props.seriesKeys).toEqual(['x', 'y']);
