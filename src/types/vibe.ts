@@ -87,17 +87,22 @@ export interface VibeOverrides {
    */
   background?: string;
   /**
-   * Background micro-texture painted behind the data (e.g. `'paper'` grain) so
-   * matte vibes don't read as a flat fill. Not a Rough.js knob — consumed by the
-   * renderer.
+   * Background micro-texture painted behind the data so matte vibes don't read
+   * as a flat fill. `'paper'` is a faint speckle grain (alias for `'paper-medium'`);
+   * `'paper-subtle'` is sparser/fainter; `'none'` disables it (handy for turning
+   * texture off on a preset that enables it). Not a Rough.js knob — consumed by
+   * the renderer.
    */
   texture?: VibeTexture;
   /** Reveal animation. Not a Rough.js knob — consumed by the renderer. */
   animate?: VibeAnimate;
 }
 
-/** Background micro-texture kinds. */
-export type VibeTexture = 'paper';
+/**
+ * Background micro-texture kinds. `'paper'` === `'paper-medium'` (the original
+ * look); `'paper-subtle'` is sparser; `'none'` paints nothing.
+ */
+export type VibeTexture = 'none' | 'paper' | 'paper-subtle' | 'paper-medium';
 
 /**
  * A preset with every knob filled in. The Vibe engine resolves any `VibeConfig`

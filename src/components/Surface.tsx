@@ -8,6 +8,7 @@ import { resolveVibe } from '../vibe/resolveVibe';
 import { BrandProvider } from '../brand/BrandProvider';
 import { resolveBrand } from '../brand/resolveBrand';
 import { PaperTexture } from './PaperTexture';
+import { speckleTierFor } from '../core/texture';
 
 export type { DataTableModel };
 
@@ -97,6 +98,7 @@ export function Surface({
   const resolved = resolveVibe(vibe, resolvedBrand.vibeOverrides);
   const drawOn = resolved.animate?.drawOn ?? false;
   const duration = resolved.animate?.durationMs ?? 800;
+  const speckleTier = speckleTierFor(resolved.texture);
 
   const body = drawOn ? <g className={DRAW_ON_CLASS}>{children}</g> : children;
 
@@ -116,11 +118,12 @@ export function Surface({
       {resolved.background ? (
         <rect x={0} y={0} width={width} height={height} fill={resolved.background} />
       ) : null}
-      {resolved.texture === 'paper' ? (
+      {speckleTier ? (
         <PaperTexture
           width={width}
           height={height}
           seed={resolved.seed}
+          tier={speckleTier}
           background={resolved.background}
         />
       ) : null}

@@ -85,6 +85,10 @@ Built-in presets: `messy_sketch`, `clean_blueprint`, `chaotic_notebook`, `pencil
 `highlighter`, `kraft`, `synthwave`, `botanical`, `risograph`, `sticky_note`, `amber_crt`. Add
 `animate: { drawOn: true }` for a hand-drawn reveal (honors `prefers-reduced-motion`).
 
+Matte vibes can carry a faint paper-grain speckle behind the data via
+`texture: 'paper' | 'paper-subtle' | 'none'` (several paper-like presets enable
+`'paper'` by default). See [`docs/API.md#vibe-engine`](./docs/API.md#vibe-engine).
+
 The same chart, six different vibes:
 
 ![One bar chart rendered in the pencil, ink, chalkboard, neon, watercolor and synthwave vibes](assets/vibes.png)
