@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, ReactNode, Ref } from 'react';
 import type { VibeConfig } from '../types/vibe';
 import type { BrandConfig, ResolvedBrandLogo } from '../types/brand';
 import type { DataTableModel } from '../types/charts';
@@ -37,6 +37,8 @@ export interface SurfaceProps {
    * `renderToSVGString` path and the MCP server.
    */
   bare?: boolean;
+  /** Attach a ref to the inner `<svg>` — handy for client-side export. */
+  svgRef?: Ref<SVGSVGElement>;
 }
 
 const DRAW_ON_CLASS = 'gc-draw-on';
@@ -93,6 +95,7 @@ export function Surface({
   style,
   children,
   bare = false,
+  svgRef,
 }: SurfaceProps) {
   const resolvedBrand = useMemo(() => resolveBrand(brand), [brand]);
   const resolved = resolveVibe(vibe, resolvedBrand.vibeOverrides);
@@ -104,6 +107,7 @@ export function Surface({
 
   const svg = (
     <svg
+      ref={svgRef}
       xmlns="http://www.w3.org/2000/svg"
       viewBox={`0 0 ${width} ${height}`}
       width={width}
