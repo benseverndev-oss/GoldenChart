@@ -8,3 +8,7 @@ coverage
 .turbo
 .worktrees
 .firecrawl
+
+# Generated gallery / example renders (regenerate via scripts/, see scripts/README.md)
+gallery
+nl-examples
