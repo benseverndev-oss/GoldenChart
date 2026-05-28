@@ -1,5 +1,7 @@
 export { Surface } from './Surface';
 export type { SurfaceProps } from './Surface';
+export { ResponsiveContainer } from './ResponsiveContainer';
+export type { ResponsiveContainerProps, ResponsiveSize } from './ResponsiveContainer';
 export { BarChart } from './BarChart';
 export type { BarChartProps, BarMode } from './BarChart';
 export { LineChart } from './LineChart';
