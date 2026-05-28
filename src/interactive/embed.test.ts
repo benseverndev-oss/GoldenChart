@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { interactiveEmbed } from './embed';
 
-const SVG = '<svg viewBox="0 0 100 100" data-gc="1"><g data-gc-mark="bar" data-gc-label="Q1" data-gc-value="12"></g></svg>';
+const SVG =
+  '<svg viewBox="0 0 100 100" data-gc="1"><g data-gc-mark="bar" data-gc-label="Q1" data-gc-value="12"></g></svg>';
 
 describe('interactiveEmbed', () => {
   it('wraps the svg in a self-contained HTML document', () => {

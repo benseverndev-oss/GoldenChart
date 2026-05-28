@@ -10,7 +10,8 @@ export function readMark(el: Element): MarkMeta | null {
   if (!host) return null;
   const get = (n: string) => host.getAttribute(n);
   const raw = get('data-gc-value');
-  const value: MarkMeta['value'] = raw == null ? 0 : raw.startsWith('{') ? JSON.parse(raw) : Number(raw);
+  const value: MarkMeta['value'] =
+    raw == null ? 0 : raw.startsWith('{') ? JSON.parse(raw) : Number(raw);
   const series = get('data-gc-series');
   const label = get('data-gc-label');
   return {

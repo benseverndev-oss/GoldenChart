@@ -113,13 +113,22 @@ export function Surface({
       {title ? <title>{title}</title> : null}
       {description ? <desc>{description}</desc> : null}
       {drawOn ? <style dangerouslySetInnerHTML={{ __html: drawOnCss(duration) }} /> : null}
-      {resolved.background ? <rect x={0} y={0} width={width} height={height} fill={resolved.background} /> : null}
+      {resolved.background ? (
+        <rect x={0} y={0} width={width} height={height} fill={resolved.background} />
+      ) : null}
       {resolved.texture === 'paper' ? (
-        <PaperTexture width={width} height={height} seed={resolved.seed} background={resolved.background} />
+        <PaperTexture
+          width={width}
+          height={height}
+          seed={resolved.seed}
+          background={resolved.background}
+        />
       ) : null}
       {body}
       {/* Logo sits above the data and outside the draw-on group so it never animates. */}
-      {resolvedBrand.logo ? <BrandLogoMark logo={resolvedBrand.logo} surfaceWidth={width} surfaceHeight={height} /> : null}
+      {resolvedBrand.logo ? (
+        <BrandLogoMark logo={resolvedBrand.logo} surfaceWidth={width} surfaceHeight={height} />
+      ) : null}
     </svg>
   );
 
@@ -150,7 +159,9 @@ function BrandLogoMark({
   surfaceHeight: number;
 }) {
   const x = logo.position.endsWith('right') ? surfaceWidth - logo.width - logo.margin : logo.margin;
-  const y = logo.position.startsWith('bottom') ? surfaceHeight - logo.height - logo.margin : logo.margin;
+  const y = logo.position.startsWith('bottom')
+    ? surfaceHeight - logo.height - logo.margin
+    : logo.margin;
   return (
     <image
       href={logo.src}

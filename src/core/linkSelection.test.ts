@@ -7,7 +7,7 @@ describe('linked-selection reducer', () => {
     expect(activeFilter(emptyLink())).toEqual([]);
   });
 
-  it('setFilter records a source chart\'s selected keys', () => {
+  it("setFilter records a source chart's selected keys", () => {
     const s = setFilter(emptyLink(), 'chartA', ['a', 'b']);
     expect(activeFilter(s)).toEqual(['a', 'b']);
   });

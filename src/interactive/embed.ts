@@ -6,7 +6,11 @@ export interface InteractiveEmbedOptions {
 }
 
 function escapeHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 const TIP_CSS =
@@ -49,6 +53,7 @@ export function interactiveEmbed(svg: string, opts: InteractiveEmbedOptions = {}
     '</title>\n' +
     (tooltip ? '<style>' + TIP_CSS + '</style>\n' : '') +
     '</head>\n<body>\n';
-  const body = svg + '\n' + (tooltip ? '<div id="gc-tip"></div>\n<script>' + HYDRATOR + '</script>\n' : '');
+  const body =
+    svg + '\n' + (tooltip ? '<div id="gc-tip"></div>\n<script>' + HYDRATOR + '</script>\n' : '');
   return head + body + '</body>\n</html>\n';
 }

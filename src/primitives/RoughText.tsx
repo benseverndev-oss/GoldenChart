@@ -38,7 +38,9 @@ export function RoughText({
   onPointerUp,
 }: RoughTextProps) {
   const resolved = useResolvedVibe(vibe, seed);
-  const lines = maxWidth ? wrapText(children, maxWidth, resolved.fontSize, resolved.fontFamily) : null;
+  const lines = maxWidth
+    ? wrapText(children, maxWidth, resolved.fontSize, resolved.fontFamily)
+    : null;
 
   // Paint a halo in the page colour behind the glyphs so labels stay legible on
   // dark/textured backgrounds and over hachure fills. `paint-order: stroke`

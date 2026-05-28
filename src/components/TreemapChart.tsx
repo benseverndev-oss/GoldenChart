@@ -53,7 +53,11 @@ export function TreemapChart({
   // dense fill competes with the text). Spread the resolved vibe so the theme is
   // preserved — a bare override object would reset to the default preset.
   const rv = resolveVibe(vibe);
-  const cellVibe = { ...rv, hachureGap: Math.max(rv.hachureGap, 7), fillWeight: Math.min(rv.fillWeight, 0.7) };
+  const cellVibe = {
+    ...rv,
+    hachureGap: Math.max(rv.hachureGap, 7),
+    fillWeight: Math.min(rv.fillWeight, 0.7),
+  };
 
   return (
     <Surface
@@ -85,7 +89,13 @@ export function TreemapChart({
                 seed={i + 1}
               />
               {labelFits && (
-                <RoughText x={leaf.x0 + w / 2} y={leaf.y0 + h / 2} anchor="middle" baseline="middle" maxWidth={w - 6}>
+                <RoughText
+                  x={leaf.x0 + w / 2}
+                  y={leaf.y0 + h / 2}
+                  anchor="middle"
+                  baseline="middle"
+                  maxWidth={w - 6}
+                >
                   {leaf.label as string}
                 </RoughText>
               )}

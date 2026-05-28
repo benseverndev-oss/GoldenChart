@@ -44,8 +44,16 @@ export function layoutLegend(
 ): LegendLayout {
   if (items.length === 0) return { rows: [], width: 0, height: 0 };
 
-  const { swatchSize = 14, swatchGap = 6, itemGap = 18, rowHeight = 22, fontSize = 14, fontFamily = 'sans-serif' } = opts;
-  const itemWidth = (it: LegendItem) => swatchSize + swatchGap + measureText(it.label, fontSize, fontFamily).width;
+  const {
+    swatchSize = 14,
+    swatchGap = 6,
+    itemGap = 18,
+    rowHeight = 22,
+    fontSize = 14,
+    fontFamily = 'sans-serif',
+  } = opts;
+  const itemWidth = (it: LegendItem) =>
+    swatchSize + swatchGap + measureText(it.label, fontSize, fontFamily).width;
 
   // Greedily group items into rows that fit the available width.
   const grouped: LegendItem[][] = [];

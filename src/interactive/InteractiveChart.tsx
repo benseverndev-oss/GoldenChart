@@ -10,7 +10,10 @@ import { useLinkGroup } from './LinkedCharts';
 import type { MarkMeta } from '../types/interaction';
 import type { VibeConfig } from '../types/vibe';
 import { VibeProvider } from '../vibe/VibeProvider';
-import { SeriesVisibilityProvider, type SeriesVisibility } from '../components/SeriesVisibilityContext';
+import {
+  SeriesVisibilityProvider,
+  type SeriesVisibility,
+} from '../components/SeriesVisibilityContext';
 import { markKey, toggleSelection } from '../core/seriesVisibility';
 import { Tooltip, type TooltipRenderer } from './Tooltip';
 import { Crosshair } from './Crosshair';
@@ -150,15 +153,23 @@ export function InteractiveChart({
   const zp = useZoomPan(zoomBounds, { pan: pan && !brush });
 
   // Animate the chart's data prop on change (line/area use `series`, others `data`).
-  const childProps = children.props as { xAxis?: Record<string, unknown>; data?: unknown; series?: unknown };
+  const childProps = children.props as {
+    xAxis?: Record<string, unknown>;
+    data?: unknown;
+    series?: unknown;
+  };
   const dataKey: 'series' | 'data' | null = Array.isArray(childProps.series)
     ? 'series'
     : Array.isArray(childProps.data)
       ? 'data'
       : null;
   const transitionOn = !!transition && dataKey != null;
-  const durationMs = typeof transition === 'object' ? transition.durationMs ?? 500 : 500;
-  const animatedData = useDataTransition(dataKey ? childProps[dataKey] : undefined, durationMs, transitionOn);
+  const durationMs = typeof transition === 'object' ? (transition.durationMs ?? 500) : 500;
+  const animatedData = useDataTransition(
+    dataKey ? childProps[dataKey] : undefined,
+    durationMs,
+    transitionOn,
+  );
 
   // Re-sketch the wrapped chart with a controlled view domain and/or animated
   // data by cloning it (re-scale, never a transform).
@@ -252,7 +263,10 @@ export function InteractiveChart({
   useEffect(() => {
     const svg = svgRef.current;
     if (!svg) return;
-    const emphasized = new Set<string>([...selectedKeys, ...(linkGroup && link ? link.filter : [])]);
+    const emphasized = new Set<string>([
+      ...selectedKeys,
+      ...(linkGroup && link ? link.filter : []),
+    ]);
     if (emphasized.size > 0) svg.setAttribute(SELECTED_ATTR, '');
     else svg.removeAttribute(SELECTED_ATTR);
     svg.querySelectorAll('[data-gc-mark]').forEach((el) => {
@@ -365,12 +379,19 @@ export function InteractiveChart({
   return (
     <div
       ref={attach}
-      style={{ position: 'relative', display: 'inline-block', overflow: zoom || pan ? 'hidden' : undefined, cursor }}
+      style={{
+        position: 'relative',
+        display: 'inline-block',
+        overflow: zoom || pan ? 'hidden' : undefined,
+        cursor,
+      }}
     >
       <SeriesVisibilityProvider value={visibility}>{content}</SeriesVisibilityProvider>
       {highlight ? <style>{hoverCss()}</style> : null}
       {selectable || linkGroup ? <style>{selectCss()}</style> : null}
-      {selectable ? <style>{`[${HOVER_ATTR}] [data-gc-mark],[data-gc-mark]{cursor:pointer}`}</style> : null}
+      {selectable ? (
+        <style>{`[${HOVER_ATTR}] [data-gc-mark],[data-gc-mark]{cursor:pointer}`}</style>
+      ) : null}
       {zoomed ? (
         <button
           type="button"
@@ -393,27 +414,49 @@ export function InteractiveChart({
       {brush && brushPx && vbHeight !== undefined ? (
         <svg
           viewBox={viewBox}
-          style={{ position: 'absolute', inset: 0, pointerEvents: 'none', width: '100%', height: '100%' }}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none',
+            width: '100%',
+            height: '100%',
+          }}
         >
           <VibeProvider vibe={vibe}>
-            <Brush start={brushRect(brushPx.a, brushPx.b).start} length={brushRect(brushPx.a, brushPx.b).length} height={vbHeight} />
+            <Brush
+              start={brushRect(brushPx.a, brushPx.b).start}
+              length={brushRect(brushPx.a, brushPx.b).length}
+              height={vbHeight}
+            />
           </VibeProvider>
         </svg>
       ) : null}
       {hover && (tooltip || crosshair) ? (
         <svg
           viewBox={viewBox}
-          style={{ position: 'absolute', inset: 0, pointerEvents: 'none', width: '100%', height: '100%' }}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none',
+            width: '100%',
+            height: '100%',
+          }}
         >
           <VibeProvider vibe={vibe}>
-            {crosshair && vbHeight !== undefined ? <Crosshair x={hover.x} height={vbHeight} /> : null}
-            {tooltip
-              ? renderTooltip
-                ? <g transform={`translate(${hover.x}, ${hover.y})`}>{renderTooltip(hover.mark)}</g>
-                : vbWidth !== undefined && vbHeight !== undefined
-                  ? <Tooltip mark={hover.mark} anchor={{ x: hover.x, y: hover.y }} bounds={{ width: vbWidth, height: vbHeight }} />
-                  : null
-              : null}
+            {crosshair && vbHeight !== undefined ? (
+              <Crosshair x={hover.x} height={vbHeight} />
+            ) : null}
+            {tooltip ? (
+              renderTooltip ? (
+                <g transform={`translate(${hover.x}, ${hover.y})`}>{renderTooltip(hover.mark)}</g>
+              ) : vbWidth !== undefined && vbHeight !== undefined ? (
+                <Tooltip
+                  mark={hover.mark}
+                  anchor={{ x: hover.x, y: hover.y }}
+                  bounds={{ width: vbWidth, height: vbHeight }}
+                />
+              ) : null
+            ) : null}
           </VibeProvider>
         </svg>
       ) : null}

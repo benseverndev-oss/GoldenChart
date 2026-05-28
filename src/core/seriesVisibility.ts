@@ -7,7 +7,11 @@ export function markKey(mark: Pick<MarkMeta, 'series' | 'index'>): string {
 
 /** Pure selection toggle. Single-select replaces (or clears on re-click of the
  *  sole selection); multi-select toggles membership. */
-export function toggleSelection(current: ReadonlySet<string>, key: string, multi: boolean): Set<string> {
+export function toggleSelection(
+  current: ReadonlySet<string>,
+  key: string,
+  multi: boolean,
+): Set<string> {
   if (!multi) return current.has(key) && current.size === 1 ? new Set() : new Set([key]);
   const next = new Set(current);
   if (next.has(key)) next.delete(key);

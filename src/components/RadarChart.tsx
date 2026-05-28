@@ -60,11 +60,18 @@ export function RadarChart({
   const rv = resolveVibe(vibe);
   const palette = resolveBrand(brand).palette;
   const legendItems: LegendItem[] =
-    showLegend && series.length > 1 ? series.map((s, i) => ({ label: s.id, color: s.color ?? colorAt(i, palette) })) : [];
+    showLegend && series.length > 1
+      ? series.map((s, i) => ({ label: s.id, color: s.color ?? colorAt(i, palette) }))
+      : [];
   const legendModel = legendItems.length
-    ? layoutLegend(legendItems, fullPlot.width, { fontSize: rv.fontSize, fontFamily: rv.fontFamily })
+    ? layoutLegend(legendItems, fullPlot.width, {
+        fontSize: rv.fontSize,
+        fontFamily: rv.fontFamily,
+      })
     : null;
-  const plot = legendModel ? { ...fullPlot, height: Math.max(1, fullPlot.height - legendModel.height - 36) } : fullPlot;
+  const plot = legendModel
+    ? { ...fullPlot, height: Math.max(1, fullPlot.height - legendModel.height - 36) }
+    : fullPlot;
 
   const geom = useMemo(() => {
     const n = axes.length;
@@ -78,17 +85,23 @@ export function RadarChart({
 
     const rings = Array.from({ length: levels }, (_, l) => {
       const r = (radius * (l + 1)) / levels;
-      return polygonPath(Array.from({ length: n }, (_, i) => polarToCartesian(cx, cy, r, axisAngle(i, n))));
+      return polygonPath(
+        Array.from({ length: n }, (_, i) => polarToCartesian(cx, cy, r, axisAngle(i, n))),
+      );
     });
 
-    const spokes = Array.from({ length: n }, (_, i) => polarToCartesian(cx, cy, radius, axisAngle(i, n)));
+    const spokes = Array.from({ length: n }, (_, i) =>
+      polarToCartesian(cx, cy, radius, axisAngle(i, n)),
+    );
     const labels = Array.from({ length: n }, (_, i) => ({
       label: axes[i],
       ...polarToCartesian(cx, cy, radius + 18, axisAngle(i, n)),
     }));
 
     const seriesGeom = series.map((s) => {
-      const pts = axes.map((_, i) => polarToCartesian(cx, cy, rScale(s.values[i] ?? 0), axisAngle(i, n)));
+      const pts = axes.map((_, i) =>
+        polarToCartesian(cx, cy, rScale(s.values[i] ?? 0), axisAngle(i, n)),
+      );
       return { id: s.id, color: s.color, path: polygonPath(pts), points: pts };
     });
 
@@ -114,7 +127,15 @@ export function RadarChart({
         <RoughPath key={`ring-${i}`} d={d} fill={null} vibe={faint} seed={i + 1} />
       ))}
       {geom.spokes.map((p, i) => (
-        <RoughLine key={`spoke-${i}`} x1={geom.cx} y1={geom.cy} x2={p.x} y2={p.y} vibe={faint} seed={i + 1} />
+        <RoughLine
+          key={`spoke-${i}`}
+          x1={geom.cx}
+          y1={geom.cy}
+          x2={p.x}
+          y2={p.y}
+          vibe={faint}
+          seed={i + 1}
+        />
       ))}
       {geom.seriesGeom.map((s, i) => (
         <g key={s.id}>
@@ -130,7 +151,14 @@ export function RadarChart({
           />
           {showDots &&
             s.points.map((p, j) => (
-              <RoughCircle key={j} cx={p.x} cy={p.y} diameter={7} fill={s.color ?? colorAt(i, palette)} seed={i * 10 + j + 1} />
+              <RoughCircle
+                key={j}
+                cx={p.x}
+                cy={p.y}
+                diameter={7}
+                fill={s.color ?? colorAt(i, palette)}
+                seed={i * 10 + j + 1}
+              />
             ))}
         </g>
       ))}
@@ -140,7 +168,14 @@ export function RadarChart({
             {l.label}
           </RoughText>
         ))}
-      {legendModel && <Legend items={legendItems} x={fullPlot.x} y={plot.y + plot.height + 30} width={fullPlot.width} />}
+      {legendModel && (
+        <Legend
+          items={legendItems}
+          x={fullPlot.x}
+          y={plot.y + plot.height + 30}
+          width={fullPlot.width}
+        />
+      )}
     </Surface>
   );
 }

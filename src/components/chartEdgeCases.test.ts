@@ -16,7 +16,9 @@ import { renderToSVGString } from '../render/renderToString';
 // core/scales.test.ts and render/roughGenerator.test.ts — rendering a NaN datum
 // here would OOM rather than fail cleanly if the primitive guards regressed.)
 const renderBar = (data: unknown) =>
-  renderToSVGString(createElement(BarChart, { width: 220, height: 140, data, bare: true } as never));
+  renderToSVGString(
+    createElement(BarChart, { width: 220, height: 140, data, bare: true } as never),
+  );
 
 describe('chart edge cases', () => {
   it('BarChart renders empty data as a bare <svg> with no NaN', () => {
@@ -32,12 +34,18 @@ describe('chart edge cases', () => {
   });
 
   it('BarChart renders negative values', () => {
-    const svg = renderBar([{ label: 'a', value: -4 }, { label: 'b', value: 6 }]);
+    const svg = renderBar([
+      { label: 'a', value: -4 },
+      { label: 'b', value: 6 },
+    ]);
     expect(svg).not.toMatch(/NaN|Infinity/);
   });
 
   it('BarChart renders an all-zero series without collapsing', () => {
-    const svg = renderBar([{ label: 'a', value: 0 }, { label: 'b', value: 0 }]);
+    const svg = renderBar([
+      { label: 'a', value: 0 },
+      { label: 'b', value: 0 },
+    ]);
     expect(svg).not.toMatch(/NaN|Infinity/);
   });
 
@@ -46,7 +54,12 @@ describe('chart edge cases', () => {
       createElement(PieChart, { width: 200, height: 200, data: [], bare: true } as never),
     );
     const single = renderToSVGString(
-      createElement(PieChart, { width: 200, height: 200, data: [{ label: 'a', value: 1 }], bare: true } as never),
+      createElement(PieChart, {
+        width: 200,
+        height: 200,
+        data: [{ label: 'a', value: 1 }],
+        bare: true,
+      } as never),
     );
     expect(empty.startsWith('<svg')).toBe(true);
     expect(single).not.toMatch(/NaN|Infinity/);
@@ -57,7 +70,12 @@ describe('chart edge cases', () => {
       createElement(ScatterPlot, { width: 200, height: 160, data: [], bare: true } as never),
     );
     const single = renderToSVGString(
-      createElement(ScatterPlot, { width: 200, height: 160, data: [{ x: 1, y: 2 }], bare: true } as never),
+      createElement(ScatterPlot, {
+        width: 200,
+        height: 160,
+        data: [{ x: 1, y: 2 }],
+        bare: true,
+      } as never),
     );
     expect(empty.startsWith('<svg')).toBe(true);
     expect(single).not.toMatch(/NaN|Infinity/);
@@ -81,7 +99,19 @@ describe('chart edge cases — remaining chart types', () => {
   it('LineChart handles empty, single-point, and flat series', () => {
     clean(render(LineChart, { series: [] }));
     clean(render(LineChart, { series: [{ id: 's', points: [{ x: 0, y: 5 }] }] }));
-    clean(render(LineChart, { series: [{ id: 's', points: [{ x: 0, y: 3 }, { x: 1, y: 3 }] }] }));
+    clean(
+      render(LineChart, {
+        series: [
+          {
+            id: 's',
+            points: [
+              { x: 0, y: 3 },
+              { x: 1, y: 3 },
+            ],
+          },
+        ],
+      }),
+    );
   });
 
   it('AreaChart handles empty, single-point, and empty-stacked series', () => {
@@ -120,7 +150,10 @@ describe('chart edge cases — remaining chart types', () => {
     clean(render(HeatmapChart, { data: [{ x: 'c0', y: 'r0', value: 5 }] }));
     clean(
       render(HeatmapChart, {
-        data: [{ x: 'c0', y: 'r0', value: 7 }, { x: 'c1', y: 'r0', value: 7 }],
+        data: [
+          { x: 'c0', y: 'r0', value: 7 },
+          { x: 'c1', y: 'r0', value: 7 },
+        ],
       }),
     );
   });

@@ -1,0 +1,9 @@
+dist
+coverage
+node_modules
+playground/dist
+gallery
+nl-examples
+src/assets/fonts.ts
+*.snap
+package-lock.json

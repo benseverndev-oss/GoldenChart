@@ -65,10 +65,36 @@ const INTENT_KEYWORDS: [Intent, string[]][] = [
   ['correlation', ['correlation', 'correlate', 'relationship', 'related', 'against']],
   ['flow', ['flow', 'funnel', 'pipeline']],
   ['hierarchy', ['hierarchy', 'tree', 'nested', 'org chart', 'drilldown', 'drill down']],
-  ['composition', ['breakdown', 'share', 'proportion', 'proportions', 'percentage', 'composition', 'makeup', 'part of']],
+  [
+    'composition',
+    [
+      'breakdown',
+      'share',
+      'proportion',
+      'proportions',
+      'percentage',
+      'composition',
+      'makeup',
+      'part of',
+    ],
+  ],
   ['distribution', ['distribution', 'spread', 'histogram', 'frequency']],
   ['trend', ['over time', 'trend', 'growth', 'decline', 'trajectory', 'history', 'timeline']],
-  ['compare', ['compare', 'comparison', 'versus', 'ranking', 'rank', 'top', 'largest', 'biggest', 'highest', 'lowest']],
+  [
+    'compare',
+    [
+      'compare',
+      'comparison',
+      'versus',
+      'ranking',
+      'rank',
+      'top',
+      'largest',
+      'biggest',
+      'highest',
+      'lowest',
+    ],
+  ],
 ];
 
 // --- chart type ------------------------------------------------------------
@@ -105,13 +131,51 @@ const MOOD_TO_PRESET: Record<string, string> = {
 const PRESET_NAMES = Object.keys(VIBE_PRESETS);
 
 const STOPWORDS = new Set([
-  'a', 'an', 'the', 'as', 'in', 'on', 'of', 'to', 'and', 'with', 'show', 'me', 'it',
-  'make', 'chart', 'graph', 'plot', 'this', 'that', 'please', 'using', 'use', 'for',
-  'between', 'into', 'my', 'data', 'is', 'are', 'be', 'render', 'draw', 'display',
+  'a',
+  'an',
+  'the',
+  'as',
+  'in',
+  'on',
+  'of',
+  'to',
+  'and',
+  'with',
+  'show',
+  'me',
+  'it',
+  'make',
+  'chart',
+  'graph',
+  'plot',
+  'this',
+  'that',
+  'please',
+  'using',
+  'use',
+  'for',
+  'between',
+  'into',
+  'my',
+  'data',
+  'is',
+  'are',
+  'be',
+  'render',
+  'draw',
+  'display',
 ]);
 
 const BY_WORDS = new Set(['by', 'per', 'across']);
-const SERIES_WORDS = new Set(['split', 'grouped', 'group', 'colored', 'color', 'stacked', 'series']);
+const SERIES_WORDS = new Set([
+  'split',
+  'grouped',
+  'group',
+  'colored',
+  'color',
+  'stacked',
+  'series',
+]);
 
 // --- field matching --------------------------------------------------------
 
@@ -178,7 +242,9 @@ export function parseChartQuery(query: string, profile: DataProfile): ChartHints
     if (field && !roles[key]) {
       roles[key] = field.name;
       for (const i of tokenIdx) if (i >= 0) consumed.add(i);
-      const fi = tokens.findIndex((t) => norm(t) === norm(field.name) || singular(norm(t)) === singular(norm(field.name)));
+      const fi = tokens.findIndex(
+        (t) => norm(t) === norm(field.name) || singular(norm(t)) === singular(norm(field.name)),
+      );
       if (fi >= 0) consumed.add(fi);
     }
   };
@@ -280,7 +346,9 @@ export function parseChartQuery(query: string, profile: DataProfile): ChartHints
   }
 
   // leftover, non-stopword words are unresolved
-  const unresolved = tokens.filter((t, i) => !consumed.has(i) && !STOPWORDS.has(t) && Number.isNaN(Number(t)));
+  const unresolved = tokens.filter(
+    (t, i) => !consumed.has(i) && !STOPWORDS.has(t) && Number.isNaN(Number(t)),
+  );
 
   const hasRole = Object.keys(roles).length > 0;
   const confidence = Math.min(

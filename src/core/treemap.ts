@@ -1,7 +1,20 @@
-import { stratify, treemap, treemapBinary, treemapDice, treemapSlice, treemapSquarify } from 'd3-hierarchy';
+import {
+  stratify,
+  treemap,
+  treemapBinary,
+  treemapDice,
+  treemapSlice,
+  treemapSquarify,
+} from 'd3-hierarchy';
 import type { HierarchyRectangularNode } from 'd3-hierarchy';
 
-type TileFn = (node: HierarchyRectangularNode<TreemapDatum>, x0: number, y0: number, x1: number, y1: number) => void;
+type TileFn = (
+  node: HierarchyRectangularNode<TreemapDatum>,
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+) => void;
 
 /**
  * Treemap layout via d3-hierarchy (already a dependency). Pure: takes a flat

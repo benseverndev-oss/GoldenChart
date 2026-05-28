@@ -8,7 +8,11 @@ import { renderToSVGString } from '../render/renderToString';
 
 const hide = (set: string[], el: ReturnType<typeof createElement>) =>
   renderToSVGString(
-    createElement(SeriesVisibilityProvider, { value: { hidden: new Set(set), toggle: () => {}, interactive: false } }, el),
+    createElement(
+      SeriesVisibilityProvider,
+      { value: { hidden: new Set(set), toggle: () => {}, interactive: false } },
+      el,
+    ),
   );
 
 describe('charts filter hidden series via SeriesVisibility', () => {
@@ -31,8 +35,20 @@ describe('charts filter hidden series via SeriesVisibility', () => {
       height: 160,
       bare: true,
       series: [
-        { id: 'a', points: [{ x: 0, y: 1 }, { x: 1, y: 2 }] },
-        { id: 'b', points: [{ x: 0, y: 3 }, { x: 1, y: 4 }] },
+        {
+          id: 'a',
+          points: [
+            { x: 0, y: 1 },
+            { x: 1, y: 2 },
+          ],
+        },
+        {
+          id: 'b',
+          points: [
+            { x: 0, y: 3 },
+            { x: 1, y: 4 },
+          ],
+        },
       ],
     } as never);
     const svg = hide(['b'], line);
@@ -46,8 +62,20 @@ describe('charts filter hidden series via SeriesVisibility', () => {
       height: 160,
       bare: true,
       series: [
-        { id: 'a', points: [{ x: 0, y: 1 }, { x: 1, y: 2 }] },
-        { id: 'b', points: [{ x: 0, y: 3 }, { x: 1, y: 4 }] },
+        {
+          id: 'a',
+          points: [
+            { x: 0, y: 1 },
+            { x: 1, y: 2 },
+          ],
+        },
+        {
+          id: 'b',
+          points: [
+            { x: 0, y: 3 },
+            { x: 1, y: 4 },
+          ],
+        },
       ],
     } as never);
     const svg = hide(['b'], area);

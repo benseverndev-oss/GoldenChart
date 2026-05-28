@@ -33,7 +33,13 @@ export function wheelFactor(deltaY: number): number {
 }
 
 /** Apply a wheel event to a domain: zoom around `focus` (0..1) then clamp. */
-export function wheelZoom(domain: Domain, focus: number, deltaY: number, bounds: Domain, minSpan: number): Domain {
+export function wheelZoom(
+  domain: Domain,
+  focus: number,
+  deltaY: number,
+  bounds: Domain,
+  minSpan: number,
+): Domain {
   return clampDomain(zoomDomain(domain, focus, wheelFactor(deltaY)), bounds, minSpan);
 }
 

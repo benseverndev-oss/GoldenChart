@@ -30,17 +30,28 @@ describe('visualize', () => {
   });
 
   it('chooses a sankey for flow data', () => {
-    const el = visualize([{ source: 'a', target: 'b', value: 5 }], { width: 300, height: 200, bare: true });
+    const el = visualize([{ source: 'a', target: 'b', value: 5 }], {
+      width: 300,
+      height: 200,
+      bare: true,
+    });
     expect(name(el)).toBe('SankeyChart');
   });
 
   it('forwards width/height/vibe and renders a valid SVG', () => {
-    const el = visualize([{ x: 1, y: 2 }, { x: 3, y: 4 }, { x: 5, y: 1 }], {
-      width: 300,
-      height: 200,
-      vibe: 'ink',
-      bare: true,
-    });
+    const el = visualize(
+      [
+        { x: 1, y: 2 },
+        { x: 3, y: 4 },
+        { x: 5, y: 1 },
+      ],
+      {
+        width: 300,
+        height: 200,
+        vibe: 'ink',
+        bare: true,
+      },
+    );
     const svg = renderToSVGString(el);
     expect(svg).toContain('<path');
   });
@@ -52,12 +63,22 @@ describe('visualize', () => {
     ];
 
     it('honors a chart-type override in the query', () => {
-      const el = visualize(sales, { query: 'sales by region as a pie', width: 240, height: 160, bare: true });
+      const el = visualize(sales, {
+        query: 'sales by region as a pie',
+        width: 240,
+        height: 160,
+        bare: true,
+      });
       expect(name(el)).toBe('PieChart');
     });
 
     it('threads a vibe parsed from the query', () => {
-      const el = visualize(sales, { query: 'sales by region in pencil', width: 240, height: 160, bare: true });
+      const el = visualize(sales, {
+        query: 'sales by region in pencil',
+        width: 240,
+        height: 160,
+        bare: true,
+      });
       expect((el.props as { vibe?: unknown }).vibe).toBe('pencil');
     });
 

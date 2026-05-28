@@ -1,11 +1,5 @@
 import type { FlowDirection, FlowEdge, FlowNode } from '../types/charts';
-import {
-  DEFAULT_NODE_H,
-  DEFAULT_NODE_W,
-  connectEdge,
-  isHorizontal,
-  layoutTree,
-} from './hierarchy';
+import { DEFAULT_NODE_H, DEFAULT_NODE_W, connectEdge, isHorizontal, layoutTree } from './hierarchy';
 import type { FlowLayout, LaidOutEdge, LaidOutNode } from './hierarchy';
 
 /** Edges as given, or derived from each node's `parent` link when absent. */
@@ -52,7 +46,10 @@ function isTreeLike(nodes: FlowNode[], edges: FlowEdge[]): boolean {
  * layer below its deepest parent; roots stay at 0. The iteration cap guarantees
  * termination even with cycles. Shared by the DAG layout and the Sankey chart.
  */
-export function assignLayers(nodeIds: string[], links: { from: string; to: string }[]): Map<string, number> {
+export function assignLayers(
+  nodeIds: string[],
+  links: { from: string; to: string }[],
+): Map<string, number> {
   const layer = new Map<string, number>(nodeIds.map((id) => [id, 0]));
   for (let iter = 0; iter < nodeIds.length; iter++) {
     let changed = false;
@@ -96,7 +93,10 @@ export function layoutDag(
     parents.get(e.to)!.push(e.from);
   }
 
-  const layer = assignLayers(nodes.map((n) => n.id), links);
+  const layer = assignLayers(
+    nodes.map((n) => n.id),
+    links,
+  );
   const maxLayer = Math.max(...nodes.map((n) => layer.get(n.id)!));
   const byLayer: string[][] = Array.from({ length: maxLayer + 1 }, () => []);
   for (const n of nodes) byLayer[layer.get(n.id)!].push(n.id);
@@ -108,7 +108,10 @@ export function layoutDag(
   byLayer.forEach(reindex);
 
   const median = (id: string, neighbours: Map<string, string[]>): number => {
-    const ps = neighbours.get(id)!.map((nb) => pos.get(nb)!).filter((p) => p != null);
+    const ps = neighbours
+      .get(id)!
+      .map((nb) => pos.get(nb)!)
+      .filter((p) => p != null);
     if (ps.length === 0) return pos.get(id)!; // no anchor ⇒ keep current slot
     ps.sort((a, b) => a - b);
     const mid = Math.floor(ps.length / 2);
@@ -125,7 +128,10 @@ export function layoutDag(
   };
 
   const down = Array.from({ length: maxLayer }, (_, i) => i + 1); // layers 1..max
-  const up = down.slice().reverse().map((l) => l - 1); // layers max-1..0
+  const up = down
+    .slice()
+    .reverse()
+    .map((l) => l - 1); // layers max-1..0
   for (let i = 0; i < 2; i++) {
     sweep(parents, down);
     sweep(children, up);

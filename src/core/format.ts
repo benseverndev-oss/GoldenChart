@@ -5,7 +5,20 @@
  * d3-format / d3-time-format.
  */
 
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
 const SI = ['', 'k', 'M', 'B', 'T'];
 
 const pad = (n: number, w = 2) => String(Math.floor(Math.abs(n))).padStart(w, '0');
@@ -27,15 +40,16 @@ function formatNumber(value: number, spec: string): string {
     n = value * 100;
     suffix = '%';
   } else if (type === 's') {
-    const tier = value === 0 ? 0 : Math.min(SI.length - 1, Math.floor(Math.log10(Math.abs(value)) / 3));
+    const tier =
+      value === 0 ? 0 : Math.min(SI.length - 1, Math.floor(Math.log10(Math.abs(value)) / 3));
     n = value / 10 ** (tier * 3);
     suffix = SI[tier];
   }
 
   const sign = n < 0 ? '-' : '';
   const fixed = Math.abs(n).toFixed(precision);
-  let [intPart, frac] = fixed.split('.');
-  if (comma) intPart = group(intPart);
+  const [intPartRaw, frac] = fixed.split('.');
+  const intPart = comma ? group(intPartRaw) : intPartRaw;
   const body = frac ? `${intPart}.${frac}` : intPart;
   return `${sign}${currency ?? ''}${body}${suffix}`;
 }

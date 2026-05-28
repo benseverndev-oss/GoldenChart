@@ -39,7 +39,10 @@ const isSingleBar = (c: CompiledChart): boolean =>
 /** Series count for color-bearing charts, or null when colour isn't the encoding. */
 function seriesColorCount(c: CompiledChart): number | null {
   const { component, props } = c;
-  if ((component === 'LineChart' || component === 'AreaChart' || component === 'RadarChart') && Array.isArray(props.series)) {
+  if (
+    (component === 'LineChart' || component === 'AreaChart' || component === 'RadarChart') &&
+    Array.isArray(props.series)
+  ) {
     return props.series.length;
   }
   if (component === 'BarChart' && Array.isArray(props.seriesKeys)) return props.seriesKeys.length;
@@ -81,7 +84,8 @@ export function critiqueChart(
       critiques.push({
         severity: 'warn',
         rule: 'pie-not-part-of-whole',
-        message: 'A pie chart shows parts of a whole; negative values have no meaningful slice — use a bar chart.',
+        message:
+          'A pie chart shows parts of a whole; negative values have no meaningful slice — use a bar chart.',
         fix: { chartType: 'bar' },
       });
     }
@@ -110,7 +114,8 @@ export function critiqueChart(
     critiques.push({
       severity: 'info',
       rule: 'temporal-trend',
-      message: 'The data has a time field; a line or area chart shows a trend over time more clearly than bars.',
+      message:
+        'The data has a time field; a line or area chart shows a trend over time more clearly than bars.',
       fix: { chartType: 'line' },
     });
   }
@@ -120,7 +125,9 @@ export function critiqueChart(
     const data = props.data as DatumLike[];
     if (data.length > 0) {
       const band = width / data.length;
-      const widest = Math.max(...data.map((d) => measureText(d.label, FONT_SIZE, FONT_FAMILY).width));
+      const widest = Math.max(
+        ...data.map((d) => measureText(d.label, FONT_SIZE, FONT_FAMILY).width),
+      );
       if (widest > band - 4) {
         critiques.push({
           severity: 'warn',

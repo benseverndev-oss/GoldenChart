@@ -23,7 +23,9 @@ describe('architectureLayout', () => {
     const scene = architectureLayout('TB')(NODES, EDGES, [480, 320]);
     expect(scene.nodes).toHaveLength(4);
     // One container per distinct group.
-    expect(new Set(scene.groups?.map((g) => g.id))).toEqual(new Set(['Frontend', 'Backend', 'Data']));
+    expect(new Set(scene.groups?.map((g) => g.id))).toEqual(
+      new Set(['Frontend', 'Backend', 'Data']),
+    );
     // Every edge is an orthogonal polyline (>= 2 waypoints, axis-aligned).
     for (const e of scene.edges) {
       expect(e.points && e.points.length >= 2).toBe(true);
@@ -36,7 +38,13 @@ describe('architectureLayout', () => {
 describe('ArchitectureDiagram', () => {
   it('renders nodes, zone labels and connectors as standalone SVG', () => {
     const svg = renderToSVGString(
-      createElement(ArchitectureDiagram, { nodes: NODES, edges: EDGES, width: 480, height: 320, bare: true }),
+      createElement(ArchitectureDiagram, {
+        nodes: NODES,
+        edges: EDGES,
+        width: 480,
+        height: 320,
+        bare: true,
+      }),
     );
     expect(svg.startsWith('<svg')).toBe(true);
     expect(svg).toContain('Database');

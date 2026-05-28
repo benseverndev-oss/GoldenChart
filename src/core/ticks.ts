@@ -1,9 +1,6 @@
 import type { ScaleBand, ScaleLinear, ScalePoint } from 'd3-scale';
 
-export type AnyScale =
-  | ScaleLinear<number, number>
-  | ScaleBand<string>
-  | ScalePoint<string>;
+export type AnyScale = ScaleLinear<number, number> | ScaleBand<string> | ScalePoint<string>;
 
 export interface Tick {
   value: string | number;

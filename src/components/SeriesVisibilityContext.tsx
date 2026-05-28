@@ -10,7 +10,11 @@ export interface SeriesVisibility {
 
 /** No-op default: hides nothing, toggles nothing, not interactive. Keeps the
  *  static/SSR/MCP render byte-identical until an interactive provider mounts. */
-export const defaultSeriesVisibility: SeriesVisibility = { hidden: new Set(), toggle: () => {}, interactive: false };
+export const defaultSeriesVisibility: SeriesVisibility = {
+  hidden: new Set(),
+  toggle: () => {},
+  interactive: false,
+};
 
 const Ctx = createContext<SeriesVisibility>(defaultSeriesVisibility);
 export const SeriesVisibilityProvider = Ctx.Provider;

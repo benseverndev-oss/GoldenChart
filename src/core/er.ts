@@ -127,7 +127,10 @@ export function computeER(
   const PAD = 8;
   const offX = Math.max(...sized.map((s) => s.width)) / 2 + PAD;
   const offY = Math.max(...sized.map((s) => s.height)) / 2 + PAD;
-  const inner: [number, number] = [Math.max(1, size[0] - 2 * offX), Math.max(1, size[1] - 2 * offY)];
+  const inner: [number, number] = [
+    Math.max(1, size[0] - 2 * offX),
+    Math.max(1, size[1] - 2 * offY),
+  ];
 
   const positioned = layoutFlow(flowNodes, inner, edges, opts.direction ?? 'LR');
   const posById = new Map(positioned.nodes.map((n) => [n.id, n]));
@@ -162,7 +165,9 @@ export function computeER(
     const tBox = toBox(t);
     const sPort = boxPort(sBox, { x: t.x, y: t.y });
     const tPort = boxPort(tBox, { x: s.x, y: s.y });
-    const others = obstacles.filter((_, i) => laidEntities[i].id !== r.from && laidEntities[i].id !== r.to);
+    const others = obstacles.filter(
+      (_, i) => laidEntities[i].id !== r.from && laidEntities[i].id !== r.to,
+    );
     const points = routeOrthogonal(sPort, tPort, others, { padding: 10 });
     const near = (port: Point, next: Point): Point => ({
       x: port.x + (next.x - port.x) * 0.28,

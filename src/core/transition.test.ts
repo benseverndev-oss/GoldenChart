@@ -23,8 +23,14 @@ describe('transition interpolation', () => {
   });
 
   it('interpolateChartData blends {label,value}[] by matching label', () => {
-    const from = [{ label: 'A', value: 0 }, { label: 'B', value: 10 }];
-    const to = [{ label: 'A', value: 10 }, { label: 'B', value: 20 }];
+    const from = [
+      { label: 'A', value: 0 },
+      { label: 'B', value: 10 },
+    ];
+    const to = [
+      { label: 'A', value: 10 },
+      { label: 'B', value: 20 },
+    ];
     expect(interpolateChartData(from, to, 0.5)).toEqual([
       { label: 'A', value: 5 },
       { label: 'B', value: 15 },
@@ -32,15 +38,47 @@ describe('transition interpolation', () => {
   });
 
   it('interpolateChartData snaps an entering datum (no match in `from`)', () => {
-    const out = interpolateChartData([{ label: 'A', value: 0 }], [{ label: 'A', value: 10 }, { label: 'C', value: 8 }], 0.5);
-    expect(out).toEqual([{ label: 'A', value: 5 }, { label: 'C', value: 8 }]);
+    const out = interpolateChartData(
+      [{ label: 'A', value: 0 }],
+      [
+        { label: 'A', value: 10 },
+        { label: 'C', value: 8 },
+      ],
+      0.5,
+    );
+    expect(out).toEqual([
+      { label: 'A', value: 5 },
+      { label: 'C', value: 8 },
+    ]);
   });
 
   it('interpolateChartData blends {id,points}[] by id + point index', () => {
-    const from = [{ id: 's', points: [{ x: 0, y: 0 }, { x: 1, y: 0 }] }];
-    const to = [{ id: 's', points: [{ x: 0, y: 10 }, { x: 1, y: 20 }] }];
+    const from = [
+      {
+        id: 's',
+        points: [
+          { x: 0, y: 0 },
+          { x: 1, y: 0 },
+        ],
+      },
+    ];
+    const to = [
+      {
+        id: 's',
+        points: [
+          { x: 0, y: 10 },
+          { x: 1, y: 20 },
+        ],
+      },
+    ];
     expect(interpolateChartData(from, to, 0.5)).toEqual([
-      { id: 's', points: [{ x: 0, y: 5 }, { x: 1, y: 10 }] },
+      {
+        id: 's',
+        points: [
+          { x: 0, y: 5 },
+          { x: 1, y: 10 },
+        ],
+      },
     ]);
   });
 

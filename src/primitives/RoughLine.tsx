@@ -28,7 +28,10 @@ export function RoughLine({
 
   const paths = useMemo(() => {
     if (!allFinite(x1, y1, x2, y2)) return [];
-    const options = vibeToRoughOptions({ ...resolved, stroke: stroke ?? resolved.stroke }, resolved.seed);
+    const options = vibeToRoughOptions(
+      { ...resolved, stroke: stroke ?? resolved.stroke },
+      resolved.seed,
+    );
     const drawable = getRoughGenerator().line(x1, y1, x2, y2, options);
     return drawableToPaths(drawable);
   }, [x1, y1, x2, y2, resolved, stroke]);

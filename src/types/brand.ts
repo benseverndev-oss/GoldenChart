@@ -54,7 +54,9 @@ export interface ResolvedBrandLogo extends Required<BrandLogo> {}
  * any explicit per-call vibe overrides, so a brand recolours any vibe while an
  * explicit override still wins.
  */
-export type BrandVibeOverrides = Partial<Pick<VibeOverrides, 'stroke' | 'fill' | 'background' | 'fontFamily'>>;
+export type BrandVibeOverrides = Partial<
+  Pick<VibeOverrides, 'stroke' | 'fill' | 'background' | 'fontFamily'>
+>;
 
 /** A `Brand` resolved into the pieces the renderer consumes. */
 export interface ResolvedBrand {

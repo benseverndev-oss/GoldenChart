@@ -52,16 +52,27 @@ export function parseMermaid(source: string): DiagramSpec {
 
 // ---- flowchart -------------------------------------------------------------
 
-const DIRECTIONS: Record<string, FlowDirection> = { TB: 'TB', TD: 'TB', BT: 'BT', LR: 'LR', RL: 'RL' };
+const DIRECTIONS: Record<string, FlowDirection> = {
+  TB: 'TB',
+  TD: 'TB',
+  BT: 'BT',
+  LR: 'LR',
+  RL: 'RL',
+};
 
 function parseNodeToken(raw: string): { id: string; label?: string; shape?: FlowNodeShape } {
   const tok = raw.trim();
   let m: RegExpMatchArray | null;
-  if ((m = tok.match(/^([A-Za-z0-9_]+)\(\((.*)\)\)$/))) return { id: m[1], label: stripQuotes(m[2]), shape: 'ellipse' };
-  if ((m = tok.match(/^([A-Za-z0-9_]+)\(\[(.*)\]\)$/))) return { id: m[1], label: stripQuotes(m[2]), shape: 'ellipse' };
-  if ((m = tok.match(/^([A-Za-z0-9_]+)\[(.*)\]$/))) return { id: m[1], label: stripQuotes(m[2]), shape: 'rect' };
-  if ((m = tok.match(/^([A-Za-z0-9_]+)\((.*)\)$/))) return { id: m[1], label: stripQuotes(m[2]), shape: 'ellipse' };
-  if ((m = tok.match(/^([A-Za-z0-9_]+)\{(.*)\}$/))) return { id: m[1], label: stripQuotes(m[2]), shape: 'diamond' };
+  if ((m = tok.match(/^([A-Za-z0-9_]+)\(\((.*)\)\)$/)))
+    return { id: m[1], label: stripQuotes(m[2]), shape: 'ellipse' };
+  if ((m = tok.match(/^([A-Za-z0-9_]+)\(\[(.*)\]\)$/)))
+    return { id: m[1], label: stripQuotes(m[2]), shape: 'ellipse' };
+  if ((m = tok.match(/^([A-Za-z0-9_]+)\[(.*)\]$/)))
+    return { id: m[1], label: stripQuotes(m[2]), shape: 'rect' };
+  if ((m = tok.match(/^([A-Za-z0-9_]+)\((.*)\)$/)))
+    return { id: m[1], label: stripQuotes(m[2]), shape: 'ellipse' };
+  if ((m = tok.match(/^([A-Za-z0-9_]+)\{(.*)\}$/)))
+    return { id: m[1], label: stripQuotes(m[2]), shape: 'diamond' };
   if ((m = tok.match(/^([A-Za-z0-9_]+)$/))) return { id: m[1] };
   throw new MermaidParseError(`Unrecognized flowchart node: "${tok}".`);
 }
@@ -69,7 +80,8 @@ function parseNodeToken(raw: string): { id: string; label?: string; shape?: Flow
 function parseFlowchart(header: string, body: string[]): DiagramSpec {
   const dirToken = header.split(/\s+/)[1];
   const direction = dirToken ? DIRECTIONS[dirToken.toUpperCase()] : undefined;
-  if (dirToken && !direction) throw new MermaidParseError(`Unknown flowchart direction: "${dirToken}".`);
+  if (dirToken && !direction)
+    throw new MermaidParseError(`Unknown flowchart direction: "${dirToken}".`);
 
   const nodes = new Map<string, FlowNode>();
   const edges: FlowEdge[] = [];
@@ -81,7 +93,11 @@ function parseFlowchart(header: string, body: string[]): DiagramSpec {
       if (parsed.label) existing.label = parsed.label;
       if (parsed.shape) existing.shape = parsed.shape;
     } else {
-      nodes.set(parsed.id, { id: parsed.id, label: parsed.label ?? parsed.id, shape: parsed.shape });
+      nodes.set(parsed.id, {
+        id: parsed.id,
+        label: parsed.label ?? parsed.id,
+        shape: parsed.shape,
+      });
     }
     return parsed.id;
   };
@@ -96,7 +112,8 @@ function parseFlowchart(header: string, body: string[]): DiagramSpec {
     const stmt = line.trim();
     let m: RegExpMatchArray | null;
     if ((m = stmt.match(/^(.+?)\s*--+>\s*\|([^|]*)\|\s*(.+)$/))) addEdge(m[1], m[3], m[2]);
-    else if ((m = stmt.match(/^(.+?)\s*--\s*([^|>][^>]*?)\s*--+>\s*(.+)$/))) addEdge(m[1], m[3], m[2]);
+    else if ((m = stmt.match(/^(.+?)\s*--\s*([^|>][^>]*?)\s*--+>\s*(.+)$/)))
+      addEdge(m[1], m[3], m[2]);
     else if ((m = stmt.match(/^(.+?)\s*--+>\s*(.+)$/))) addEdge(m[1], m[2]);
     else if ((m = stmt.match(/^(.+?)\s*---+\s*(.+)$/))) addEdge(m[1], m[2]);
     else register(stmt);
@@ -107,7 +124,18 @@ function parseFlowchart(header: string, body: string[]): DiagramSpec {
 
 // ---- sequenceDiagram -------------------------------------------------------
 
-const SEQ_UNSUPPORTED = ['note', 'loop', 'alt', 'opt', 'par', 'activate', 'deactivate', 'rect', 'critical', 'break'];
+const SEQ_UNSUPPORTED = [
+  'note',
+  'loop',
+  'alt',
+  'opt',
+  'par',
+  'activate',
+  'deactivate',
+  'rect',
+  'critical',
+  'break',
+];
 
 function parseSequence(body: string[]): DiagramSpec {
   const actors = new Map<string, SequenceActorInput>();
@@ -134,7 +162,12 @@ function parseSequence(body: string[]): DiagramSpec {
       const [, from, arrow, to, label] = m;
       ensureActor(from);
       ensureActor(to);
-      messages.push({ from, to, label: stripQuotes(label), kind: arrow.startsWith('--') ? 'reply' : 'sync' });
+      messages.push({
+        from,
+        to,
+        label: stripQuotes(label),
+        kind: arrow.startsWith('--') ? 'reply' : 'sync',
+      });
       continue;
     }
     const lead = stmt.split(/\s+/)[0].toLowerCase();
@@ -152,9 +185,12 @@ function parseSequence(body: string[]): DiagramSpec {
 function parseMindmapLabel(raw: string): { label: string; shape?: FlowNodeShape } {
   const tok = raw.trim();
   let m: RegExpMatchArray | null;
-  if ((m = tok.match(/^[A-Za-z0-9_]*\(\((.*)\)\)$/))) return { label: stripQuotes(m[1]), shape: 'ellipse' };
-  if ((m = tok.match(/^[A-Za-z0-9_]*\[(.*)\]$/))) return { label: stripQuotes(m[1]), shape: 'rect' };
-  if ((m = tok.match(/^[A-Za-z0-9_]*\((.*)\)$/))) return { label: stripQuotes(m[1]), shape: 'ellipse' };
+  if ((m = tok.match(/^[A-Za-z0-9_]*\(\((.*)\)\)$/)))
+    return { label: stripQuotes(m[1]), shape: 'ellipse' };
+  if ((m = tok.match(/^[A-Za-z0-9_]*\[(.*)\]$/)))
+    return { label: stripQuotes(m[1]), shape: 'rect' };
+  if ((m = tok.match(/^[A-Za-z0-9_]*\((.*)\)$/)))
+    return { label: stripQuotes(m[1]), shape: 'ellipse' };
   return { label: stripQuotes(tok) };
 }
 

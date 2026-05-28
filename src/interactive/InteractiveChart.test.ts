@@ -14,7 +14,9 @@ function fakeHost(attrs: Record<string, string>): Element {
 }
 
 function fakeChildOf(host: Element): Element {
-  return { closest: (sel: string) => (sel === '[data-gc-mark]' ? host : null) } as unknown as Element;
+  return {
+    closest: (sel: string) => (sel === '[data-gc-mark]' ? host : null),
+  } as unknown as Element;
 }
 
 const fakeSvg = {} as unknown as SVGSVGElement;
@@ -29,7 +31,14 @@ describe('markFromEvent', () => {
   });
 
   it('resolves via closest() from a child element', () => {
-    const meta: MarkMeta = { kind: 'point', series: 's1', index: 0, value: { x: 1, y: 2 }, cx: 5, cy: 6 };
+    const meta: MarkMeta = {
+      kind: 'point',
+      series: 's1',
+      index: 0,
+      value: { x: 1, y: 2 },
+      cx: 5,
+      cy: 6,
+    };
     const host = fakeHost(markAttrs(meta));
     expect(markFromEvent(fakeSvg, fakeChildOf(host), 0, 0)?.mark.series).toBe('s1');
   });

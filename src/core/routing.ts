@@ -60,7 +60,12 @@ function blocked(p: Point, q: Point, rects: InflatedRect[]): boolean {
  * from other boxes. Pure geometry; returns the simplified polyline from `from`
  * to `to` (or a direct elbow when the lattice is fully blocked).
  */
-export function routeOrthogonal(from: Point, to: Point, obstacles: Obstacle[], opts: RouteOptions = {}): Point[] {
+export function routeOrthogonal(
+  from: Point,
+  to: Point,
+  obstacles: Obstacle[],
+  opts: RouteOptions = {},
+): Point[] {
   const pad = opts.padding ?? 10;
   const turnPenalty = opts.turnPenalty ?? 20;
 

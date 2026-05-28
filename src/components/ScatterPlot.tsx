@@ -72,8 +72,14 @@ export function ScatterPlot({
   const { x, y, points } = useMemo(() => {
     const xs = data.map((d) => d.x);
     const ys = data.map((d) => d.y);
-    const xScale = linearScale(resolveDomain(xs, extentOf(xs, false), xAxis), [plot.x, plot.x + plot.width]);
-    const yScale = linearScale(resolveDomain(ys, extentOf(ys, false), yAxis), [plot.y + plot.height, plot.y]);
+    const xScale = linearScale(resolveDomain(xs, extentOf(xs, false), xAxis), [
+      plot.x,
+      plot.x + plot.width,
+    ]);
+    const yScale = linearScale(resolveDomain(ys, extentOf(ys, false), yAxis), [
+      plot.y + plot.height,
+      plot.y,
+    ]);
     const rValues = data.map((d) => d.r).filter((r): r is number => r !== undefined);
     const rScale = rValues.length ? sqrtScale([0, Math.max(...rValues)], [2, maxRadius]) : null;
 
@@ -101,7 +107,11 @@ export function ScatterPlot({
       ariaLabel={ariaLabel}
       dataTable={
         dataTable
-          ? { caption: title, columns: ['X', 'Y'], rows: data.map((d) => [d.x, d.y] as (string | number)[]) }
+          ? {
+              caption: title,
+              columns: ['X', 'Y'],
+              rows: data.map((d) => [d.x, d.y] as (string | number)[]),
+            }
           : undefined
       }
       className={className}
@@ -115,8 +125,20 @@ export function ScatterPlot({
       {overlay && <Annotations annotations={overlay} plot={plot} xScale={x} yScale={y} />}
       {showAxes && (
         <>
-          <Axis scale={x} orientation="bottom" plot={plot} tickFormat={tickFormatter(xAxis)} ticks={xAxis?.tickCount} />
-          <Axis scale={y} orientation="left" plot={plot} tickFormat={tickFormatter(yAxis)} ticks={yAxis?.tickCount} />
+          <Axis
+            scale={x}
+            orientation="bottom"
+            plot={plot}
+            tickFormat={tickFormatter(xAxis)}
+            ticks={xAxis?.tickCount}
+          />
+          <Axis
+            scale={y}
+            orientation="left"
+            plot={plot}
+            tickFormat={tickFormatter(yAxis)}
+            ticks={yAxis?.tickCount}
+          />
         </>
       )}
     </Surface>
@@ -127,7 +149,15 @@ function ScatterDot({
   point,
   index,
 }: {
-  point: { cx: number; cy: number; r: number; color?: string; label?: string; dx: number; dy: number };
+  point: {
+    cx: number;
+    cy: number;
+    r: number;
+    color?: string;
+    label?: string;
+    dx: number;
+    dy: number;
+  };
   index: number;
 }) {
   const vibe = useVibeContext();

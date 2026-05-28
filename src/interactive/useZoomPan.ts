@@ -16,7 +16,10 @@ export function chartXExtent(props: Record<string, unknown>): Domain | null {
   }
   const data = props.data as { x?: number }[] | undefined;
   if (Array.isArray(data) && data.length > 0 && data.every((d) => typeof d?.x === 'number')) {
-    return extentOf(data.map((d) => d.x as number), false);
+    return extentOf(
+      data.map((d) => d.x as number),
+      false,
+    );
   }
   return null;
 }
@@ -36,7 +39,10 @@ export interface UseZoomPan {
  * clamped to `bounds`. All domain math is delegated to the pure `core/zoom`
  * helpers; this hook only wires pointer state. No-op when `bounds` is null.
  */
-export function useZoomPan(bounds: Domain | null, opts: { pan?: boolean; minSpan?: number } = {}): UseZoomPan {
+export function useZoomPan(
+  bounds: Domain | null,
+  opts: { pan?: boolean; minSpan?: number } = {},
+): UseZoomPan {
   const minSpan = opts.minSpan ?? (bounds ? (bounds[1] - bounds[0]) / 1000 || 1 : 1);
   const [domain, setDomain] = useState<Domain | null>(null);
   const drag = useRef<{ x: number; domain: Domain } | null>(null);

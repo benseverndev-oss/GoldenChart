@@ -59,12 +59,22 @@ export function ERDiagram({
       <g transform={`translate(${plot.x}, ${plot.y})`}>
         {layout.relationships.map((r, i) => {
           const pts = r.points;
-          const d = `M${pts[0].x},${pts[0].y} ` + pts.slice(1).map((p) => `L${p.x},${p.y}`).join(' ');
+          const d =
+            `M${pts[0].x},${pts[0].y} ` +
+            pts
+              .slice(1)
+              .map((p) => `L${p.x},${p.y}`)
+              .join(' ');
           return (
             <g key={`${r.from}->${r.to}-${i}`}>
               <RoughPath d={d} fill={null} seed={i + 1} />
               {r.fromCardinality && (
-                <RoughText x={r.fromLabelAt.x} y={r.fromLabelAt.y} anchor="middle" baseline="middle">
+                <RoughText
+                  x={r.fromLabelAt.x}
+                  y={r.fromLabelAt.y}
+                  anchor="middle"
+                  baseline="middle"
+                >
                   {r.fromCardinality}
                 </RoughText>
               )}
@@ -82,8 +92,21 @@ export function ERDiagram({
           const top = e.y - e.height / 2;
           return (
             <g key={e.id}>
-              <RoughRectangle x={left} y={top} width={e.width} height={e.height} fill="#ffffff" seed={i + 1} />
-              <RoughLine x1={left} y1={top + e.headerHeight} x2={left + e.width} y2={top + e.headerHeight} seed={i + 1} />
+              <RoughRectangle
+                x={left}
+                y={top}
+                width={e.width}
+                height={e.height}
+                fill="#ffffff"
+                seed={i + 1}
+              />
+              <RoughLine
+                x1={left}
+                y1={top + e.headerHeight}
+                x2={left + e.width}
+                y2={top + e.headerHeight}
+                seed={i + 1}
+              />
               <RoughText x={e.x} y={top + e.headerHeight / 2} anchor="middle" baseline="middle">
                 {e.label}
               </RoughText>

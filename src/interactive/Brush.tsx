@@ -12,5 +12,7 @@ export interface BrushOverlayProps {
 /** A sketched translucent selection rectangle for an x-axis brush. */
 export function Brush({ start, length, height }: BrushOverlayProps) {
   if (length <= 0 || height <= 0) return null;
-  return <RoughRectangle x={start} y={0} width={length} height={height} style={{ opacity: 0.25 }} />;
+  return (
+    <RoughRectangle x={start} y={0} width={length} height={height} style={{ opacity: 0.25 }} />
+  );
 }

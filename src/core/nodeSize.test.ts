@@ -30,6 +30,8 @@ describe('nodeSize', () => {
   });
 
   it('is deterministic', () => {
-    expect(nodeSize('Engineering', 'rect', 14, FONT)).toEqual(nodeSize('Engineering', 'rect', 14, FONT));
+    expect(nodeSize('Engineering', 'rect', 14, FONT)).toEqual(
+      nodeSize('Engineering', 'rect', 14, FONT),
+    );
   });
 });

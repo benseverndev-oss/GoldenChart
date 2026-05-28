@@ -55,7 +55,12 @@ describe('parseMermaid — sequenceDiagram', () => {
       { id: 'S', label: 'Server' },
     ]);
     expect(spec.messages[0]).toMatchObject({ from: 'U', to: 'S', label: 'request', kind: 'sync' });
-    expect(spec.messages[1]).toMatchObject({ from: 'S', to: 'U', label: 'response', kind: 'reply' });
+    expect(spec.messages[1]).toMatchObject({
+      from: 'S',
+      to: 'U',
+      label: 'response',
+      kind: 'reply',
+    });
   });
 
   it('auto-registers actors first seen in messages', () => {
@@ -86,7 +91,9 @@ describe('parseMermaid — errors', () => {
 
   it('throws for recognised-but-unsupported constructs', () => {
     expect(() => parseMermaid('erDiagram\n A ||--o{ B : has')).toThrow(/not yet supported/);
-    expect(() => parseMermaid('sequenceDiagram\n loop every minute')).toThrow(/Unsupported sequenceDiagram/);
+    expect(() => parseMermaid('sequenceDiagram\n loop every minute')).toThrow(
+      /Unsupported sequenceDiagram/,
+    );
   });
 
   it('throws when a mindmap has multiple roots', () => {

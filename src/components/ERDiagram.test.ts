@@ -49,7 +49,13 @@ describe('computeER', () => {
 describe('ERDiagram', () => {
   it('renders entities, fields and cardinalities as standalone SVG', () => {
     const svg = renderToSVGString(
-      createElement(ERDiagram, { entities: ENTITIES, relationships: RELS, width: 560, height: 320, bare: true }),
+      createElement(ERDiagram, {
+        entities: ENTITIES,
+        relationships: RELS,
+        width: 560,
+        height: 320,
+        bare: true,
+      }),
     );
     expect(svg.startsWith('<svg')).toBe(true);
     expect(svg).toContain('Order');

@@ -28,7 +28,11 @@ export function renderDiagram(spec: DiagramSpec, opts: DiagramRenderOptions): Re
         ...opts,
       });
     case 'sequence':
-      return createElement(SequenceDiagram, { actors: spec.actors, messages: spec.messages, ...opts });
+      return createElement(SequenceDiagram, {
+        actors: spec.actors,
+        messages: spec.messages,
+        ...opts,
+      });
     case 'mindmap':
       return createElement(MindMap, { nodes: spec.nodes, edges: spec.edges, ...opts });
     case 'arch':
@@ -46,8 +50,17 @@ export function renderDiagram(spec: DiagramSpec, opts: DiagramRenderOptions): Re
         ...opts,
       });
     case 'timeline':
-      return createElement(Timeline, { events: spec.events, orientation: spec.orientation, ...opts });
+      return createElement(Timeline, {
+        events: spec.events,
+        orientation: spec.orientation,
+        ...opts,
+      });
     case 'org':
-      return createElement(OrgChart, { nodes: spec.nodes, edges: spec.edges, direction: spec.direction, ...opts });
+      return createElement(OrgChart, {
+        nodes: spec.nodes,
+        edges: spec.edges,
+        direction: spec.direction,
+        ...opts,
+      });
   }
 }

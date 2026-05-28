@@ -121,7 +121,12 @@ export function HeatmapChart({
             seed={i + 1}
           />
           {showValues && (
-            <RoughText x={cell.x + cell.width / 2} y={cell.y + cell.height / 2} anchor="middle" baseline="middle">
+            <RoughText
+              x={cell.x + cell.width / 2}
+              y={cell.y + cell.height / 2}
+              anchor="middle"
+              baseline="middle"
+            >
               {String(cell.value)}
             </RoughText>
           )}

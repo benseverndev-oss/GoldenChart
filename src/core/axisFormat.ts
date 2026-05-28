@@ -6,7 +6,11 @@ import { formatValue } from './format';
  * Resolve an `AxisFormat.domain` against a chart's values. Returns the default
  * extent when no override is given, so callers stay default-preserving.
  */
-export function resolveDomain(values: number[], fallback: [number, number], axis?: AxisFormat): [number, number] {
+export function resolveDomain(
+  values: number[],
+  fallback: [number, number],
+  axis?: AxisFormat,
+): [number, number] {
   const d = axis?.domain;
   if (Array.isArray(d)) return d;
   if (d === 'zero') {

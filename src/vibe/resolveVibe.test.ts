@@ -29,7 +29,11 @@ describe('resolveVibe', () => {
 
   describe('brand overrides', () => {
     it('layers brand colour/font between the preset and explicit overrides', () => {
-      const resolved = resolveVibe('ink', { stroke: '#brand', fill: '#bf', fontFamily: 'Brand Sans' });
+      const resolved = resolveVibe('ink', {
+        stroke: '#brand',
+        fill: '#bf',
+        fontFamily: 'Brand Sans',
+      });
       expect(resolved.stroke).toBe('#brand');
       expect(resolved.fill).toBe('#bf');
       expect(resolved.fontFamily).toBe('Brand Sans');
@@ -38,7 +42,10 @@ describe('resolveVibe', () => {
     });
 
     it('lets an explicit vibe override beat the brand', () => {
-      const resolved = resolveVibe({ preset: 'ink', stroke: '#explicit' }, { stroke: '#brand', fill: '#bf' });
+      const resolved = resolveVibe(
+        { preset: 'ink', stroke: '#explicit' },
+        { stroke: '#brand', fill: '#bf' },
+      );
       expect(resolved.stroke).toBe('#explicit');
       expect(resolved.fill).toBe('#bf');
     });

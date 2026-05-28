@@ -69,11 +69,18 @@ export function LineChart({
   const palette = resolveBrand(brand).palette;
   const { hidden } = useSeriesVisibility();
   const legendItems: LegendItem[] =
-    showLegend && series.length > 1 ? series.map((s, i) => ({ label: s.id, color: s.color ?? colorAt(i, palette) })) : [];
+    showLegend && series.length > 1
+      ? series.map((s, i) => ({ label: s.id, color: s.color ?? colorAt(i, palette) }))
+      : [];
   const legendModel = legendItems.length
-    ? layoutLegend(legendItems, fullPlot.width, { fontSize: rv.fontSize, fontFamily: rv.fontFamily })
+    ? layoutLegend(legendItems, fullPlot.width, {
+        fontSize: rv.fontSize,
+        fontFamily: rv.fontFamily,
+      })
     : null;
-  const plot = legendModel ? { ...fullPlot, height: Math.max(1, fullPlot.height - legendModel.height - 36) } : fullPlot;
+  const plot = legendModel
+    ? { ...fullPlot, height: Math.max(1, fullPlot.height - legendModel.height - 36) }
+    : fullPlot;
 
   const resolved = useMemo(() => resolveEmphasis(series, emphasis ?? []), [series, emphasis]);
   const overlay = emphasis ? [...(annotations ?? []), ...resolved.annotations] : annotations;
@@ -85,8 +92,14 @@ export function LineChart({
     const allPoints = visible.flatMap((s) => s.points);
     const xs = allPoints.map((p) => p.x);
     const ys = allPoints.map((p) => p.y);
-    const xScale = linearScale(resolveDomain(xs, extentOf(xs, false), xAxis), [plot.x, plot.x + plot.width]);
-    const yScale = linearScale(resolveDomain(ys, extentOf(ys), yAxis), [plot.y + plot.height, plot.y]);
+    const xScale = linearScale(resolveDomain(xs, extentOf(xs, false), xAxis), [
+      plot.x,
+      plot.x + plot.width,
+    ]);
+    const yScale = linearScale(resolveDomain(ys, extentOf(ys), yAxis), [
+      plot.y + plot.height,
+      plot.y,
+    ]);
 
     const computed = visible.map((s) => {
       const i = series.indexOf(s);
@@ -123,7 +136,14 @@ export function LineChart({
           <RoughPath d={line.d} stroke={line.color} fill={null} seed={i + 1} />
           {showPoints &&
             line.pixels.map((p, j) => (
-              <RoughCircle key={j} cx={p.x} cy={p.y} diameter={8} fill={line.color} seed={i * 100 + j + 1} />
+              <RoughCircle
+                key={j}
+                cx={p.x}
+                cy={p.y}
+                diameter={8}
+                fill={line.color}
+                seed={i * 100 + j + 1}
+              />
             ))}
           {/* Inert transparent hit targets per datum: the line is one merged path,
               so per-point hover needs an addressable element. */}
@@ -149,11 +169,30 @@ export function LineChart({
       {overlay && <Annotations annotations={overlay} plot={plot} xScale={x} yScale={y} />}
       {showAxes && (
         <>
-          <Axis scale={x} orientation="bottom" plot={plot} tickFormat={tickFormatter(xAxis)} ticks={xAxis?.tickCount} />
-          <Axis scale={y} orientation="left" plot={plot} tickFormat={tickFormatter(yAxis)} ticks={yAxis?.tickCount} />
+          <Axis
+            scale={x}
+            orientation="bottom"
+            plot={plot}
+            tickFormat={tickFormatter(xAxis)}
+            ticks={xAxis?.tickCount}
+          />
+          <Axis
+            scale={y}
+            orientation="left"
+            plot={plot}
+            tickFormat={tickFormatter(yAxis)}
+            ticks={yAxis?.tickCount}
+          />
         </>
       )}
-      {legendModel && <Legend items={legendItems} x={fullPlot.x} y={plot.y + plot.height + 30} width={fullPlot.width} />}
+      {legendModel && (
+        <Legend
+          items={legendItems}
+          x={fullPlot.x}
+          y={plot.y + plot.height + 30}
+          width={fullPlot.width}
+        />
+      )}
     </Surface>
   );
 }

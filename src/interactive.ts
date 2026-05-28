@@ -33,10 +33,22 @@ export {
 export type { SeriesVisibility } from './components/SeriesVisibilityContext';
 
 // Phase 3
-export { zoomDomain, panDomain, clampDomain, wheelFactor, wheelZoom, focusFraction } from './core/zoom';
+export {
+  zoomDomain,
+  panDomain,
+  clampDomain,
+  wheelFactor,
+  wheelZoom,
+  focusFraction,
+} from './core/zoom';
 export type { Domain } from './core/zoom';
 export { pixelToValue, marksInPixelRange, clientToViewBox, brushRect } from './core/brush';
-export { lerp, interpolateNumberMap, easeInOutCubic, interpolateChartData } from './core/transition';
+export {
+  lerp,
+  interpolateNumberMap,
+  easeInOutCubic,
+  interpolateChartData,
+} from './core/transition';
 export { emptyLink, setFilter, clearFilter, activeFilter } from './core/linkSelection';
 export type { LinkState } from './core/linkSelection';
 export { useZoomPan, chartXExtent } from './interactive/useZoomPan';

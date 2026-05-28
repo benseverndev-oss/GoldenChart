@@ -8,7 +8,11 @@ export interface PixelMark {
 /** Nearest mark to (x, y) by pixel distance — used to snap a crosshair/selection
  *  to the closest datum without needing the chart's scales. Returns null when
  *  there are no marks. */
-export function nearestMark<T extends PixelMark>(marks: readonly T[], x: number, y: number): T | null {
+export function nearestMark<T extends PixelMark>(
+  marks: readonly T[],
+  x: number,
+  y: number,
+): T | null {
   let best: T | null = null;
   let bestD = Infinity;
   for (const m of marks) {

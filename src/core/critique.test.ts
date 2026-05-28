@@ -34,13 +34,22 @@ describe('critiqueChart — fires on targeted fixtures', () => {
   it('flags a pie with negative values as not part-of-whole', () => {
     const compiled: CompiledChart = {
       component: 'PieChart',
-      props: { data: [{ label: 'a', value: 5 }, { label: 'b', value: -3 }] },
+      props: {
+        data: [
+          { label: 'a', value: 5 },
+          { label: 'b', value: -3 },
+        ],
+      },
     };
     expect(rules(critiqueChart(compiled, EMPTY_PROFILE))).toContain('pie-not-part-of-whole');
   });
 
   it('flags clustered bar values as low-contrast', () => {
-    const cs = critiqueChart(barData(4, (i) => 100 + i), EMPTY_PROFILE, { width: 640 });
+    const cs = critiqueChart(
+      barData(4, (i) => 100 + i),
+      EMPTY_PROFILE,
+      { width: 640 },
+    );
     const c = cs.find((x) => x.rule === 'low-bar-contrast')!;
     expect(c.severity).toBe('info');
     expect(c.fix).toMatchObject({ chartType: 'line' });
@@ -62,10 +71,15 @@ describe('critiqueChart — fires on targeted fixtures', () => {
     const compiled: CompiledChart = {
       component: 'BarChart',
       props: {
-        data: Array.from({ length: 10 }, (_, i) => ({ label: `Very long category label ${i}`, value: i + 1 })),
+        data: Array.from({ length: 10 }, (_, i) => ({
+          label: `Very long category label ${i}`,
+          value: i + 1,
+        })),
       },
     };
-    const c = critiqueChart(compiled, EMPTY_PROFILE, { width: 400 }).find((x) => x.rule === 'axis-label-collision')!;
+    const c = critiqueChart(compiled, EMPTY_PROFILE, { width: 400 }).find(
+      (x) => x.rule === 'axis-label-collision',
+    )!;
     expect(c.severity).toBe('warn');
     expect(c.fix).toMatchObject({ rotateLabels: 45 });
   });
@@ -75,7 +89,9 @@ describe('critiqueChart — fires on targeted fixtures', () => {
       component: 'LineChart',
       props: { series: Array.from({ length: 10 }, (_, i) => ({ id: `s${i}`, points: [] })) },
     };
-    const c = critiqueChart(compiled, EMPTY_PROFILE).find((x) => x.rule === 'too-many-series-colors')!;
+    const c = critiqueChart(compiled, EMPTY_PROFILE).find(
+      (x) => x.rule === 'too-many-series-colors',
+    )!;
     expect(c.severity).toBe('warn');
   });
 });
@@ -89,7 +105,13 @@ describe('critiqueChart — quiet on clean input', () => {
   it('returns no critiques for a 3-series line chart', () => {
     const compiled: CompiledChart = {
       component: 'LineChart',
-      props: { series: [{ id: 'a', points: [] }, { id: 'b', points: [] }, { id: 'c', points: [] }] },
+      props: {
+        series: [
+          { id: 'a', points: [] },
+          { id: 'b', points: [] },
+          { id: 'c', points: [] },
+        ],
+      },
     };
     expect(critiqueChart(compiled, EMPTY_PROFILE)).toEqual([]);
   });

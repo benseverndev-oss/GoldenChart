@@ -49,7 +49,11 @@ export function boxEdgePoint(center: Point, width: number, height: number, towar
 }
 
 /** SVG path for a smooth cubic link between two points (flowchart edges). */
-export function linkPath(from: Point, to: Point, orientation: LinkOrientation = 'vertical'): string {
+export function linkPath(
+  from: Point,
+  to: Point,
+  orientation: LinkOrientation = 'vertical',
+): string {
   if (orientation === 'horizontal') {
     const midX = (from.x + to.x) / 2;
     return `M${from.x},${from.y} C${midX},${from.y} ${midX},${to.y} ${to.x},${to.y}`;
@@ -64,7 +68,11 @@ export function linkPath(from: Point, to: Point, orientation: LinkOrientation = 
  * The final segment is axis-aligned, so an arrowhead reads as a clean right
  * angle into the target.
  */
-export function orthogonalPoints(from: Point, to: Point, orientation: LinkOrientation = 'vertical'): Point[] {
+export function orthogonalPoints(
+  from: Point,
+  to: Point,
+  orientation: LinkOrientation = 'vertical',
+): Point[] {
   if (orientation === 'horizontal') {
     const midX = (from.x + to.x) / 2;
     return [from, { x: midX, y: from.y }, { x: midX, y: to.y }, to];
@@ -74,7 +82,11 @@ export function orthogonalPoints(from: Point, to: Point, orientation: LinkOrient
 }
 
 /** SVG path for an elbow (orthogonal) connector between two points. */
-export function orthogonalPath(from: Point, to: Point, orientation: LinkOrientation = 'vertical'): string {
+export function orthogonalPath(
+  from: Point,
+  to: Point,
+  orientation: LinkOrientation = 'vertical',
+): string {
   const [head, ...rest] = orthogonalPoints(from, to, orientation);
   return `M${head.x},${head.y} ` + rest.map((p) => `L${p.x},${p.y}`).join(' ');
 }
@@ -117,7 +129,8 @@ export function connectorPath(
 ): Connector {
   const routing = opts.routing ?? 'straight';
   const orientation =
-    opts.orientation ?? (Math.abs(to.x - from.x) >= Math.abs(to.y - from.y) ? 'horizontal' : 'vertical');
+    opts.orientation ??
+    (Math.abs(to.x - from.x) >= Math.abs(to.y - from.y) ? 'horizontal' : 'vertical');
   const midpoint = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 };
 
   if (routing === 'orthogonal') {
@@ -133,9 +146,19 @@ export function connectorPath(
     };
   }
   if (routing === 'curved') {
-    return { d: linkPath(from, to, orientation), endHeadTail: from, startHeadTail: to, labelAt: midpoint };
+    return {
+      d: linkPath(from, to, orientation),
+      endHeadTail: from,
+      startHeadTail: to,
+      labelAt: midpoint,
+    };
   }
-  return { d: `M${from.x},${from.y} L${to.x},${to.y}`, endHeadTail: from, startHeadTail: to, labelAt: midpoint };
+  return {
+    d: `M${from.x},${from.y} L${to.x},${to.y}`,
+    endHeadTail: from,
+    startHeadTail: to,
+    labelAt: midpoint,
+  };
 }
 
 /**
@@ -146,8 +169,14 @@ export function connectorPath(
 export function arrowHeadPath(from: Point, to: Point, size = 9, filled = false): string {
   const angle = Math.atan2(to.y - from.y, to.x - from.x);
   const spread = Math.PI / 7;
-  const left = { x: to.x - size * Math.cos(angle - spread), y: to.y - size * Math.sin(angle - spread) };
-  const right = { x: to.x - size * Math.cos(angle + spread), y: to.y - size * Math.sin(angle + spread) };
+  const left = {
+    x: to.x - size * Math.cos(angle - spread),
+    y: to.y - size * Math.sin(angle - spread),
+  };
+  const right = {
+    x: to.x - size * Math.cos(angle + spread),
+    y: to.y - size * Math.sin(angle + spread),
+  };
   const d = `M${left.x},${left.y} L${to.x},${to.y} L${right.x},${right.y}`;
   return filled ? `${d} Z` : d;
 }

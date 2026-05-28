@@ -22,7 +22,11 @@ describe('linearRegression', () => {
 
 describe('pickPoint', () => {
   it('selects by strategy', () => {
-    const pts = [{ x: 0, y: 4 }, { x: 1, y: 9 }, { x: 2, y: 2 }];
+    const pts = [
+      { x: 0, y: 4 },
+      { x: 1, y: 9 },
+      { x: 2, y: 2 },
+    ];
     expect(pickPoint(pts, 'max')).toEqual({ x: 1, y: 9 });
     expect(pickPoint(pts, 'peak')).toEqual({ x: 1, y: 9 });
     expect(pickPoint(pts, 'min')).toEqual({ x: 2, y: 2 });
@@ -35,7 +39,9 @@ describe('pickPoint', () => {
 describe('resolveEmphasis', () => {
   it('resolves a linear trend to a segment across the x-extent', () => {
     const { annotations } = resolveEmphasis([line], [{ kind: 'trend' }]);
-    expect(annotations).toEqual([{ kind: 'segment', x1: 0, y1: 1, x2: 3, y2: 7, color: undefined }]);
+    expect(annotations).toEqual([
+      { kind: 'segment', x1: 0, y1: 1, x2: 3, y2: 7, color: undefined },
+    ]);
   });
 
   it('resolves a mean trend to a flat segment', () => {
@@ -44,7 +50,10 @@ describe('resolveEmphasis', () => {
   });
 
   it('resolves an auto-callout to a templated point-callout at the extreme', () => {
-    const { annotations } = resolveEmphasis([line], [{ kind: 'auto-callout', pick: 'max', template: 'Peak {value}' }]);
+    const { annotations } = resolveEmphasis(
+      [line],
+      [{ kind: 'auto-callout', pick: 'max', template: 'Peak {value}' }],
+    );
     expect(annotations[0]).toMatchObject({ kind: 'point-callout', x: 3, y: 7, text: 'Peak 7' });
   });
 
@@ -57,7 +66,9 @@ describe('resolveEmphasis', () => {
 
   it('emphasize mode does not mute others', () => {
     const series = [line, { id: 'b', points: [{ x: 0, y: 0 }] }];
-    const { muted } = resolveEmphasis(series, [{ kind: 'highlight-series', id: 'a', mode: 'emphasize' }]);
+    const { muted } = resolveEmphasis(series, [
+      { kind: 'highlight-series', id: 'a', mode: 'emphasize' },
+    ]);
     expect(muted.size).toBe(0);
   });
 
