@@ -8,6 +8,7 @@ import { getPlotArea } from '../core/geometry';
 import { colorAt } from '../core/palette';
 import { resolveBrand } from '../brand/resolveBrand';
 import { seriesTable } from '../core/dataTable';
+import { describeSeries } from '../core/a11yDescribe';
 import { layoutLegend } from '../core/legend';
 import type { LegendItem } from '../core/legend';
 import { resolveVibe } from '../vibe/resolveVibe';
@@ -123,7 +124,7 @@ export function LineChart({
       vibe={vibe}
       brand={brand}
       title={title}
-      description={description}
+      description={description ?? describeSeries(series, 'Line')}
       ariaLabel={ariaLabel}
       dataTable={dataTable ? seriesTable(series, title) : undefined}
       className={className}

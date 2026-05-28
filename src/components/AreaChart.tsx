@@ -8,6 +8,7 @@ import { getPlotArea } from '../core/geometry';
 import { colorAt } from '../core/palette';
 import { resolveBrand } from '../brand/resolveBrand';
 import { seriesTable } from '../core/dataTable';
+import { describeSeries } from '../core/a11yDescribe';
 import { layoutLegend } from '../core/legend';
 import type { LegendItem } from '../core/legend';
 import { resolveVibe } from '../vibe/resolveVibe';
@@ -173,7 +174,7 @@ export function AreaChart({
       vibe={vibe}
       brand={brand}
       title={title}
-      description={description}
+      description={description ?? describeSeries(series, 'Area')}
       ariaLabel={ariaLabel}
       dataTable={dataTable ? seriesTable(series, title) : undefined}
       className={className}
