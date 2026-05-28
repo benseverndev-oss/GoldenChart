@@ -7,7 +7,8 @@ export function registerPrompts(server: McpServer): void {
     'make-me-a-chart',
     {
       title: 'Make me a chart',
-      description: 'Guided flow: pick a vibe from the mood, choose a chart for the data, then render it.',
+      description:
+        'Guided flow: pick a vibe from the mood, choose a chart for the data, then render it.',
       argsSchema: { dataDescription: z.string(), mood: z.string().optional() },
     },
     ({ dataDescription, mood }) => ({
@@ -39,7 +40,8 @@ export function registerPrompts(server: McpServer): void {
     'make-me-a-diagram',
     {
       title: 'Make me a diagram',
-      description: 'Guided flow: pick a vibe, describe the diagram, then render it from a spec or Mermaid.',
+      description:
+        'Guided flow: pick a vibe, describe the diagram, then render it from a spec or Mermaid.',
       argsSchema: { diagramDescription: z.string(), mood: z.string().optional() },
     },
     ({ diagramDescription, mood }) => ({
@@ -61,6 +63,41 @@ export function registerPrompts(server: McpServer): void {
               '6. If a raster image is needed, pass the returned SVG to export_png.',
               '',
               'Return the final SVG (or PNG) and mention which diagram kind you used.',
+            ].join('\n'),
+          },
+        },
+      ],
+    }),
+  );
+
+  server.registerPrompt(
+    'iterate-until-good',
+    {
+      title: 'Iterate until good',
+      description:
+        'Refine loop: pick a chart for the data, critique it, apply the highest-severity fix, re-render, repeat. Stops when critiques are empty or `maxIterations` is reached.',
+      argsSchema: {
+        dataDescription: z.string(),
+        maxIterations: z.string().optional(),
+      },
+    },
+    ({ dataDescription, maxIterations }) => ({
+      messages: [
+        {
+          role: 'user' as const,
+          content: {
+            type: 'text' as const,
+            text: [
+              'You are refining a hand-drawn chart with the GoldenChart MCP tools. Follow this loop:',
+              '',
+              `1. The data to visualize: ${dataDescription}`,
+              `2. Call suggest_improvements with the data, width, and height. Note the chosen chart, the SVG, and the \`critiques\` array. Each critique has a stable \`rule\`, a \`severity\` (\`warn\` outranks \`info\`), and an optional machine-readable \`fix\`.`,
+              `3. If \`critiques\` is empty, return the SVG — you're done.`,
+              `4. Otherwise pick the highest-severity critique that carries a \`fix\` (prefer \`warn\` over \`info\`). Call render_with_revision with the *original* data, the same width/height/vibe, and \`revisions\` set to the critique's \`fix\` object. Supported fix fields: \`keepTopCategories\`, \`groupRemainderAs\`, \`maxSeries\`, \`chartType\`.`,
+              `5. Inspect the new \`critiques\` returned by render_with_revision. If it's smaller (or empty), keep iterating from step 3 using the new chart's recommendations. Cap the loop at ${maxIterations ?? '3'} iterations to avoid thrashing.`,
+              `6. Return the final SVG and a short log of which revisions you applied at each step.`,
+              '',
+              "Don't apply the same revision twice; if a critique persists after one fix, try the next-highest critique instead of repeating.",
             ].join('\n'),
           },
         },
