@@ -21,8 +21,6 @@ describe('badgeIcons', () => {
     expect(BADGE_TONE_COLORS.danger).toMatch(/^#/);
   });
   it('lists every supported tone literal', () => {
-    expect(new Set(BADGE_TONES)).toEqual(
-      new Set(['neutral', 'info', 'success', 'warn', 'danger']),
-    );
+    expect(new Set(BADGE_TONES)).toEqual(new Set(['neutral', 'info', 'success', 'warn', 'danger']));
   });
 });
