@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   BarChart,
   LineChart,
@@ -47,6 +47,11 @@ import type {
 } from 'goldenchart';
 
 import { InteractivityShowcase } from './InteractivityShowcase';
+import { Gallery } from './Gallery';
+
+type View = 'playground' | 'gallery';
+const viewFromHash = (): View =>
+  typeof window !== 'undefined' && window.location.hash === '#gallery' ? 'gallery' : 'playground';
 
 const PRESETS = Object.keys(VIBE_PRESETS) as VibePreset[];
 
@@ -63,7 +68,10 @@ function wordmark(text: string, bg: string, fg: string): string {
 }
 
 /** Named brand kits the playground can apply in one click. */
-const BRAND_KITS: Record<string, { primary: string; ink: string; page: string; palette: string; font: string; logo: string }> = {
+const BRAND_KITS: Record<
+  string,
+  { primary: string; ink: string; page: string; palette: string; font: string; logo: string }
+> = {
   Acme: {
     primary: '#0b3d91',
     ink: '#1d2433',
@@ -313,7 +321,9 @@ const CRITIQUE_DATA = Array.from({ length: 16 }, (_, i) => ({
 }));
 const CRITIQUE_PROFILE = profileData(CRITIQUE_DATA);
 const CRITIQUE_REC = recommendChart(CRITIQUE_PROFILE)[0];
-const CRITIQUES = critiqueChart(compileChart(CRITIQUE_DATA, CRITIQUE_REC), CRITIQUE_PROFILE, { width: 460 });
+const CRITIQUES = critiqueChart(compileChart(CRITIQUE_DATA, CRITIQUE_REC), CRITIQUE_PROFILE, {
+  width: 460,
+});
 
 const SPARK_POINTS = [3, 7, 4, 9, 6, 11, 8, 14].map((v, i) => ({ x: i * 50, y: 120 - v * 7 }));
 
@@ -326,9 +336,21 @@ const NL_DATA = [
 ];
 
 export function App() {
+  const [view, setView] = useState<View>(viewFromHash);
   const [preset, setPreset] = useState<VibePreset>('messy_sketch');
   const [roughness, setRoughness] = useState(VIBE_PRESETS[preset].roughness);
   const [query, setQuery] = useState('revenue by month as a line in pencil');
+
+  // Keep the view in sync with the URL hash so #gallery is linkable/back-able.
+  useEffect(() => {
+    const sync = () => setView(viewFromHash());
+    window.addEventListener('hashchange', sync);
+    return () => window.removeEventListener('hashchange', sync);
+  }, []);
+  const go = (next: View) => {
+    window.location.hash = next === 'gallery' ? 'gallery' : '';
+    setView(next);
+  };
 
   // Branding controls — layered on top of the vibe.
   const [brandOn, setBrandOn] = useState(true);
@@ -354,7 +376,10 @@ export function App() {
 
   const vibe: VibeConfig = { preset, roughness };
 
-  const palette = paletteText.split(',').map((s) => s.trim()).filter(Boolean);
+  const palette = paletteText
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
   const brand: BrandConfig | undefined = brandOn
     ? {
         primary,
@@ -362,7 +387,9 @@ export function App() {
         page,
         palette: palette.length ? palette : undefined,
         font: brandFont || undefined,
-        logo: showLogo ? { src: wordmark(logoText, primary, '#ffffff'), position: logoPos, width: 72 } : undefined,
+        logo: showLogo
+          ? { src: wordmark(logoText, primary, '#ffffff'), position: logoPos, width: 72 }
+          : undefined,
       }
     : undefined;
 
@@ -372,327 +399,515 @@ export function App() {
   return (
     <div className="min-h-screen bg-amber-50 p-8 text-gray-900">
       <header className="mx-auto mb-8 max-w-5xl">
-        <h1 className="text-3xl font-bold tracking-tight">GoldenChart Playground</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          GoldenChart {view === 'gallery' ? 'Gallery' : 'Playground'}
+        </h1>
         <p className="mt-1 text-gray-600">
-          D3 computes the geometry, Rough.js draws it, the Vibe engine sets the mood, and a Brand layers on your identity.
+          D3 computes the geometry, Rough.js draws it, the Vibe engine sets the mood, and a Brand
+          layers on your identity.
         </p>
+        <nav className="mt-3 flex gap-2">
+          <ViewTab
+            label="Playground"
+            active={view === 'playground'}
+            onClick={() => go('playground')}
+          />
+          <ViewTab label="Gallery" active={view === 'gallery'} onClick={() => go('gallery')} />
+        </nav>
       </header>
 
-      <section className="mx-auto mb-8 flex max-w-5xl flex-wrap items-center gap-6 rounded-lg border border-gray-300 bg-white p-4 shadow-sm">
-        <label className="flex items-center gap-2">
-          <span className="font-medium">Preset</span>
-          <select
-            className="rounded border border-gray-300 px-2 py-1"
-            value={preset}
-            onChange={(e) => {
-              const next = e.target.value as VibePreset;
-              setPreset(next);
-              setRoughness(VIBE_PRESETS[next].roughness);
-            }}
-          >
-            {PRESETS.map((p) => (
-              <option key={p} value={p}>
-                {p}
-              </option>
-            ))}
-          </select>
-        </label>
+      {view === 'gallery' ? (
+        <Gallery />
+      ) : (
+        <>
+          <section className="mx-auto mb-8 flex max-w-5xl flex-wrap items-center gap-6 rounded-lg border border-gray-300 bg-white p-4 shadow-sm">
+            <label className="flex items-center gap-2">
+              <span className="font-medium">Preset</span>
+              <select
+                className="rounded border border-gray-300 px-2 py-1"
+                value={preset}
+                onChange={(e) => {
+                  const next = e.target.value as VibePreset;
+                  setPreset(next);
+                  setRoughness(VIBE_PRESETS[next].roughness);
+                }}
+              >
+                {PRESETS.map((p) => (
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-        <label className="flex items-center gap-2">
-          <span className="font-medium">Roughness</span>
-          <input
-            type="range"
-            min={0}
-            max={4}
-            step={0.1}
-            value={roughness}
-            onChange={(e) => setRoughness(Number(e.target.value))}
-          />
-          <span className="w-10 tabular-nums text-gray-600">{roughness.toFixed(1)}</span>
-        </label>
-      </section>
+            <label className="flex items-center gap-2">
+              <span className="font-medium">Roughness</span>
+              <input
+                type="range"
+                min={0}
+                max={4}
+                step={0.1}
+                value={roughness}
+                onChange={(e) => setRoughness(Number(e.target.value))}
+              />
+              <span className="w-10 tabular-nums text-gray-600">{roughness.toFixed(1)}</span>
+            </label>
+          </section>
 
-      <section className="mx-auto mb-8 max-w-5xl rounded-lg border border-gray-300 bg-white p-4 shadow-sm">
-        <div className="mb-3 flex flex-wrap items-center gap-4">
-          <label className="flex items-center gap-2 font-medium">
-            <input type="checkbox" checked={brandOn} onChange={(e) => setBrandOn(e.target.checked)} />
-            Apply brand
-          </label>
-          <span className="text-sm text-gray-500">Quick kits:</span>
-          {(Object.keys(BRAND_KITS) as (keyof typeof BRAND_KITS)[]).map((name) => (
-            <button
-              key={name}
-              type="button"
-              onClick={() => applyKit(name)}
-              className="rounded border border-gray-300 px-2 py-1 text-sm hover:bg-gray-50"
-            >
-              {name}
-            </button>
-          ))}
-          <span className="text-xs text-gray-500">
-            The brand recolours any vibe; the vibe keeps its hand-drawn texture.
-          </span>
-        </div>
-
-        <div className={`flex flex-wrap items-center gap-5 ${brandOn ? '' : 'pointer-events-none opacity-40'}`}>
-          <label className="flex items-center gap-2 text-sm">
-            <span className="font-medium">Primary</span>
-            <input type="color" value={primary} onChange={(e) => setPrimary(e.target.value)} />
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <span className="font-medium">Ink</span>
-            <input type="color" value={ink} onChange={(e) => setInk(e.target.value)} />
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <span className="font-medium">Page</span>
-            <input type="color" value={page} onChange={(e) => setPage(e.target.value)} />
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <span className="font-medium">Font</span>
-            <select
-              className="rounded border border-gray-300 px-2 py-1"
-              value={brandFont}
-              onChange={(e) => setBrandFont(e.target.value)}
-            >
-              {FONT_OPTIONS.map((f) => (
-                <option key={f.label} value={f.value}>
-                  {f.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <span className="font-medium">Palette</span>
-            <input
-              type="text"
-              className="w-72 rounded border border-gray-300 px-2 py-1"
-              value={paletteText}
-              onChange={(e) => setPaletteText(e.target.value)}
-              placeholder="#0b3d91, #2a9d8f, …"
-            />
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={showLogo} onChange={(e) => setShowLogo(e.target.checked)} />
-            <span className="font-medium">Logo</span>
-          </label>
-          <input
-            type="text"
-            className="w-28 rounded border border-gray-300 px-2 py-1 text-sm"
-            value={logoText}
-            onChange={(e) => setLogoText(e.target.value)}
-            disabled={!showLogo}
-          />
-          <select
-            className="rounded border border-gray-300 px-2 py-1 text-sm"
-            value={logoPos}
-            onChange={(e) => setLogoPos(e.target.value as LogoPosition)}
-            disabled={!showLogo}
-          >
-            <option value="top-left">top-left</option>
-            <option value="top-right">top-right</option>
-            <option value="bottom-left">bottom-left</option>
-            <option value="bottom-right">bottom-right</option>
-          </select>
-        </div>
-      </section>
-
-      <section className="mx-auto mb-8 max-w-5xl rounded-lg border border-gray-300 bg-white p-4 shadow-sm">
-        <label className="block">
-          <span className="font-medium">Describe your chart</span>
-          <input
-            type="text"
-            className="mt-1 w-full rounded border border-gray-300 px-3 py-2"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder='e.g. "revenue by region as a pie in neon"'
-          />
-        </label>
-        <p className="mt-2 text-xs text-gray-600">
-          Fields: <code>month</code>, <code>revenue</code>, <code>region</code>. Try{' '}
-          <code>revenue by region as a pie</code> or <code>compare revenue across region in chalkboard</code>.
-        </p>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <AutoChart width={460} height={280} query={query} data={NL_DATA} brand={brand} />
-          <div className="text-sm text-gray-700">
-            <p className="font-medium">Interpretation</p>
-            <ul className="mt-1 space-y-1">
-              <li>chart: <code>{plan.recommendation.chartType}</code></li>
-              <li>intent: <code>{plan.hints.intent ?? '—'}</code></li>
-              <li>roles: <code>{plan.hints.roles ? JSON.stringify(plan.hints.roles) : '—'}</code></li>
-              <li>vibe: <code>{String(plan.hints.vibe ?? '—')}</code></li>
-              <li>confidence: <code>{plan.hints.confidence.toFixed(2)}</code></li>
-              {plan.hints.unresolved.length > 0 && (
-                <li>unresolved: <code>{plan.hints.unresolved.join(', ')}</code></li>
-              )}
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <InteractivityShowcase vibe={vibe} brand={brand} />
-
-      <main className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2">
-        <Panel title="BarChart">
-          <BarChart width={460} height={300} vibe={vibe} brand={brand} data={BAR_DATA} title="Weekly visits" />
-        </Panel>
-
-        <Panel title="LineChart (multi-series)">
-          <LineChart width={460} height={300} vibe={vibe} brand={brand} series={SERIES} curve="catmullRom" showPoints />
-        </Panel>
-
-        <Panel title="AreaChart">
-          <AreaChart width={460} height={300} vibe={vibe} brand={brand} series={[SERIES[0]]} curve="basis" />
-        </Panel>
-
-        <Panel title="ScatterPlot (bubble)">
-          <ScatterPlot width={460} height={300} vibe={vibe} brand={brand} data={SCATTER} />
-        </Panel>
-
-        <Panel title="PieChart / Donut">
-          <div className="flex gap-2">
-            <PieChart width={220} height={220} vibe={vibe} brand={brand} data={BAR_DATA} />
-            <PieChart width={220} height={220} vibe={vibe} brand={brand} data={BAR_DATA} innerRadius={45} />
-          </div>
-        </Panel>
-
-        <Panel title="Flowchart (shapes, labels, LR)">
-          <Flowchart
-            width={460}
-            height={300}
-            vibe={vibe} brand={brand}
-            nodes={FLOW_NODES}
-            edges={FLOW_EDGES}
-            direction="LR"
-          />
-        </Panel>
-
-        <Panel title="Flowchart (orthogonal elbow routing, TB)">
-          <Flowchart
-            width={460}
-            height={300}
-            vibe={vibe} brand={brand}
-            nodes={FLOW_NODES}
-            edges={FLOW_EDGES}
-            direction="TB"
-            routing="orthogonal"
-          />
-        </Panel>
-
-        <Panel title="Flowchart (DAG merge — two roots into one node)">
-          <Flowchart
-            width={460}
-            height={320}
-            vibe={vibe} brand={brand}
-            nodes={DAG_NODES}
-            edges={DAG_EDGES}
-            direction="TB"
-            routing="orthogonal"
-          />
-        </Panel>
-
-        <Panel title="MindMap (radial tree)">
-          <MindMap width={460} height={360} vibe={vibe} brand={brand} nodes={MIND_NODES} />
-        </Panel>
-
-        <Panel title="OrgChart (hierarchy of boxes)">
-          <OrgChart width={460} height={300} vibe={vibe} brand={brand} nodes={ORG_NODES} />
-        </Panel>
-
-        <Panel title="ArchitectureDiagram (zones + routed links)">
-          <ArchitectureDiagram width={460} height={360} vibe={vibe} brand={brand} nodes={ARCH_NODES} edges={ARCH_EDGES} />
-        </Panel>
-
-        <Panel title="SequenceDiagram (actors + messages)">
-          <SequenceDiagram width={460} height={360} vibe={vibe} brand={brand} actors={SEQ_ACTORS} messages={SEQ_MESSAGES} />
-        </Panel>
-
-        <Panel title="ERDiagram (entities + cardinality)">
-          <ERDiagram width={460} height={340} vibe={vibe} brand={brand} entities={ER_ENTITIES} relationships={ER_RELS} />
-        </Panel>
-
-        <Panel title="Timeline (events along an axis)">
-          <Timeline width={460} height={240} vibe={vibe} brand={brand} events={TIMELINE_EVENTS} />
-        </Panel>
-
-        <Panel title="Chart critique (suggest_improvements)">
-          <AutoChart width={460} height={200} vibe={vibe} brand={brand} data={CRITIQUE_DATA} />
-          <ul className="mt-3 space-y-1 text-xs text-gray-700">
-            {CRITIQUES.map((c) => (
-              <li key={c.rule}>
-                <span
-                  className={`mr-1 rounded px-1 font-semibold uppercase ${
-                    c.severity === 'warn' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
-                  }`}
+          <section className="mx-auto mb-8 max-w-5xl rounded-lg border border-gray-300 bg-white p-4 shadow-sm">
+            <div className="mb-3 flex flex-wrap items-center gap-4">
+              <label className="flex items-center gap-2 font-medium">
+                <input
+                  type="checkbox"
+                  checked={brandOn}
+                  onChange={(e) => setBrandOn(e.target.checked)}
+                />
+                Apply brand
+              </label>
+              <span className="text-sm text-gray-500">Quick kits:</span>
+              {(Object.keys(BRAND_KITS) as (keyof typeof BRAND_KITS)[]).map((name) => (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => applyKit(name)}
+                  className="rounded border border-gray-300 px-2 py-1 text-sm hover:bg-gray-50"
                 >
-                  {c.severity}
-                </span>
-                {c.message}
-              </li>
-            ))}
-          </ul>
-        </Panel>
+                  {name}
+                </button>
+              ))}
+              <span className="text-xs text-gray-500">
+                The brand recolours any vibe; the vibe keeps its hand-drawn texture.
+              </span>
+            </div>
 
-        <Panel title="Mermaid → diagram (renderDiagram + parseMermaid)">
-          {renderDiagram(parseMermaid(MERMAID_SRC), { width: 460, height: 300, vibe, brand })}
-        </Panel>
+            <div
+              className={`flex flex-wrap items-center gap-5 ${brandOn ? '' : 'pointer-events-none opacity-40'}`}
+            >
+              <label className="flex items-center gap-2 text-sm">
+                <span className="font-medium">Primary</span>
+                <input type="color" value={primary} onChange={(e) => setPrimary(e.target.value)} />
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <span className="font-medium">Ink</span>
+                <input type="color" value={ink} onChange={(e) => setInk(e.target.value)} />
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <span className="font-medium">Page</span>
+                <input type="color" value={page} onChange={(e) => setPage(e.target.value)} />
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <span className="font-medium">Font</span>
+                <select
+                  className="rounded border border-gray-300 px-2 py-1"
+                  value={brandFont}
+                  onChange={(e) => setBrandFont(e.target.value)}
+                >
+                  {FONT_OPTIONS.map((f) => (
+                    <option key={f.label} value={f.value}>
+                      {f.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <span className="font-medium">Palette</span>
+                <input
+                  type="text"
+                  className="w-72 rounded border border-gray-300 px-2 py-1"
+                  value={paletteText}
+                  onChange={(e) => setPaletteText(e.target.value)}
+                  placeholder="#0b3d91, #2a9d8f, …"
+                />
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={showLogo}
+                  onChange={(e) => setShowLogo(e.target.checked)}
+                />
+                <span className="font-medium">Logo</span>
+              </label>
+              <input
+                type="text"
+                className="w-28 rounded border border-gray-300 px-2 py-1 text-sm"
+                value={logoText}
+                onChange={(e) => setLogoText(e.target.value)}
+                disabled={!showLogo}
+              />
+              <select
+                className="rounded border border-gray-300 px-2 py-1 text-sm"
+                value={logoPos}
+                onChange={(e) => setLogoPos(e.target.value as LogoPosition)}
+                disabled={!showLogo}
+              >
+                <option value="top-left">top-left</option>
+                <option value="top-right">top-right</option>
+                <option value="bottom-left">bottom-left</option>
+                <option value="bottom-right">bottom-right</option>
+              </select>
+            </div>
+          </section>
 
-        <Panel title="Sankey (weighted flow)">
-          <SankeyChart width={460} height={300} vibe={vibe} brand={brand} nodes={SANKEY_NODES} links={SANKEY_LINKS} showValues />
-        </Panel>
-
-        <Panel title="Treemap">
-          <TreemapChart width={460} height={300} vibe={vibe} brand={brand} data={TREEMAP_DATA} />
-        </Panel>
-
-        <Panel title="Heatmap (viridis)">
-          <HeatmapChart width={460} height={280} vibe={vibe} brand={brand} data={HEATMAP_DATA} showValues />
-        </Panel>
-
-        <Panel title="Radar (multi-series)">
-          <RadarChart width={360} height={320} vibe={vibe} brand={brand} axes={RADAR_AXES} series={RADAR_SERIES} />
-        </Panel>
-
-        <Panel title="Grouped bars (multi-series)">
-          <BarChart width={460} height={280} vibe={vibe} brand={brand} data={MULTI_BARS} mode="grouped" />
-        </Panel>
-
-        <Panel title="Stacked bars (multi-series)">
-          <BarChart width={460} height={280} vibe={vibe} brand={brand} data={MULTI_BARS} mode="stacked" />
-        </Panel>
-
-        <Panel title="Stacked area">
-          <AreaChart width={460} height={260} vibe={vibe} brand={brand} series={SERIES} stacked />
-        </Panel>
-
-        <Panel title="Line chart with annotations">
-          <LineChart width={460} height={260} vibe={vibe} brand={brand} series={[SERIES[0]]} annotations={ANNOTATIONS} />
-        </Panel>
-
-        <Panel title="AutoChart (visualize — picks the chart from the data)">
-          <AutoChart width={460} height={280} vibe={vibe} brand={brand} data={AUTO_RECORDS} />
-        </Panel>
-
-        <Panel title="Composed primitives (RoughPath + RoughCircle)">
-          <Surface width={460} height={160} vibe={vibe} brand={brand} title="Sparkline">
-            <RoughPath d={linePath(SPARK_POINTS, 'catmullRom')} fill={null} />
-            {SPARK_POINTS.map((p, i) => (
-              <RoughCircle key={i} cx={p.x} cy={p.y} diameter={10} seed={i + 1} />
-            ))}
-          </Surface>
-        </Panel>
-
-        <Panel title="All three presets, side by side">
-          <div className="flex flex-wrap gap-2">
-            {PRESETS.map((p) => (
-              <div key={p} className="text-center">
-                <BarChart width={150} height={110} vibe={p} data={BAR_DATA} showAxes={false} showGrid={false} />
-                <div className="mt-1 text-xs text-gray-500">{p}</div>
+          <section className="mx-auto mb-8 max-w-5xl rounded-lg border border-gray-300 bg-white p-4 shadow-sm">
+            <label className="block">
+              <span className="font-medium">Describe your chart</span>
+              <input
+                type="text"
+                className="mt-1 w-full rounded border border-gray-300 px-3 py-2"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder='e.g. "revenue by region as a pie in neon"'
+              />
+            </label>
+            <p className="mt-2 text-xs text-gray-600">
+              Fields: <code>month</code>, <code>revenue</code>, <code>region</code>. Try{' '}
+              <code>revenue by region as a pie</code> or{' '}
+              <code>compare revenue across region in chalkboard</code>.
+            </p>
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <AutoChart width={460} height={280} query={query} data={NL_DATA} brand={brand} />
+              <div className="text-sm text-gray-700">
+                <p className="font-medium">Interpretation</p>
+                <ul className="mt-1 space-y-1">
+                  <li>
+                    chart: <code>{plan.recommendation.chartType}</code>
+                  </li>
+                  <li>
+                    intent: <code>{plan.hints.intent ?? '—'}</code>
+                  </li>
+                  <li>
+                    roles: <code>{plan.hints.roles ? JSON.stringify(plan.hints.roles) : '—'}</code>
+                  </li>
+                  <li>
+                    vibe: <code>{String(plan.hints.vibe ?? '—')}</code>
+                  </li>
+                  <li>
+                    confidence: <code>{plan.hints.confidence.toFixed(2)}</code>
+                  </li>
+                  {plan.hints.unresolved.length > 0 && (
+                    <li>
+                      unresolved: <code>{plan.hints.unresolved.join(', ')}</code>
+                    </li>
+                  )}
+                </ul>
               </div>
-            ))}
-          </div>
-        </Panel>
-      </main>
+            </div>
+          </section>
+
+          <InteractivityShowcase vibe={vibe} brand={brand} />
+
+          <main className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2">
+            <Panel title="BarChart">
+              <BarChart
+                width={460}
+                height={300}
+                vibe={vibe}
+                brand={brand}
+                data={BAR_DATA}
+                title="Weekly visits"
+              />
+            </Panel>
+
+            <Panel title="LineChart (multi-series)">
+              <LineChart
+                width={460}
+                height={300}
+                vibe={vibe}
+                brand={brand}
+                series={SERIES}
+                curve="catmullRom"
+                showPoints
+              />
+            </Panel>
+
+            <Panel title="AreaChart">
+              <AreaChart
+                width={460}
+                height={300}
+                vibe={vibe}
+                brand={brand}
+                series={[SERIES[0]]}
+                curve="basis"
+              />
+            </Panel>
+
+            <Panel title="ScatterPlot (bubble)">
+              <ScatterPlot width={460} height={300} vibe={vibe} brand={brand} data={SCATTER} />
+            </Panel>
+
+            <Panel title="PieChart / Donut">
+              <div className="flex gap-2">
+                <PieChart width={220} height={220} vibe={vibe} brand={brand} data={BAR_DATA} />
+                <PieChart
+                  width={220}
+                  height={220}
+                  vibe={vibe}
+                  brand={brand}
+                  data={BAR_DATA}
+                  innerRadius={45}
+                />
+              </div>
+            </Panel>
+
+            <Panel title="Flowchart (shapes, labels, LR)">
+              <Flowchart
+                width={460}
+                height={300}
+                vibe={vibe}
+                brand={brand}
+                nodes={FLOW_NODES}
+                edges={FLOW_EDGES}
+                direction="LR"
+              />
+            </Panel>
+
+            <Panel title="Flowchart (orthogonal elbow routing, TB)">
+              <Flowchart
+                width={460}
+                height={300}
+                vibe={vibe}
+                brand={brand}
+                nodes={FLOW_NODES}
+                edges={FLOW_EDGES}
+                direction="TB"
+                routing="orthogonal"
+              />
+            </Panel>
+
+            <Panel title="Flowchart (DAG merge — two roots into one node)">
+              <Flowchart
+                width={460}
+                height={320}
+                vibe={vibe}
+                brand={brand}
+                nodes={DAG_NODES}
+                edges={DAG_EDGES}
+                direction="TB"
+                routing="orthogonal"
+              />
+            </Panel>
+
+            <Panel title="MindMap (radial tree)">
+              <MindMap width={460} height={360} vibe={vibe} brand={brand} nodes={MIND_NODES} />
+            </Panel>
+
+            <Panel title="OrgChart (hierarchy of boxes)">
+              <OrgChart width={460} height={300} vibe={vibe} brand={brand} nodes={ORG_NODES} />
+            </Panel>
+
+            <Panel title="ArchitectureDiagram (zones + routed links)">
+              <ArchitectureDiagram
+                width={460}
+                height={360}
+                vibe={vibe}
+                brand={brand}
+                nodes={ARCH_NODES}
+                edges={ARCH_EDGES}
+              />
+            </Panel>
+
+            <Panel title="SequenceDiagram (actors + messages)">
+              <SequenceDiagram
+                width={460}
+                height={360}
+                vibe={vibe}
+                brand={brand}
+                actors={SEQ_ACTORS}
+                messages={SEQ_MESSAGES}
+              />
+            </Panel>
+
+            <Panel title="ERDiagram (entities + cardinality)">
+              <ERDiagram
+                width={460}
+                height={340}
+                vibe={vibe}
+                brand={brand}
+                entities={ER_ENTITIES}
+                relationships={ER_RELS}
+              />
+            </Panel>
+
+            <Panel title="Timeline (events along an axis)">
+              <Timeline
+                width={460}
+                height={240}
+                vibe={vibe}
+                brand={brand}
+                events={TIMELINE_EVENTS}
+              />
+            </Panel>
+
+            <Panel title="Chart critique (suggest_improvements)">
+              <AutoChart width={460} height={200} vibe={vibe} brand={brand} data={CRITIQUE_DATA} />
+              <ul className="mt-3 space-y-1 text-xs text-gray-700">
+                {CRITIQUES.map((c) => (
+                  <li key={c.rule}>
+                    <span
+                      className={`mr-1 rounded px-1 font-semibold uppercase ${
+                        c.severity === 'warn'
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-blue-100 text-blue-700'
+                      }`}
+                    >
+                      {c.severity}
+                    </span>
+                    {c.message}
+                  </li>
+                ))}
+              </ul>
+            </Panel>
+
+            <Panel title="Mermaid → diagram (renderDiagram + parseMermaid)">
+              {renderDiagram(parseMermaid(MERMAID_SRC), { width: 460, height: 300, vibe, brand })}
+            </Panel>
+
+            <Panel title="Sankey (weighted flow)">
+              <SankeyChart
+                width={460}
+                height={300}
+                vibe={vibe}
+                brand={brand}
+                nodes={SANKEY_NODES}
+                links={SANKEY_LINKS}
+                showValues
+              />
+            </Panel>
+
+            <Panel title="Treemap">
+              <TreemapChart
+                width={460}
+                height={300}
+                vibe={vibe}
+                brand={brand}
+                data={TREEMAP_DATA}
+              />
+            </Panel>
+
+            <Panel title="Heatmap (viridis)">
+              <HeatmapChart
+                width={460}
+                height={280}
+                vibe={vibe}
+                brand={brand}
+                data={HEATMAP_DATA}
+                showValues
+              />
+            </Panel>
+
+            <Panel title="Radar (multi-series)">
+              <RadarChart
+                width={360}
+                height={320}
+                vibe={vibe}
+                brand={brand}
+                axes={RADAR_AXES}
+                series={RADAR_SERIES}
+              />
+            </Panel>
+
+            <Panel title="Grouped bars (multi-series)">
+              <BarChart
+                width={460}
+                height={280}
+                vibe={vibe}
+                brand={brand}
+                data={MULTI_BARS}
+                mode="grouped"
+              />
+            </Panel>
+
+            <Panel title="Stacked bars (multi-series)">
+              <BarChart
+                width={460}
+                height={280}
+                vibe={vibe}
+                brand={brand}
+                data={MULTI_BARS}
+                mode="stacked"
+              />
+            </Panel>
+
+            <Panel title="Stacked area">
+              <AreaChart
+                width={460}
+                height={260}
+                vibe={vibe}
+                brand={brand}
+                series={SERIES}
+                stacked
+              />
+            </Panel>
+
+            <Panel title="Line chart with annotations">
+              <LineChart
+                width={460}
+                height={260}
+                vibe={vibe}
+                brand={brand}
+                series={[SERIES[0]]}
+                annotations={ANNOTATIONS}
+              />
+            </Panel>
+
+            <Panel title="AutoChart (visualize — picks the chart from the data)">
+              <AutoChart width={460} height={280} vibe={vibe} brand={brand} data={AUTO_RECORDS} />
+            </Panel>
+
+            <Panel title="Composed primitives (RoughPath + RoughCircle)">
+              <Surface width={460} height={160} vibe={vibe} brand={brand} title="Sparkline">
+                <RoughPath d={linePath(SPARK_POINTS, 'catmullRom')} fill={null} />
+                {SPARK_POINTS.map((p, i) => (
+                  <RoughCircle key={i} cx={p.x} cy={p.y} diameter={10} seed={i + 1} />
+                ))}
+              </Surface>
+            </Panel>
+
+            <Panel title="All three presets, side by side">
+              <div className="flex flex-wrap gap-2">
+                {PRESETS.map((p) => (
+                  <div key={p} className="text-center">
+                    <BarChart
+                      width={150}
+                      height={110}
+                      vibe={p}
+                      data={BAR_DATA}
+                      showAxes={false}
+                      showGrid={false}
+                    />
+                    <div className="mt-1 text-xs text-gray-500">{p}</div>
+                  </div>
+                ))}
+              </div>
+            </Panel>
+          </main>
+        </>
+      )}
     </div>
+  );
+}
+
+function ViewTab({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full px-4 py-1 text-sm font-medium transition ${
+        active
+          ? 'bg-gray-900 text-white'
+          : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+      }`}
+    >
+      {label}
+    </button>
   );
 }
 
