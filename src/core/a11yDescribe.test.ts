@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  describeBars,
-  describePie,
-  describeScatter,
-  describeSeries,
-} from './a11yDescribe';
+import { describeBars, describePie, describeScatter, describeSeries } from './a11yDescribe';
 
 describe('a11yDescribe', () => {
   it('describes single-series bars with category count and value range', () => {
@@ -19,9 +14,7 @@ describe('a11yDescribe', () => {
   });
 
   it('handles a single category (singular noun)', () => {
-    expect(describeBars([{ label: 'Only', value: 5 }])).toBe(
-      'Bar chart with 1 category, value 5.',
-    );
+    expect(describeBars([{ label: 'Only', value: 5 }])).toBe('Bar chart with 1 category, value 5.');
   });
 
   it('describes multi-series bars with series count', () => {
@@ -41,8 +34,20 @@ describe('a11yDescribe', () => {
     expect(
       describeSeries(
         [
-          { id: 'a', points: [{ x: 0, y: 1 }, { x: 1, y: 5 }] },
-          { id: 'b', points: [{ x: 0, y: -3 }, { x: 1, y: 2 }] },
+          {
+            id: 'a',
+            points: [
+              { x: 0, y: 1 },
+              { x: 1, y: 5 },
+            ],
+          },
+          {
+            id: 'b',
+            points: [
+              { x: 0, y: -3 },
+              { x: 1, y: 2 },
+            ],
+          },
         ],
         'Line',
       ),
@@ -50,9 +55,9 @@ describe('a11yDescribe', () => {
   });
 
   it('respects the Area kind label', () => {
-    expect(
-      describeSeries([{ id: 'a', points: [{ x: 0, y: 1 }] }], 'Area'),
-    ).toBe('Area chart with 1 series and 1 point, y value 1.');
+    expect(describeSeries([{ id: 'a', points: [{ x: 0, y: 1 }] }], 'Area')).toBe(
+      'Area chart with 1 series and 1 point, y value 1.',
+    );
   });
 
   it('describes pies with slice count and total', () => {
@@ -66,9 +71,7 @@ describe('a11yDescribe', () => {
   });
 
   it('formats non-integer values with up to two decimals, trimmed', () => {
-    expect(describePie([{ label: 'A', value: 1.5 }])).toBe(
-      'Pie chart with 1 slice totaling 1.5.',
-    );
+    expect(describePie([{ label: 'A', value: 1.5 }])).toBe('Pie chart with 1 slice totaling 1.5.');
   });
 
   it('describes scatter data with point count', () => {

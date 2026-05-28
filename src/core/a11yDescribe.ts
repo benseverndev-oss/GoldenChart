@@ -8,9 +8,7 @@ import type { ChartDatum, MultiSeriesDatum, Series } from '../types/charts';
  * `description` to `<Surface>`.
  */
 
-function isMultiSeries(
-  data: ChartDatum[] | MultiSeriesDatum[],
-): data is MultiSeriesDatum[] {
+function isMultiSeries(data: ChartDatum[] | MultiSeriesDatum[]): data is MultiSeriesDatum[] {
   return data.length > 0 && 'values' in (data[0] as object);
 }
 

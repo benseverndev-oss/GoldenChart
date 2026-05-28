@@ -11,12 +11,23 @@ const BAR_DATA = [
   { label: 'Q1', value: 12 },
   { label: 'Q2', value: 19 },
 ];
-const SERIES_DATA = [{ id: 'a', points: [{ x: 0, y: 1 }, { x: 1, y: 5 }] }];
+const SERIES_DATA = [
+  {
+    id: 'a',
+    points: [
+      { x: 0, y: 1 },
+      { x: 1, y: 5 },
+    ],
+  },
+];
 const PIE_DATA = [
   { label: 'A', value: 10 },
   { label: 'B', value: 20 },
 ];
-const SCATTER_DATA = [{ x: 0, y: 0 }, { x: 1, y: 1 }];
+const SCATTER_DATA = [
+  { x: 0, y: 0 },
+  { x: 1, y: 1 },
+];
 
 const render = (el: ReturnType<typeof createElement>) => renderToStaticMarkup(el);
 
@@ -53,7 +64,9 @@ describe('a11y: chart SVGs expose role/title/desc', () => {
         bare: true,
       } as any),
     );
-    expect(svg).toMatch(/<desc>Line chart with 1 series and 2 points, y values from 1 to 5\.<\/desc>/);
+    expect(svg).toMatch(
+      /<desc>Line chart with 1 series and 2 points, y values from 1 to 5\.<\/desc>/,
+    );
   });
 
   it('AreaChart fallback labels itself as Area', () => {
