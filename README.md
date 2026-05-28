@@ -288,6 +288,10 @@ src/
 npm run playground        # interactive Vite demo of every chart + vibe
 ```
 
+It has two views: the interactive **Playground** (live vibe / brand / natural-language
+controls) and a **[Gallery](https://benseverndev-oss.github.io/GoldenChart/#gallery)** —
+a static tour of every vibe, every chart type, the paper-grain texture tiers, and brand kits.
+
 ## MCP server
 
 An MCP server in [`mcp/`](./mcp) exposes GoldenChart as tools at every level
