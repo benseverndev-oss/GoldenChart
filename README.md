@@ -2,7 +2,7 @@
 
 Hand-drawn, sketchy React charts and flowcharts.
 
-![npm v0.2.0](assets/badges/npm.svg) ![license MIT](assets/badges/license.svg) ![drawn with rough.js](assets/badges/drawn-with.svg) ![default vibe chaotic_notebook](assets/badges/vibe.svg)
+![npm v0.2.0](assets/badges/npm.svg) ![downloads/mo](assets/badges/downloads.svg) ![license MIT](assets/badges/license.svg) ![drawn with rough.js](assets/badges/drawn-with.svg) ![default vibe chaotic_notebook](assets/badges/vibe.svg)
 
 > These badges? We ship them. See [`Badge`](src/components/Badge.tsx) and the `render-badge` / `render-github-badge` MCP tools.
 
