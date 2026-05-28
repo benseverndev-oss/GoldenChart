@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { COLOR_SCALE_NAMES, VIBE_PRESETS, colorRamp } from 'goldenchart';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 import { chartTools, extraChartTools } from './tools';
 
 const allChartTools = [...chartTools, ...extraChartTools];
@@ -158,7 +157,7 @@ export function registerResources(server: McpServer): void {
       if (!tool) {
         throw new Error(`Unknown chart type: ${type}`);
       }
-      const jsonSchema = zodToJsonSchema(z.object(tool.config.inputSchema), `${type}_chart_input`);
+      const jsonSchema = z.toJSONSchema(z.object(tool.config.inputSchema));
       return { contents: [{ uri: uri.href, mimeType: 'application/json', text: JSON.stringify(jsonSchema, null, 2) }] };
     },
   );
