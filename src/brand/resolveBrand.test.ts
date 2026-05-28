@@ -56,4 +56,25 @@ describe('resolveBrand', () => {
   it('respects an explicit logo height', () => {
     expect(resolveBrand({ logo: { src: 'l.png', width: 120, height: 40 } }).logo?.height).toBe(40);
   });
+
+  it('picks the light side of a ThemedBrand by default', () => {
+    const resolved = resolveBrand({
+      light: { primary: '#f00', page: '#fff' },
+      dark: { primary: '#0ff', page: '#000' },
+    });
+    expect(resolved.vibeOverrides.fill).toBe('#f00');
+    expect(resolved.vibeOverrides.background).toBe('#fff');
+  });
+
+  it('picks the dark side of a ThemedBrand when scheme=dark', () => {
+    const resolved = resolveBrand(
+      {
+        light: { primary: '#f00', page: '#fff' },
+        dark: { primary: '#0ff', page: '#000' },
+      },
+      'dark',
+    );
+    expect(resolved.vibeOverrides.fill).toBe('#0ff');
+    expect(resolved.vibeOverrides.background).toBe('#000');
+  });
 });
