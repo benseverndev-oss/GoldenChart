@@ -12,12 +12,25 @@ export interface Speck {
   opacity: number;
 }
 
-// "medium" tier — chosen against the live before/after comparison.
-const DENSITY_DIVISOR = 550; // one speck per ~550 px²
-const R_MIN = 0.5;
-const R_MAX = 1.0;
-const O_MIN = 0.05;
-const O_MAX = 0.13;
+/** Speckle intensity tier. `medium` is the original (and default) look. */
+export type SpeckleTier = 'subtle' | 'medium';
+
+interface TierConfig {
+  /** One speck per ~this many px² (bigger = sparser). */
+  divisor: number;
+  rMin: number;
+  rMax: number;
+  oMin: number;
+  oMax: number;
+}
+
+// Tiers chosen against the live before/after comparison. `medium` keeps the
+// exact constants (and rand() call order) the feature shipped with, so the
+// presets that default to it render byte-identically.
+const TIERS: Record<SpeckleTier, TierConfig> = {
+  subtle: { divisor: 950, rMin: 0.4, rMax: 0.9, oMin: 0.04, oMax: 0.1 },
+  medium: { divisor: 550, rMin: 0.5, rMax: 1.0, oMin: 0.05, oMax: 0.13 },
+};
 
 /** Small, fast, seedable PRNG (mulberry32) — stable across platforms. */
 function mulberry32(seed: number): () => number {
@@ -32,20 +45,43 @@ function mulberry32(seed: number): () => number {
 
 const round = (n: number, dp = 1) => Math.round(n * 10 ** dp) / 10 ** dp;
 
-export function paperSpeckles(width: number, height: number, seed: number): Speck[] {
+export function paperSpeckles(
+  width: number,
+  height: number,
+  seed: number,
+  tier: SpeckleTier = 'medium',
+): Speck[] {
   if (width <= 0 || height <= 0) return [];
+  const t = TIERS[tier];
   const rand = mulberry32(seed);
-  const count = Math.round((width * height) / DENSITY_DIVISOR);
+  const count = Math.round((width * height) / t.divisor);
   const specks: Speck[] = [];
   for (let i = 0; i < count; i++) {
     specks.push({
       cx: round(rand() * width),
       cy: round(rand() * height),
-      r: round(R_MIN + rand() * (R_MAX - R_MIN), 2),
-      opacity: round(O_MIN + rand() * (O_MAX - O_MIN), 3),
+      r: round(t.rMin + rand() * (t.rMax - t.rMin), 2),
+      opacity: round(t.oMin + rand() * (t.oMax - t.oMin), 3),
     });
   }
   return specks;
+}
+
+/**
+ * Map a vibe `texture` value to the speckle tier to render, or `null` when no
+ * texture should be painted (`'none'` or unset). Keeps the texture vocabulary in
+ * one place so the renderer doesn't hard-code the mapping.
+ */
+export function speckleTierFor(texture: string | undefined): SpeckleTier | null {
+  switch (texture) {
+    case 'paper':
+    case 'paper-medium':
+      return 'medium';
+    case 'paper-subtle':
+      return 'subtle';
+    default:
+      return null;
+  }
 }
 
 /** Whether a `#rrggbb` colour is dark, so specks can be tinted for contrast. */

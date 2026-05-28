@@ -184,6 +184,19 @@ Presets: `messy_sketch`, `clean_blueprint`, `chaotic_notebook`, `pencil`, `marke
 `risograph`, `sticky_note`, `amber_crt`. Add `animate: { drawOn: true }` for a
 hand-drawn reveal (honors `prefers-reduced-motion`).
 
+**Background texture.** `texture` paints a faint, deterministic paper-grain
+speckle behind the data so matte vibes don't read as a flat fill:
+
+- `'paper'` / `'paper-medium'` — the standard grain.
+- `'paper-subtle'` — sparser and fainter.
+- `'none'` — disabled.
+
+`watercolor`, `newsprint`, `kraft`, `botanical`, `risograph`, `sticky_note`, and
+`typewriter` enable `'paper'` by default; override per call to tune or turn it off
+(`vibe={{ preset: 'kraft', texture: 'paper-subtle' }}` or `texture: 'none'`). The
+speckle is seeded from the vibe seed, so output is byte-stable across renders, and
+it's `aria-hidden`.
+
 ## Branding
 
 A `brand` (`BrandConfig`) layers identity on top of a `vibe`. The vibe controls
