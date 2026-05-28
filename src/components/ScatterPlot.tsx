@@ -13,6 +13,7 @@ import { resolveEmphasis } from '../core/emphasis';
 import { RoughCircle } from '../primitives/RoughCircle';
 import { useVibeContext } from '../vibe/VibeProvider';
 import { markAttrs } from '../core/interaction';
+import { describeScatter } from '../core/a11yDescribe';
 
 export interface ScatterDatum {
   x: number;
@@ -103,7 +104,7 @@ export function ScatterPlot({
       vibe={vibe}
       brand={brand}
       title={title}
-      description={description}
+      description={description ?? describeScatter(data)}
       ariaLabel={ariaLabel}
       dataTable={
         dataTable

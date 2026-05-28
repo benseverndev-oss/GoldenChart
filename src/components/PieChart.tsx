@@ -5,6 +5,7 @@ import { computePie } from '../core/arc';
 import { colorAt } from '../core/palette';
 import { resolveBrand } from '../brand/resolveBrand';
 import { datumTable } from '../core/dataTable';
+import { describePie } from '../core/a11yDescribe';
 import { resolveVibe } from '../vibe/resolveVibe';
 import { Surface } from './Surface';
 import { RoughPath } from '../primitives/RoughPath';
@@ -62,7 +63,7 @@ export function PieChart({
       vibe={vibe}
       brand={brand}
       title={title}
-      description={description}
+      description={description ?? describePie(data)}
       ariaLabel={ariaLabel}
       dataTable={dataTable ? datumTable(data, title) : undefined}
       className={className}

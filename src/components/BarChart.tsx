@@ -12,6 +12,7 @@ import { getPlotArea } from '../core/geometry';
 import { colorAt } from '../core/palette';
 import { resolveBrand } from '../brand/resolveBrand';
 import { datumTable } from '../core/dataTable';
+import { describeBars } from '../core/a11yDescribe';
 import { groupMax, seriesKeysOf, stackLayout, stackMax } from '../core/stack';
 import { Surface } from './Surface';
 import { Axis } from './Axis';
@@ -215,7 +216,7 @@ export function BarChart({
       vibe={vibe}
       brand={brand}
       title={title}
-      description={description}
+      description={description ?? describeBars(data)}
       ariaLabel={ariaLabel}
       dataTable={table}
       className={className}
