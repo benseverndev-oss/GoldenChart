@@ -13,6 +13,7 @@ import { colorAt } from '../core/palette';
 import { resolveBrand } from '../brand/resolveBrand';
 import { datumTable } from '../core/dataTable';
 import { describeBars } from '../core/a11yDescribe';
+import { useDataTransition } from '../interactive/useDataTransition';
 import { groupMax, seriesKeysOf, stackLayout, stackMax } from '../core/stack';
 import { Surface } from './Surface';
 import { Axis } from './Axis';
@@ -63,7 +64,7 @@ interface LaidBar {
  * multi-series modes.
  */
 export function BarChart({
-  data,
+  data: rawData,
   width,
   height,
   margin,
@@ -84,7 +85,13 @@ export function BarChart({
   annotations,
   xAxis,
   yAxis,
+  transitions,
 }: BarChartProps) {
+  const data = useDataTransition(
+    rawData,
+    transitions?.durationMs ?? 400,
+    transitions?.enabled ?? false,
+  );
   const fullPlot = getPlotArea(width, height, margin);
   const resolved = resolveVibe(vibe);
   const palette = resolveBrand(brand).palette;

@@ -6,6 +6,7 @@ import { colorAt } from '../core/palette';
 import { resolveBrand } from '../brand/resolveBrand';
 import { datumTable } from '../core/dataTable';
 import { describePie } from '../core/a11yDescribe';
+import { useDataTransition } from '../interactive/useDataTransition';
 import { resolveVibe } from '../vibe/resolveVibe';
 import { Surface } from './Surface';
 import { RoughPath } from '../primitives/RoughPath';
@@ -25,7 +26,7 @@ export interface PieChartProps extends BaseChartProps {
  * origin; we translate to the plot center and let `<RoughPath>` sketch them.
  */
 export function PieChart({
-  data,
+  data: rawData,
   width,
   height,
   margin,
@@ -41,7 +42,13 @@ export function PieChart({
   innerRadius = 0,
   padAngle = 0.02,
   showLabels = true,
+  transitions,
 }: PieChartProps) {
+  const data = useDataTransition(
+    rawData,
+    transitions?.durationMs ?? 400,
+    transitions?.enabled ?? false,
+  );
   const plot = getPlotArea(width, height, margin);
   const cx = plot.x + plot.width / 2;
   const cy = plot.y + plot.height / 2;
