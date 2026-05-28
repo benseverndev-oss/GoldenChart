@@ -25,6 +25,19 @@ export { RoughPath, RoughLine, RoughRectangle, RoughCircle, RoughText } from './
 export { getRoughGenerator, drawableToPaths } from './render/roughGenerator';
 export type { RoughPathInfo } from './render/roughGenerator';
 
+// Client-side export helpers (SVG/PNG/clipboard). Browser-only.
+export {
+  toSvgString,
+  toPng,
+  downloadChart,
+  copyToClipboard,
+  chartSvgFrom,
+  svgPixelSize,
+  extensionFor,
+  mimeFor,
+} from './render/clientExport';
+export type { ExportFormat, ToPngOptions, DownloadOptions } from './render/clientExport';
+
 // High-level components
 export {
   Surface,
