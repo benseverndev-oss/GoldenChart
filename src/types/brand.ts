@@ -43,8 +43,28 @@ export interface Brand {
   logo?: BrandLogo;
 }
 
-/** What consumers pass to `<Surface>`/charts. Currently identical to `Brand`. */
-export type BrandConfig = Brand;
+/** Which colour scheme to pick from a `ThemedBrand`. `'auto'` follows the OS. */
+export type BrandMode = 'light' | 'dark' | 'auto';
+
+/**
+ * A pair of brands tagged for light and dark colour schemes. Pass one of
+ * these to a chart's `brand` prop (or to `<BrandProvider>`) to follow the
+ * user's OS theme; explicit `mode` forces a side.
+ */
+export interface ThemedBrand {
+  /** `'auto'` (default) follows `prefers-color-scheme`; otherwise pinned. */
+  mode?: BrandMode;
+  light: Brand;
+  dark: Brand;
+}
+
+/** What consumers pass to `<Surface>`/charts: a plain brand or a themed pair. */
+export type BrandConfig = Brand | ThemedBrand;
+
+/** Type guard for the themed shape. */
+export function isThemedBrand(brand?: BrandConfig): brand is ThemedBrand {
+  return !!brand && typeof brand === 'object' && 'light' in brand && 'dark' in brand;
+}
 
 /** A logo with every layout field filled in. */
 export interface ResolvedBrandLogo extends Required<BrandLogo> {}

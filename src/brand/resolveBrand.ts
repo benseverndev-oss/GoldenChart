@@ -7,6 +7,7 @@ import type {
   ResolvedBrand,
   ResolvedBrandLogo,
 } from '../types/brand';
+import { isThemedBrand } from '../types/brand';
 
 const DEFAULT_LOGO_POSITION = 'bottom-right' as const;
 const DEFAULT_LOGO_WIDTH = 64;
@@ -46,13 +47,18 @@ export function brandVibeOverrides(brand: Brand): BrandVibeOverrides {
  * brand contributes. The single boundary between loose brand config and the
  * strict internal shape — mirrors `resolveVibe`.
  */
-export function resolveBrand(brand?: BrandConfig): ResolvedBrand {
+export function resolveBrand(
+  brand?: BrandConfig,
+  /** Forces a side of a `ThemedBrand`. Defaults to `'light'` (SSR-safe). */
+  scheme: 'light' | 'dark' = 'light',
+): ResolvedBrand {
   if (brand === undefined) {
     return { palette: DEFAULT_PALETTE, vibeOverrides: {} };
   }
+  const plain: Brand = isThemedBrand(brand) ? brand[scheme] : brand;
   return {
-    palette: brand.palette && brand.palette.length > 0 ? brand.palette : DEFAULT_PALETTE,
-    logo: brand.logo ? resolveLogo(brand.logo) : undefined,
-    vibeOverrides: brandVibeOverrides(brand),
+    palette: plain.palette && plain.palette.length > 0 ? plain.palette : DEFAULT_PALETTE,
+    logo: plain.logo ? resolveLogo(plain.logo) : undefined,
+    vibeOverrides: brandVibeOverrides(plain),
   };
 }
