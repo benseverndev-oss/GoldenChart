@@ -25,8 +25,28 @@ const BRAND = {
   font: 'sans-serif',
 };
 
+function formatCount(n) {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1).replace(/\.0$/, '')}k`;
+  return String(n);
+}
+
+async function fetchNpmDownloads(pkg, period = 'last-month') {
+  const url = `https://api.npmjs.org/downloads/point/${period}/${pkg}`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`npm downloads fetch failed: ${r.status}`);
+  const j = await r.json();
+  return j.downloads;
+}
+
+const monthlyDownloads = await fetchNpmDownloads('goldenchart', 'last-month');
+console.log(`  fetched npm last-month downloads: ${monthlyDownloads}`);
+
 const badges = [
   { file: 'npm.svg', label: 'npm', value: 'v0.2.0', tone: 'info', icon: 'tag' },
+  // No icon: the v1 BADGE_ICONS set has no download glyph and "downloads/mo"
+  // as a label is clear enough on its own.
+  { file: 'downloads.svg', label: 'downloads/mo', value: formatCount(monthlyDownloads), tone: 'info' },
   { file: 'license.svg', label: 'license', value: 'MIT', tone: 'neutral', icon: 'license' },
   { file: 'drawn-with.svg', label: 'drawn with', value: 'rough.js', tone: 'neutral' },
   { file: 'vibe.svg', label: 'default vibe', value: 'chaotic_notebook', tone: 'info', icon: 'star' },
