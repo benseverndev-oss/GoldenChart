@@ -99,7 +99,7 @@ export function createGithubClient(opts: CreateGithubClientOptions = {}): Github
       return call(`https://api.github.com/repos/${o}/${r}/actions/runs?per_page=1${q}`, async (resp) => {
         const j = await resp.json() as any;
         const run = j.workflow_runs?.[0];
-        if (!run) throw new GithubFetchError('not-found', resp.status, 'no runs');
+        if (!run) throw new GithubFetchError('not-found', 404, 'no workflow runs');
         return {
           name: run.name ?? '',
           conclusion: run.conclusion ?? 'unknown',

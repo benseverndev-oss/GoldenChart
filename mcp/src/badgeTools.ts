@@ -50,11 +50,20 @@ export const renderBadgeTool: ToolDef = {
     outputSchema: renderOutputShape,
   },
   handler: async (args) => {
-    const svg = renderToSVGString(createElement(Badge as any, args));
-    return {
-      content: [{ type: 'text', text: svg }],
-      structuredContent: { svg, meta: { kind: 'badge', width: parseSvgWidth(svg), height: 26 } },
-    };
+    try {
+      const svg = renderToSVGString(createElement(Badge as any, args));
+      return {
+        content: [{ type: 'text', text: svg }],
+        structuredContent: { svg, meta: { kind: 'badge', width: parseSvgWidth(svg), height: 26 } },
+      };
+    } catch (e) {
+      const message = (e as Error).message ?? 'render failed';
+      return {
+        content: [{ type: 'text', text: `badge error: unexpected: ${message}` }],
+        structuredContent: { error: { kind: 'unexpected', message } },
+        isError: true,
+      };
+    }
   },
 };
 
