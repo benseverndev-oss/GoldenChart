@@ -52,6 +52,11 @@ export {
   Annotations,
   AutoChart,
   visualize,
+  Badge,
+  BADGE_TONES,
+  BADGE_ICONS,
+  isBadgeTone,
+  isBadgeIcon,
 } from './components';
 export type {
   SurfaceProps,
@@ -86,4 +91,7 @@ export type {
   Annotation,
   AutoChartProps,
   VisualizeOptions,
+  BadgeProps,
+  BadgeTone,
+  BadgeIcon,
 } from './components';

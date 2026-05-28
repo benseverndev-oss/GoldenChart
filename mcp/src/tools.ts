@@ -26,6 +26,7 @@ import { orchestrationTools } from './orchestrationTools';
 import { exportTools } from './exportTools';
 import { visualizeTools } from './visualizeTool';
 import { dslTools } from './dslTools';
+import { badgeTools } from './badgeTools';
 import {
   AnnotationSchema,
   AxisFormatSchema,
@@ -350,4 +351,5 @@ export const tools: ToolDef[] = [
   ...orchestrationTools,
   ...exportTools,
   ...visualizeTools,
+  ...badgeTools,
 ];

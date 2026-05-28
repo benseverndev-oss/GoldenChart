@@ -17,6 +17,7 @@ import { Resvg } from '@resvg/resvg-js';
 import {
   Surface,
   BarChart,
+  Badge,
   RoughPath,
   RoughRectangle,
   RoughCircle,
@@ -222,8 +223,142 @@ function arrows() {
   );
 }
 
+// === SP4: badge primitive ===================================================
+// Before, the agent had no first-class "badge" — to show a `stars: 42.3k`
+// shields-style pill it had to compose a RoughRectangle + two RoughText calls,
+// guess the geometry, and skip the icon entirely. After: one `Badge` element
+// renders the pill with icon, divider, tone colour, and intrinsic width.
+function badge() {
+  const W = 220;
+  const H = 60;
+  const vibe = { preset: 'ink', background: '#ffffff' };
+
+  const before = renderToSVGString(
+    h(
+      Surface,
+      { width: W, height: H, vibe, bare: true },
+      // Hand-rolled pill: a rectangle + two text labels. No icon, no divider,
+      // no tone colour, width guessed.
+      h(RoughRectangle, { key: 'pill', x: 30, y: 18, width: 160, height: 26 }),
+      h(RoughText, { key: 'label', x: 70, y: 31, children: 'stars' }),
+      h(RoughText, { key: 'value', x: 150, y: 31, children: '42.3k' }),
+    ),
+  );
+
+  const after = renderToSVGString(
+    h(
+      'svg',
+      { xmlns: 'http://www.w3.org/2000/svg', width: W, height: H, viewBox: `0 0 ${W} ${H}` },
+      h('rect', { width: '100%', height: '100%', fill: '#ffffff' }),
+      h(
+        'g',
+        { transform: 'translate(30, 17)' },
+        h(Badge, { label: 'stars', value: '42.3k', tone: 'info', icon: 'star', seed: 1 }),
+      ),
+    ),
+  );
+
+  compare(
+    'compare-sp4-badge',
+    W,
+    H,
+    before,
+    after,
+    'rectangle + two text labels (no icon, no tone, guessed geometry)',
+    'one `Badge`: icon + label + divider + tone colour, intrinsic width',
+    'SP4: the `Badge` primitive renders a shields-style label/value pill with icon, divider, and tone in a single element.',
+  );
+}
+
+// === SP5: github badge row ==================================================
+// Before, an agent showing repo stats had to fire N raw fetches and pipe the
+// results into N independent rectangles. After: one `render-github-badge-row`
+// call resolves a deduplicated set of metrics and lays them out as a single
+// hand-drawn SVG row. The compare script uses a stubbed `GithubClient` (canned
+// `RepoSummary` / `ReleaseSummary`) so no network is touched.
+function githubRow() {
+  const stubRepo = {
+    stars: 124300, forks: 26800, openIssues: 1342,
+    license: 'MIT', language: 'JavaScript',
+    pushedAt: '2026-05-20T00:00:00Z', defaultBranch: 'canary',
+  };
+  const stubRelease = { tag: 'v15.0.3', name: '15.0.3', publishedAt: '2026-05-15T00:00:00Z' };
+
+  // formatCount + per-metric resolution mirrored from badgeTools.ts so this
+  // script doesn't need to import compiled TS. Duplication is intentional —
+  // CLAUDE.md prefers self-contained compare scenes over a private-helper
+  // dependency edge from scripts/ -> src/.
+  const formatCount = (n) => {
+    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+    if (n >= 1_000) return `${(n / 1_000).toFixed(1).replace(/\.0$/, '')}k`;
+    return String(n);
+  };
+  const metricsResolved = [
+    { label: 'stars', value: formatCount(stubRepo.stars), tone: 'info', icon: 'star' },
+    { label: 'forks', value: formatCount(stubRepo.forks), tone: 'info', icon: 'fork' },
+    { label: 'issues', value: formatCount(stubRepo.openIssues),
+      tone: stubRepo.openIssues > 0 ? 'warn' : 'success', icon: 'issue' },
+    { label: 'release', value: stubRelease.tag, tone: 'info', icon: 'tag' },
+    { label: 'license', value: stubRepo.license, tone: 'neutral', icon: 'license' },
+  ];
+
+  // Compose a row by stacking Badge SVGs left-to-right (same approach as the
+  // real row tool's handler).
+  const parseWidth = (svg) => {
+    const m = /<svg[^>]*\swidth="(\d+(?:\.\d+)?)"/.exec(svg);
+    return m ? Math.round(Number(m[1])) : 0;
+  };
+  const parts = metricsResolved.map((r) => renderToSVGString(
+    h(Badge, { label: r.label, value: r.value, tone: r.tone, icon: r.icon, seed: 2 }),
+  ));
+  const widths = parts.map(parseWidth);
+  const gap = 8;
+  const rowW = widths.reduce((a, b) => a + b, 0) + Math.max(0, widths.length - 1) * gap;
+  const rowH = 26;
+  let xOff = 0;
+  const inners = parts.map((svg, i) => {
+    let inner = svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
+    if (i > 0) inner = inner.replace(/<style\b[^>]*>[\s\S]*?<\/style>/g, '');
+    const t = `<g transform="translate(${xOff}, 0)">${inner}</g>`;
+    xOff += widths[i] + gap;
+    return t;
+  }).join('');
+  const rowSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${rowW}" height="${rowH}" viewBox="0 0 ${rowW} ${rowH}">${inners}</svg>`;
+
+  const W = Math.max(rowW + 40, 560);
+  const H = 60;
+
+  // "Before": only a single stars badge — the agent could call render-badge
+  // once but had no way to lay out a coordinated row.
+  const beforeSingle = renderToSVGString(
+    h(Badge, { label: 'stars', value: '124.3k', tone: 'info', icon: 'star', seed: 2 }),
+  );
+  const before = renderToSVGString(
+    h(
+      'svg',
+      { xmlns: 'http://www.w3.org/2000/svg', width: W, height: H, viewBox: `0 0 ${W} ${H}` },
+      h('rect', { width: '100%', height: '100%', fill: '#ffffff' }),
+    ),
+  ).replace(/<\/svg>$/, `<g transform="translate(20, 17)">${beforeSingle.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '')}</g></svg>`);
+
+  const after = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><rect width="100%" height="100%" fill="#ffffff"/><g transform="translate(${Math.round((W - rowW) / 2)}, 17)">${rowSvg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '')}</g></svg>`;
+
+  compare(
+    'compare-sp5-github-row',
+    W,
+    H,
+    before,
+    after,
+    'one badge at a time — agent had to layout coordinate by hand',
+    '5 metrics, 1 deduped GitHub fetch round-trip, 1 SVG row',
+    'SP5: `render-github-badge-row` resolves N metrics (stubbed here, no live HTTP) and lays them out as a single row.',
+  );
+}
+
 console.log('Generating comparisons ->', OUT);
 presets();
 shapes();
 arrows();
+badge();
+githubRow();
 console.log('done.');
