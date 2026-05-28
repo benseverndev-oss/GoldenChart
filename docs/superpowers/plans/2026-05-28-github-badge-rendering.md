@@ -39,6 +39,7 @@
 
 **Files:**
 - Create: `src/core/badgeIcons.ts`
+- Create: `src/core/badgeIcons.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
@@ -121,7 +122,7 @@ export const BADGE_ICON_PATHS: Record<BadgeIcon, string | string[]> = {
   // Circle with vertical bar (open issue indicator).
   issue: ['M8 1 a7 7 0 1 0 0 14 a7 7 0 1 0 0 -14', 'M8 5 L8 9', 'M8 11 L8 12'],
   // Price-tag silhouette (open stroke; no Z).
-  tag: 'M1 8 L8 1 L15 1 L15 8 L8 15 Z'.replace(/Z/g, ''), // sentinel — see below
+  tag: 'M1 8 L8 1 L15 1 L15 8 L8 15',
   // Git commit dot + line.
   commit: ['M2 8 L6 8', 'M10 8 L14 8', 'M8 6 a2 2 0 1 0 0 4 a2 2 0 1 0 0 -4'],
   // Scroll silhouette (open).
@@ -131,10 +132,6 @@ export const BADGE_ICON_PATHS: Record<BadgeIcon, string | string[]> = {
   // Check mark.
   check: 'M2 9 L6 13 L14 3',
 };
-
-// The `tag` glyph above is a workaround to keep the string literal honest;
-// re-define it cleanly here.
-BADGE_ICON_PATHS.tag = 'M1 8 L8 1 L15 1 L15 8 L8 15';
 
 export const BADGE_TONE_COLORS: Record<'success' | 'warn' | 'danger', string> = {
   success: '#3a8a3a',
@@ -270,7 +267,9 @@ export function Badge({
   const iconW = icon ? ICON_SIZE + ICON_GAP : 0;
   const dividerX = PAD_X + iconW + labelW + DIVIDER_GAP;
   const valueX = dividerX + DIVIDER_W + DIVIDER_GAP;
-  const width = valueX + valueW + PAD_X;
+  // Round to an integer so downstream regex parsers (row tool) don't need to
+  // handle floats.
+  const width = Math.ceil(valueX + valueW + PAD_X);
 
   // Tone -> fill
   const valueFill =
@@ -316,7 +315,7 @@ function renderIcon(name: BadgeIcon, ox: number, oy: number, stroke: string, see
   return (
     <g transform={`translate(${ox}, ${oy})`}>
       {strokes.map((d, i) => (
-        <RoughPath key={i} d={d} stroke={stroke} fill="none" seed={seed ?? 0 + i} />
+        <RoughPath key={i} d={d} stroke={stroke} fill="none" seed={(seed ?? 0) + i} />
       ))}
     </g>
   );
@@ -653,12 +652,20 @@ git commit -m "feat(mcp): GitHub client with TTL cache, in-flight dedup, typed e
 
 ## Task 5: MCP refresh — pull new library exports into `mcp/`
 
-This is the CLAUDE.md-mandated force-recopy step. The remaining tasks depend on `import { Badge } from 'goldenchart/server'` resolving in `mcp/`.
+This is the CLAUDE.md-mandated force-recopy step. The remaining tasks depend on `import { Badge } from 'goldenchart'` (and `renderToSVGString` from `goldenchart/server`) resolving in `mcp/`.
+
+**Before Task 3 build:** confirm `src/core/text.ts` does NOT import anything from `src/assets/fonts` — otherwise re-exporting `Badge` from `src/index.ts` will pull font bytes into the browser entry and `check:bundle` will fail. Skim the file:
+
+```powershell
+Select-String -Path src\core\text.ts -Pattern 'assets/fonts'
+```
+
+Expected: no matches. If there are matches, lift the helper into a font-free module before continuing.
 
 - [ ] **Step 1: Rebuild root**
 
 From project root:
-```bash
+```powershell
 npm run build
 ```
 
@@ -674,11 +681,11 @@ cd mcp; npm install --install-links; cd ..
 
 - [ ] **Step 3: Sanity check the new export resolves**
 
-```bash
-cd mcp && node -e "console.log(typeof require('goldenchart').Badge)" && cd ..
+```powershell
+cd mcp; node -e "console.log(typeof require('goldenchart').Badge)"; cd ..
 ```
 
-Expected: `function`.
+Expected: `function`. (PowerShell `&&` is not available in 5.1; use `;` chaining per CLAUDE.md.)
 
 (No commit; this is environment-only.)
 
@@ -692,7 +699,7 @@ Expected: `function`.
 
 `makeRenderTool` won't fit — it puts `width`/`height` into `meta` from args, but the badge is intrinsic. Build a fresh `ToolDef`.
 
-- [ ] **Step 1: Add Zod input shape and first tool to `badgeTools.ts`**
+- [ ] **Step 1: Add shared imports, helpers, and the first tool to `badgeTools.ts`**
 
 ```ts
 import { createElement } from 'react';
@@ -707,6 +714,26 @@ import {
 
 const ToneEnum = z.enum(BADGE_TONES as unknown as [string, ...string[]]);
 const IconEnum = z.enum(BADGE_ICONS as unknown as [string, ...string[]]);
+
+/**
+ * Module-level seam for tests. Default `null` means "construct a fresh client
+ * via `createGithubClient()` per tool invocation"; tests call
+ * `__setGithubClientForTests(stub)` to inject a stub. Module-level (not arg-
+ * level) so the SDK input validator doesn't strip the seam from `args`.
+ */
+let injectedClient: GithubClient | null = null;
+export function __setGithubClientForTests(c: GithubClient | null) {
+  injectedClient = c;
+}
+function getClient(): GithubClient {
+  return injectedClient ?? createGithubClient();
+}
+
+/** Parse the intrinsic `width="N"` attribute the Badge writes into its root SVG. */
+function parseSvgWidth(svg: string): number {
+  const m = /<svg[^>]*\swidth="(\d+(?:\.\d+)?)"/.exec(svg);
+  return m ? Math.round(Number(m[1])) : 0;
+}
 
 const badgeInputShape = {
   label: z.string().min(1),
@@ -730,9 +757,7 @@ export const renderBadgeTool: ToolDef = {
     const svg = renderToSVGString(createElement(Badge as any, args));
     return {
       content: [{ type: 'text', text: svg }],
-      structuredContent: { svg, meta: { kind: 'badge', width: 0, height: 26 } },
-      // width is intrinsic; 0 here flags "ask the SVG itself". Alternative:
-      // parse the emitted width attribute; not worth it for v1.
+      structuredContent: { svg, meta: { kind: 'badge', width: parseSvgWidth(svg), height: 26 } },
     };
   },
 };
@@ -784,12 +809,20 @@ The tool accepts an optional `githubClient` for tests; production callers omit i
 
 - [ ] **Step 1: Tests first**
 
-Append to `badgeTools.test.ts`:
+Append to `badgeTools.test.ts` (full updated import block at the top of the test file):
 
 ```ts
-import { renderGithubBadgeTool } from './badgeTools';
+// At the TOP of badgeTools.test.ts (replace the import line from Task 6 Step 2):
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import {
+  renderBadgeTool, renderGithubBadgeTool, __setGithubClientForTests,
+} from './badgeTools';
+import { GithubFetchError, type GithubClient } from './githubClient';
+```
 
-const stubClient = (overrides?: Partial<GithubClient>) => ({
+```ts
+// New tests:
+const stubClient = (overrides?: Partial<GithubClient>): GithubClient => ({
   getRepo: async () => ({
     stars: 12345, forks: 678, openIssues: 0,
     license: 'MIT', language: 'TypeScript',
@@ -799,42 +832,50 @@ const stubClient = (overrides?: Partial<GithubClient>) => ({
   getWorkflowStatus: async () => ({ name: 'CI', conclusion: 'success', status: 'completed', htmlUrl: '' }),
   getContributorsCount: async () => 42,
   ...overrides,
-} as GithubClient);
+});
 
 describe('render-github-badge', () => {
+  afterEach(() => __setGithubClientForTests(null));
+
   it('renders a stars badge with k-formatted value and info tone', async () => {
+    __setGithubClientForTests(stubClient());
     const res = await renderGithubBadgeTool.handler({
       owner: 'o', repo: 'r', metric: 'stars',
-      __client: stubClient(),  // test seam, see implementation
     });
-    expect((res.content[0] as any).text).toMatchSnapshot();
+    const svg = (res.content[0] as { text: string }).text;
+    expect(svg).toContain('12.3k');                 // formatCount(12345)
+    expect(svg).toMatchSnapshot();
   });
-  it('renders a workflow badge as success', async () => {
+  it('renders a workflow badge as success (green)', async () => {
+    __setGithubClientForTests(stubClient());
     const res = await renderGithubBadgeTool.handler({
       owner: 'o', repo: 'r', metric: 'workflow',
-      __client: stubClient(),
     });
-    const svg = (res.content[0] as any).text;
-    expect(svg).toContain('#3a8a3a');  // success color
+    const svg = (res.content[0] as { text: string }).text;
+    expect(svg).toContain('#3a8a3a');               // success color
   });
   it('reports rate-limited errors as structured tool errors', async () => {
-    const c = stubClient({
+    __setGithubClientForTests(stubClient({
       getRepo: async () => { throw new GithubFetchError('rate-limited', 403, 'rate'); },
-    });
+    }));
     const res = await renderGithubBadgeTool.handler({
-      owner: 'o', repo: 'r', metric: 'stars', __client: c,
+      owner: 'o', repo: 'r', metric: 'stars',
     });
     expect(res.isError).toBe(true);
-    expect((res.content[0] as any).text).toContain('rate-limited');
+    expect((res.content[0] as { text: string }).text).toContain('rate-limited');
   });
 });
 ```
 
 - [ ] **Step 2: Append tool to `badgeTools.ts`**
 
-```ts
-import type { GithubClient } from './githubClient';
+> **GitHub API caveat:** `workflow_id` on `/actions/runs` accepts either the
+> numeric workflow ID or the workflow file name (e.g. `ci.yml`), NOT the
+> human-readable display name. Document this in the tool description so an
+> agent passing `workflow: "CI"` (a name) understands they'll get the latest
+> run across any workflow, filtered only if they pass a file name.
 
+```ts
 const MetricEnum = z.enum([
   'stars', 'forks', 'open-issues', 'release', 'license',
   'last-commit', 'contributors', 'language', 'workflow',
@@ -928,7 +969,7 @@ export const renderGithubBadgeTool: ToolDef = {
     outputSchema: renderOutputShape,
   },
   handler: async (args) => {
-    const client: GithubClient = (args as any).__client ?? createGithubClient();
+    const client = getClient();
     const { owner, repo, metric, workflow, label, tone, icon, vibe, brand, seed } =
       args as Record<string, any>;
     try {
@@ -943,7 +984,7 @@ export const renderGithubBadgeTool: ToolDef = {
       const svg = renderToSVGString(createElement(Badge as any, props));
       return {
         content: [{ type: 'text', text: svg }],
-        structuredContent: { svg, meta: { kind: 'github-badge', width: 0, height: 26 } },
+        structuredContent: { svg, meta: { kind: 'github-badge', width: parseSvgWidth(svg), height: 26 } },
       };
     } catch (e) {
       const kind = e instanceof GithubFetchError ? e.kind : 'unexpected';
@@ -989,20 +1030,23 @@ Reuses the client's in-flight dedup, so calling `resolveMetric` once per metric 
 - [ ] **Step 1: Test**
 
 ```ts
+// Also add `renderGithubBadgeRowTool` to the imports at the top of the file.
+
 describe('render-github-badge-row', () => {
+  afterEach(() => __setGithubClientForTests(null));
+
   it('renders a row that triggers exactly one repo call for repo-derived metrics', async () => {
     const repo = vi.fn(async () => ({
       stars: 100, forks: 10, openIssues: 0, license: 'MIT',
       language: 'TS', pushedAt: new Date().toISOString(), defaultBranch: 'main',
     }));
-    const client = stubClient({ getRepo: repo });
+    __setGithubClientForTests(stubClient({ getRepo: repo }));
     const res = await renderGithubBadgeRowTool.handler({
       owner: 'o', repo: 'r',
       metrics: ['stars', 'forks', 'open-issues', 'license', 'language'],
-      __client: client,
     });
     expect(repo).toHaveBeenCalledTimes(1);
-    expect((res.content[0] as any).text).toMatchSnapshot();
+    expect((res.content[0] as { text: string }).text).toMatchSnapshot();
   });
 });
 ```
@@ -1033,24 +1077,27 @@ export const renderGithubBadgeRowTool: ToolDef = {
     outputSchema: renderOutputShape,
   },
   handler: async (args) => {
-    const client: GithubClient = (args as any).__client ?? createGithubClient();
+    const client = getClient();
     const { owner, repo, metrics, workflow, gap = 8, vibe, brand, seed } =
       args as Record<string, any>;
     try {
       const resolved = await Promise.all(
         (metrics as string[]).map((m) => resolveMetric(client, owner, repo, m, workflow)),
       );
-      // Render each Badge to its own SVG, then concatenate by parsing out the
-      // intrinsic widths from the `<svg width="…">` attribute and wrapping in
-      // a parent <svg> with <g transform="translate(x, 0)">.
-      const parts = resolved.map((r) => ({
-        svg: renderToSVGString(createElement(Badge as any, {
-          ...r, label: r.label, value: r.value, tone: r.tone, icon: r.icon,
-          vibe, brand, seed,
-        })),
-      }));
-      const widths = parts.map((p) => Number(/<svg[^>]*\swidth="(\d+)"/.exec(p.svg)?.[1] ?? 0));
-      const inners = parts.map((p) => p.svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, ''));
+      // Render each badge to its own SVG, then strip the outer <svg>…</svg>
+      // shell and translate the remainder into a parent <svg>. We keep the
+      // <defs>/<style> blocks from the FIRST badge only; the rest are
+      // duplicates of the same @font-face embedding from goldenchart/server.
+      const parts = resolved.map((r) => renderToSVGString(createElement(Badge as any, {
+        label: r.label, value: r.value, tone: r.tone, icon: r.icon,
+        vibe, brand, seed,
+      })));
+      const widths = parts.map(parseSvgWidth);
+      const inners = parts.map((svg, i) => {
+        let inner = svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
+        if (i > 0) inner = inner.replace(/<style\b[^>]*>[\s\S]*?<\/style>/g, '');
+        return inner;
+      });
       const totalW = widths.reduce((a, b) => a + b, 0) + Math.max(0, widths.length - 1) * gap;
       const height = 26;
       let x = 0;
@@ -1078,7 +1125,7 @@ export const renderGithubBadgeRowTool: ToolDef = {
 badgeTools.push(renderGithubBadgeRowTool);
 ```
 
-If a font `<style>` block appears in each per-badge SVG (because `goldenchart/server` auto-embeds `@font-face`), the row's concatenated output will contain N duplicated style blocks. That's wasteful but not broken — the implementer should dedupe once during this task by stripping `<style>…</style>` blocks from `inners[1..]` and keeping only the one from `inners[0]`. Verify against the snapshot.
+The `<style>`-dedup logic above keeps only the first badge's `<style>` block (the @font-face embedding from `goldenchart/server` is identical across badges). Verify in the snapshot that exactly one `<style>` block appears at the top of the first `<g>`.
 
 - [ ] **Step 3: Run tests**
 
@@ -1098,6 +1145,8 @@ git commit -m "feat(mcp): render-github-badge-row tool"
 ---
 
 ## Task 9: Registry wiring
+
+The spec text says "registered in `mcp/src/registry.ts`" loosely. In practice `registry.ts` only exports the `makeRenderTool` factory and shared types; the aggregated tool list that the MCP server iterates lives in `mcp/src/tools.ts`. We modify `tools.ts`. (If a future refactor moves the aggregation, follow it.)
 
 **Files:**
 - Modify: `mcp/src/tools.ts`
@@ -1136,13 +1185,19 @@ git commit -m "feat(mcp): register badge tools"
 **Files:**
 - Modify: whatever script `cd mcp && npm run compare` invokes (locate from `mcp/package.json` `scripts.compare`).
 
-- [ ] **Step 1: Locate the compare script and its scene file(s)**
+- [ ] **Step 1: Locate the compare script, its scene file(s), and the artifact output path**
 
-```bash
+```powershell
 node -e "console.log(require('./mcp/package.json').scripts.compare)"
 ```
 
-Read whichever file builds the scene list.
+Read the script. Then find the most recent carry-forward commit on `main` to learn where artifacts land:
+
+```powershell
+git log --oneline -20 main -- mcp/ | Select-String -Pattern 'compare|carry'
+```
+
+Open one of those commits with `git show <sha> --stat` to see the exact paths the implementer needs to `git add` in Step 3.
 
 - [ ] **Step 2: Add two new scenes**
 
@@ -1188,14 +1243,13 @@ Expected: clean working tree, commits land on `spec/github-badge-rendering`.
 
 - [ ] **Step 3: Switch gh account and open PR**
 
-Per memory `gh-account-write-access`:
+Per memory `gh-account-write-access` and the `gh --body quoting gotchas` note in `goldenchart-windows-shell-and-oom`, do NOT use a bash heredoc — write the body to a temp file and pass `--body-file`.
 
-```bash
+```powershell
 gh auth switch --user benzsevern
 git push -u origin spec/github-badge-rendering
-gh pr create --base main --head spec/github-badge-rendering \
-  --title "feat: hand-drawn GitHub badges (library + MCP)" \
-  --body-file - <<'EOF'
+
+$body = @'
 Adds a new `Badge` component to `goldenchart` (intrinsic SVG, brand-aware, no
 network) plus three MCP tools:
 
@@ -1210,16 +1264,22 @@ Spec: `docs/superpowers/specs/2026-05-28-github-badge-rendering-design.md`.
 Plan: `docs/superpowers/plans/2026-05-28-github-badge-rendering.md`.
 
 CI runs the full vitest suite (local Windows OOMs on it, per docs).
-EOF
+'@
+$tmp = New-TemporaryFile
+Set-Content -Path $tmp -Value $body -Encoding utf8
+gh pr create --base main --head spec/github-badge-rendering `
+  --title "feat: hand-drawn GitHub badges (library + MCP)" `
+  --body-file $tmp
+Remove-Item $tmp
 ```
 
 - [ ] **Step 4: Watch CI**
 
-```bash
-gh pr view --web   # or: gh run watch
+```powershell
+gh pr checks --watch
 ```
 
-Expected: `library` and `mcp` workflows both green.
+Expected: `library` workflow PASS, `mcp` workflow PASS. If anything fails, fix on this branch (do not skip).
 
 - [ ] **Step 5: Merge per Ben's merge-on-green pattern**
 
