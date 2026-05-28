@@ -179,8 +179,88 @@ export const renderGithubBadgeTool: ToolDef = {
   },
 };
 
+const githubBadgeRowInputShape = {
+  owner: z.string().min(1),
+  repo: z.string().min(1),
+  metrics: z.array(MetricEnum).min(1).max(8),
+  workflow: z.string().optional(),
+  gap: z.number().int().nonnegative().optional(),
+  vibe: VibeConfigSchema.optional(),
+  brand: BrandConfigSchema.optional(),
+  seed: z.number().optional(),
+};
+
+export const renderGithubBadgeRowTool: ToolDef = {
+  name: 'render-github-badge-row',
+  config: {
+    title: 'Render a row of GitHub repo badges',
+    description:
+      'Resolves multiple GitHub metrics (with cached + deduplicated fetches) and renders them as a single SVG row of hand-drawn Badges.',
+    inputSchema: githubBadgeRowInputShape,
+    outputSchema: renderOutputShape,
+  },
+  handler: async (args) => {
+    const client = getClient();
+    const { owner, repo, metrics, workflow, gap = 8, vibe, brand, seed } =
+      args as Record<string, any>;
+    // Per-handler in-flight dedup so a stub client (no internal cache) still
+    // collapses duplicate parallel reads. Production clients already dedup,
+    // so this is a cheap belt-and-suspenders wrapper.
+    const inflight = new Map<string, Promise<unknown>>();
+    const memo = <T>(key: string, fn: () => Promise<T>): Promise<T> => {
+      const hit = inflight.get(key);
+      if (hit) return hit as Promise<T>;
+      const p = fn();
+      inflight.set(key, p);
+      return p;
+    };
+    const memoClient: GithubClient = {
+      getRepo: (o, r) => memo(`repo:${o}/${r}`, () => client.getRepo(o, r)),
+      getLatestRelease: (o, r) => memo(`release:${o}/${r}`, () => client.getLatestRelease(o, r)),
+      getWorkflowStatus: (o, r, w) => memo(`wf:${o}/${r}/${w ?? ''}`, () => client.getWorkflowStatus(o, r, w)),
+      getContributorsCount: (o, r) => memo(`contrib:${o}/${r}`, () => client.getContributorsCount(o, r)),
+    };
+    try {
+      const resolved = await Promise.all(
+        (metrics as string[]).map((m) => resolveMetric(memoClient, owner, repo, m, workflow)),
+      );
+      const parts = resolved.map((r) => renderToSVGString(createElement(Badge as any, {
+        label: r.label, value: r.value, tone: r.tone, icon: r.icon,
+        vibe, brand, seed,
+      })));
+      const widths = parts.map(parseSvgWidth);
+      const inners = parts.map((svg, i) => {
+        let inner = svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
+        if (i > 0) inner = inner.replace(/<style\b[^>]*>[\s\S]*?<\/style>/g, '');
+        return inner;
+      });
+      const totalW = widths.reduce((a, b) => a + b, 0) + Math.max(0, widths.length - 1) * gap;
+      const height = 26;
+      let x = 0;
+      const children = inners.map((inner, i) => {
+        const t = `<g transform="translate(${x}, 0)">${inner}</g>`;
+        x += widths[i] + gap;
+        return t;
+      }).join('');
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${totalW}" height="${height}" viewBox="0 0 ${totalW} ${height}">${children}</svg>`;
+      return {
+        content: [{ type: 'text', text: svg }],
+        structuredContent: { svg, meta: { kind: 'github-badge-row', width: totalW, height } },
+      };
+    } catch (e) {
+      const kind = e instanceof GithubFetchError ? e.kind : 'unexpected';
+      return {
+        content: [{ type: 'text', text: `github-badge-row error: ${kind}: ${(e as Error).message}` }],
+        structuredContent: { error: { kind, message: (e as Error).message } },
+        isError: true,
+      };
+    }
+  },
+};
+
 export const badgeTools: ToolDef[] = [renderBadgeTool];
 badgeTools.push(renderGithubBadgeTool);
+badgeTools.push(renderGithubBadgeRowTool);
 
 // Re-exported for symmetry; consumed internally too.
 export { GithubFetchError };

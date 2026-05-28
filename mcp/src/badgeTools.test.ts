@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import {
-  renderBadgeTool, renderGithubBadgeTool, __setGithubClientForTests,
+  renderBadgeTool, renderGithubBadgeTool, renderGithubBadgeRowTool, __setGithubClientForTests,
 } from './badgeTools';
 import { GithubFetchError, type GithubClient } from './githubClient';
 
@@ -60,5 +60,20 @@ describe('render-github-badge', () => {
   });
 });
 
-// Ensure `vi` import is treated as used even if no test currently references it directly.
-void vi;
+describe('render-github-badge-row', () => {
+  afterEach(() => __setGithubClientForTests(null));
+
+  it('renders a row that triggers exactly one repo call for repo-derived metrics', async () => {
+    const repo = vi.fn(async () => ({
+      stars: 100, forks: 10, openIssues: 0, license: 'MIT',
+      language: 'TS', pushedAt: new Date().toISOString(), defaultBranch: 'main',
+    }));
+    __setGithubClientForTests(stubClient({ getRepo: repo }));
+    const res = await renderGithubBadgeRowTool.handler({
+      owner: 'o', repo: 'r',
+      metrics: ['stars', 'forks', 'open-issues', 'license', 'language'],
+    });
+    expect(repo).toHaveBeenCalledTimes(1);
+    expect((res.content[0] as { text: string }).text).toMatchSnapshot();
+  });
+});
