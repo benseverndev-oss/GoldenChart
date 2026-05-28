@@ -123,6 +123,26 @@ const html = interactiveEmbed(svgString, { title: 'Sales' });
 The MCP server exposes the same via the `export_interactive_html` tool, so an
 agent can emit an interactive chart a reader can hover — not just a static image.
 
+## Data-change transitions
+
+Pass `transitions={{ enabled: true }}` to `BarChart`, `LineChart`, `AreaChart`,
+or `PieChart` and the chart will tween between data snapshots (400 ms by
+default; override with `durationMs`). Off by default — existing renders are
+byte-identical. Honors `prefers-reduced-motion` (snaps instead of tweening).
+
+```tsx
+<BarChart
+  width={400}
+  height={300}
+  data={data}
+  transitions={{ enabled: true, durationMs: 600 }}
+/>
+```
+
+Under the hood the chart wraps its `data` prop in `useDataTransition`
+(exported from `goldenchart/interactive` for direct use in custom
+compositions). Rough.js seeds are index-based and don't shimmer across frames.
+
 ## Accessibility
 
 Marks are keyboard-focusable with `aria-label`s; the tooltip path is reachable

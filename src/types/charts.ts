@@ -60,6 +60,16 @@ export interface BaseChartProps {
   children?: ReactNode;
   /** Render only the bare `<svg>` (no wrapper div) for headless/SVG-string use. */
   bare?: boolean;
+  /**
+   * Opt-in enter/update transitions when the chart's data prop changes. Off
+   * by default so existing renders are byte-identical; honours
+   * `prefers-reduced-motion` (snaps to the new state instead of tweening).
+   */
+  transitions?: {
+    enabled?: boolean;
+    /** Tween length in ms. Default 400. */
+    durationMs?: number;
+  };
 }
 
 /** A tabular mirror of a chart's data, rendered visually-hidden for screen readers. */

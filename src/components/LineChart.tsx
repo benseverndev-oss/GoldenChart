@@ -9,6 +9,7 @@ import { colorAt } from '../core/palette';
 import { resolveBrand } from '../brand/resolveBrand';
 import { seriesTable } from '../core/dataTable';
 import { describeSeries } from '../core/a11yDescribe';
+import { useDataTransition } from '../interactive/useDataTransition';
 import { layoutLegend } from '../core/legend';
 import type { LegendItem } from '../core/legend';
 import { resolveVibe } from '../vibe/resolveVibe';
@@ -42,7 +43,7 @@ export interface LineChartProps extends BaseChartProps {
 
 /** Multi-series line chart: d3-shape builds each path, `<RoughPath>` sketches it. */
 export function LineChart({
-  series,
+  series: rawSeries,
   width,
   height,
   margin,
@@ -64,7 +65,13 @@ export function LineChart({
   emphasis,
   xAxis,
   yAxis,
+  transitions,
 }: LineChartProps) {
+  const series = useDataTransition(
+    rawSeries,
+    transitions?.durationMs ?? 400,
+    transitions?.enabled ?? false,
+  );
   const fullPlot = getPlotArea(width, height, margin);
   const rv = resolveVibe(vibe);
   const palette = resolveBrand(brand).palette;
