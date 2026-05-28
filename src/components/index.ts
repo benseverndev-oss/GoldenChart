@@ -48,5 +48,5 @@ export { AutoChart, visualize } from './AutoChart';
 export type { AutoChartProps, VisualizeOptions } from './AutoChart';
 export { Badge } from './Badge';
 export type { BadgeProps } from './Badge';
-export { BADGE_TONES, BADGE_ICONS } from '../core/badgeIcons';
+export { BADGE_TONES, BADGE_ICONS, isBadgeTone, isBadgeIcon } from '../core/badgeIcons';
 export type { BadgeTone, BadgeIcon } from '../core/badgeIcons';

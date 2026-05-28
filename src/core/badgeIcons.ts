@@ -24,6 +24,11 @@ export const BADGE_ICONS = [
 ] as const;
 export type BadgeIcon = (typeof BADGE_ICONS)[number];
 
+export const isBadgeTone = (x: unknown): x is BadgeTone =>
+  (BADGE_TONES as readonly string[]).includes(x as string);
+export const isBadgeIcon = (x: unknown): x is BadgeIcon =>
+  (BADGE_ICONS as readonly string[]).includes(x as string);
+
 /** Stroke-only path data, authored against a 16x16 box. */
 export const BADGE_ICON_PATHS: Record<BadgeIcon, string | string[]> = {
   // Five-point star outline (open at the top tip so it remains an open stroke).
