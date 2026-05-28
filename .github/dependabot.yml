@@ -9,6 +9,12 @@ updates:
     groups:
       dev-dependencies:
         dependency-type: development
+        # Only auto-group safe (minor/patch) bumps. Majors come as their own
+        # PRs so a React 18->19 or Tailwind 3->4 migration can be reviewed and
+        # taken on deliberately, instead of bundled with eight other updates.
+        update-types:
+          - minor
+          - patch
 
   # MCP server package
   - package-ecosystem: npm
@@ -19,6 +25,12 @@ updates:
     groups:
       dev-dependencies:
         dependency-type: development
+        # Only auto-group safe (minor/patch) bumps. Majors come as their own
+        # PRs so a React 18->19 or Tailwind 3->4 migration can be reviewed and
+        # taken on deliberately, instead of bundled with eight other updates.
+        update-types:
+          - minor
+          - patch
 
   # GitHub Actions workflows
   - package-ecosystem: github-actions
