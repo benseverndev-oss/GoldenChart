@@ -1,6 +1,6 @@
 {
   "name": "goldenchart-mcp",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "MCP server that renders GoldenChart sketchy charts and flowcharts as SVG.",
   "author": "Ben Severn",
   "repository": {
