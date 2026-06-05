@@ -1,7 +1,8 @@
-import tailwindcss from 'tailwindcss';
-import autoprefixer from 'autoprefixer';
-import config from './tailwind.config.js';
+import tailwindcss from '@tailwindcss/postcss';
 
+// Tailwind 4 ships its own PostCSS plugin and bundles autoprefixer, so the
+// standalone `autoprefixer` dep is gone. Content is auto-detected from the Vite
+// entrypoints; the library glob is declared via `@source` in `index.css`.
 export default {
-  plugins: [tailwindcss(config), autoprefixer],
+  plugins: [tailwindcss],
 };

@@ -1,3 +1,9 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+/* Tailwind 4 auto-detects content, but the playground also styles the library's
+   own `Surface` wrapper classes (rendered from ../../src), which live outside
+   the playground tree — declare every scanned root explicitly, mirroring the
+   v3 `content` globs. Paths are relative to this file (playground/src). */
+@source '../index.html';
+@source './**/*.{ts,tsx}';
+@source '../../src/**/*.{ts,tsx}';
