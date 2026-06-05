@@ -78,6 +78,14 @@ export interface RoughTextProps extends RoughPrimitiveProps {
    * the label stays legible over a fill even when the vibe has no background.
    */
   haloColor?: string;
+  /**
+   * Paint a solid background-coloured rect behind the whole label (a hard
+   * knockout box, not the gappy per-glyph halo) so a line crossing the label —
+   * sequence lifelines, ER/arch edges — gets a clean continuous break. `true`
+   * uses the resolved vibe background (falling back to white); a string forces
+   * that colour.
+   */
+  knockout?: boolean | string;
   /** When set, wrap the text to this pixel width across multiple lines. */
   maxWidth?: number;
 }
