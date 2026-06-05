@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { describeBars, describePie, describeScatter, describeSeries } from './a11yDescribe';
+import {
+  describeBars,
+  describeDiagram,
+  describeER,
+  describePie,
+  describeSankey,
+  describeScatter,
+  describeSeries,
+} from './a11yDescribe';
 
 describe('a11yDescribe', () => {
   it('describes single-series bars with category count and value range', () => {
@@ -88,5 +96,36 @@ describe('a11yDescribe', () => {
     expect(describeSeries([])).toBe('Line chart with no data.');
     expect(describePie([])).toBe('Pie chart with no data.');
     expect(describeScatter([])).toBe('Scatter plot with no data.');
+  });
+
+  it('describes diagrams with node and edge counts (flowchart/org/mindmap/arch)', () => {
+    const nodes = [
+      { id: 'a', label: 'A' },
+      { id: 'b', label: 'B' },
+      { id: 'c', label: 'C' },
+    ];
+    expect(
+      describeDiagram(nodes, [
+        { from: 'a', to: 'b' },
+        { from: 'b', to: 'c' },
+      ]),
+    ).toBe('Diagram with 3 nodes and 2 edges.');
+    // Singular nouns + missing edges array.
+    expect(describeDiagram([{ id: 'a', label: 'A' }])).toBe('Diagram with 1 node and 0 edges.');
+    expect(describeDiagram([], [])).toBe('Diagram with no nodes.');
+  });
+
+  it('describes ER diagrams with entity and relationship counts', () => {
+    expect(describeER([{ name: 'User' }, { name: 'Order' }], [{ from: 'User', to: 'Order' }])).toBe(
+      'Entity-relationship diagram with 2 entities and 1 relationship.',
+    );
+    expect(describeER([], [])).toBe('Entity-relationship diagram with no entities.');
+  });
+
+  it('describes Sankey diagrams with node and link counts', () => {
+    expect(
+      describeSankey([{ id: 'a' }, { id: 'b' }, { id: 'c' }], [{ from: 'a', to: 'b', value: 5 }]),
+    ).toBe('Sankey diagram with 3 nodes and 1 link.');
+    expect(describeSankey([], [])).toBe('Sankey diagram with no nodes.');
   });
 });

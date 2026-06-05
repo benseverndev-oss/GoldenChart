@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import type { BaseChartProps, FlowDirection } from '../types/charts';
 import type { EREntityInput, ERRelationshipInput } from '../core/er';
 import { computeER } from '../core/er';
+import { describeER } from '../core/a11yDescribe';
 import { getPlotArea } from '../core/geometry';
 import { Surface } from './Surface';
 import { RoughRectangle } from '../primitives/RoughRectangle';
@@ -50,7 +51,7 @@ export function ERDiagram({
       vibe={vibe}
       brand={brand}
       title={title}
-      description={description}
+      description={description ?? describeER(entities, relationships ?? [])}
       ariaLabel={ariaLabel}
       className={className}
       style={style}

@@ -29,62 +29,71 @@ IntelliSense reflects the exact props. Import everything from `goldenchart`
 
 Shared by every chart and diagram component:
 
-| Prop | Type | Notes |
-| --- | --- | --- |
-| `width` | `number` | Required. |
-| `height` | `number` | Required. |
-| `margin` | `Partial<{ top; right; bottom; left }>` | Per-chart defaults otherwise. |
-| `vibe` | `VibeConfig` | Preset name or `{ preset, ...overrides }`. |
-| `brand` | `BrandConfig` | Palette / colours / font / logo layered on the vibe. See [Branding](#branding). |
-| `title` | `string` | Accessible label → `<title>` / aria-label. |
-| `description` | `string` | Longer description → `<desc>`. |
-| `ariaLabel` | `string` | Explicit aria-label; falls back to `title`. |
-| `dataTable` | `boolean` | Emit a visually-hidden data table (data charts only). |
-| `className` / `style` | `string` / `CSSProperties` | Applied to the wrapper. |
-| `bare` | `boolean` | Render only the `<svg>` (no wrapper div) — for headless/SVG-string use. |
+| Prop                  | Type                                    | Notes                                                                           |
+| --------------------- | --------------------------------------- | ------------------------------------------------------------------------------- |
+| `width`               | `number`                                | Required.                                                                       |
+| `height`              | `number`                                | Required.                                                                       |
+| `margin`              | `Partial<{ top; right; bottom; left }>` | Per-chart defaults otherwise.                                                   |
+| `vibe`                | `VibeConfig`                            | Preset name or `{ preset, ...overrides }`.                                      |
+| `brand`               | `BrandConfig`                           | Palette / colours / font / logo layered on the vibe. See [Branding](#branding). |
+| `title`               | `string`                                | Accessible label → `<title>` / aria-label.                                      |
+| `description`         | `string`                                | Longer description → `<desc>`.                                                  |
+| `ariaLabel`           | `string`                                | Explicit aria-label; falls back to `title`.                                     |
+| `dataTable`           | `boolean`                               | Emit a visually-hidden data table (data charts only).                           |
+| `className` / `style` | `string` / `CSSProperties`              | Applied to the wrapper.                                                         |
+| `bare`                | `boolean`                               | Render only the `<svg>` (no wrapper div) — for headless/SVG-string use.         |
 
 ## Charts
 
 ### `BarChart`
+
 - `data: ChartDatum[] | MultiSeriesDatum[]` — `{ label, value, color? }`, or `{ label, values }` for multi-series.
 - `mode?: 'single' | 'grouped' | 'stacked'` (default `single`)
 - `seriesKeys?: string[]`, `showAxes?`, `showGrid?`, `showLegend?`, `annotations?: Annotation[]`
 - `xAxis? / yAxis?: AxisFormat`
 
 ### `LineChart`
+
 - `series: Series[]` — `{ id, points: { x, y }[], color? }`
 - `curve?: CurveName`, `showPoints?`, `showAxes?`, `showGrid?`
 - `emphasis?: EmphasisSpec[]` — trend lines, auto-callouts, series highlighting
 - `annotations?`, `xAxis? / yAxis?: AxisFormat`
 
 ### `AreaChart`
+
 - `series: Series[]`, `curve?: CurveName`
 - `baseline?: number`, `showLine?`, `stacked?` (index-aligned series)
 - `showAxes?`, `showGrid?`, `annotations?`, `xAxis? / yAxis?`
 
 ### `ScatterPlot`
+
 - `data: ScatterDatum[]` — `{ x, y, r?, ... }`
 - `radius?: number`, `maxRadius?: number` (for bubble sizing when `r` is present)
 - `emphasis?: EmphasisSpec[]`, `showAxes?`, `showGrid?`, `annotations?`, `xAxis? / yAxis?`
 
 ### `PieChart`
+
 - `data: ChartDatum[]`
 - `innerRadius?: number` (0 = pie, > 0 = donut), `padAngle?: number`, `showLabels?`
 
 ### `SankeyChart`
+
 - `nodes: SankeyNodeInput[]`, `links: SankeyLinkInput[]`
 - `direction?: SankeyOrientation`, `nodeWidth?`, `nodePadding?`, `showValues?`
 
 ### `TreemapChart`
+
 - `data: TreemapDatum[]`
 - `padding?: number`, `tile?: TreemapTile`, `showLabels?`
 
 ### `HeatmapChart`
+
 - `data: HeatmapDatum[]`
 - `xLabels? / yLabels?: (string | number)[]`
 - `colorScale?: ColorScaleName | ((value: number) => string)`, `showValues?`, `showAxes?`
 
 ### `RadarChart`
+
 - `axes: string[]`, `series: RadarSeries[]`
 - `maxValue?: number`, `levels?: number`, `showDots?`, `showLabels?`
 
@@ -95,30 +104,37 @@ parent?, shape?: 'rect' | 'ellipse' | 'diamond', group?, vibe? }`) and `FlowEdge
 (`{ from, to, label?, routing? }`).
 
 ### `Flowchart`
+
 - `nodes: FlowNode[]`, `edges?: FlowEdge[]`
 - `direction?: 'TB' | 'BT' | 'LR' | 'RL'` (default `TB`)
 - `routing?: 'curved' | 'orthogonal'` (default `curved`), `showArrowheads?` (default `true`)
 - `layoutOptions?: LayoutOptions` — `density`, `nodeSpacing`, `rankSpacing`, `engine: 'auto' | 'tree' | 'dag'`
 
 ### `MindMap`, `OrgChart`, `ArchitectureDiagram`
+
 Thin wrappers over `Diagram` with a preset layout. Take `nodes` / `edges` (and
 `direction` for `OrgChart` / `ArchitectureDiagram`).
 
 ### `Diagram` (low-level)
+
 - `nodes: FlowNode[]`, `edges?: FlowEdge[]`
 - `layout: LayoutEngine` — e.g. `flowLayout(direction, opts)`, `radialLayout()`
 - `routing?`, `showArrowheads?`
 
 ### `SequenceDiagram`
+
 - `actors: SequenceActorInput[]`, `messages: SequenceMessageInput[]`, `actorHeight?: number`
 
 ### `ERDiagram`
+
 - `entities: EREntityInput[]`, `relationships?: ERRelationshipInput[]`, `direction?: FlowDirection`
 
 ### `Timeline`
+
 - `events: TimelineEventInput[]`, `orientation?: TimelineOrientation`
 
 ### Mermaid bridge
+
 - `parseMermaid(source: string): DiagramSpec` — flowchart, sequence, and mindmap syntaxes;
   throws `MermaidParseError` on unsupported input.
 - `renderDiagram(spec: DiagramSpec, opts): ReactElement` — dispatches a spec to its component.
@@ -135,7 +151,7 @@ Thin wrappers over `Diagram` with a preset layout. Take `nodes` / `edges` (and
 
 Pass a plain-English `query` to `visualize` / `AutoChart` and it picks the chart
 type, maps fields to roles, and selects a vibe from the sentence. The parser only
-*nudges* the same recommender used for `intent`, so the two can't disagree — and
+_nudges_ the same recommender used for `intent`, so the two can't disagree — and
 any explicit prop you also pass (`width`, `vibe`, …) still wins over what the
 query inferred.
 
@@ -200,20 +216,20 @@ it's `aria-hidden`.
 ## Branding
 
 A `brand` (`BrandConfig`) layers identity on top of a `vibe`. The vibe controls
-*how* a chart is drawn (texture, roughness, the hand-drawn feel); the brand
-controls *identity* (colours, font, logo). Every field is optional — omit one to
+_how_ a chart is drawn (texture, roughness, the hand-drawn feel); the brand
+controls _identity_ (colours, font, logo). Every field is optional — omit one to
 inherit the vibe's value. Precedence is **preset < brand < explicit `vibe`
 overrides**: a brand recolours any vibe, and an explicit per-call `vibe` override
 still wins over the brand.
 
-| Field | Type | Maps to vibe | Notes |
-| --- | --- | --- | --- |
-| `palette` | `string[]` | — | Categorical hues for multi-series / pie. Replaces the default palette. |
-| `primary` | `string` | `fill` | Single-series bars, accents. |
-| `ink` | `string` | `stroke` | Line / stroke colour. |
-| `page` | `string` | `background` | Page / canvas colour. |
-| `font` | `string` | `fontFamily` | Font family for all chart text. |
-| `logo` | `BrandLogo` | — | Optional corner wordmark / logo. |
+| Field     | Type        | Maps to vibe | Notes                                                                  |
+| --------- | ----------- | ------------ | ---------------------------------------------------------------------- |
+| `palette` | `string[]`  | —            | Categorical hues for multi-series / pie. Replaces the default palette. |
+| `primary` | `string`    | `fill`       | Single-series bars, accents.                                           |
+| `ink`     | `string`    | `stroke`     | Line / stroke colour.                                                  |
+| `page`    | `string`    | `background` | Page / canvas colour.                                                  |
+| `font`    | `string`    | `fontFamily` | Font family for all chart text.                                        |
+| `logo`    | `BrandLogo` | —            | Optional corner wordmark / logo.                                       |
 
 `BrandLogo` = `{ src, position?, width?, height?, opacity?, margin? }`. `src` is a
 URL or data-URI (the library never bundles image bytes). `position` is one of
@@ -228,7 +244,7 @@ loose config and the strict internal shape, mirroring `resolveVibe`.
 
 ```tsx
 <BarChart
-  vibe="pencil"                         // brand recolours, vibe keeps the sketch feel
+  vibe="pencil" // brand recolours, vibe keeps the sketch feel
   brand={{
     palette: ['#ff6b35', '#f7b801', '#7a9e7e', '#ef476f', '#118ab2'],
     primary: '#ff6b35',
@@ -288,3 +304,21 @@ support `dataTable` to emit a visually-hidden table mirroring the data for scree
 readers (diagrams have no tabular equivalent, so `dataTable` is a no-op there). The
 `drawOn` animation is disabled under `prefers-reduced-motion`. Interactive marks
 (via `goldenchart/interactive`) are keyboard-focusable with `aria-label`s.
+
+**Fallback descriptions.** When you omit `description`, every chart and diagram
+auto-emits a short data-derived `<desc>` so the surface is never unlabelled — an
+explicit `description` always wins. The fallback summarises the shape of the data:
+
+| Component                                                 | Example fallback `<desc>`                                          |
+| --------------------------------------------------------- | ------------------------------------------------------------------ |
+| `BarChart`                                                | `Bar chart with 4 categories, values from 7 to 24.`                |
+| `LineChart` / `AreaChart`                                 | `Line chart with 2 series and 24 points, y values from -3 to 90.`  |
+| `PieChart`                                                | `Pie chart with 3 slices totaling 60.`                             |
+| `ScatterPlot`                                             | `Scatter plot with 120 points.`                                    |
+| `Flowchart`, `OrgChart`, `MindMap`, `ArchitectureDiagram` | `Diagram with 6 nodes and 5 edges.`                                |
+| `ERDiagram`                                               | `Entity-relationship diagram with 3 entities and 2 relationships.` |
+| `SankeyChart`                                             | `Sankey diagram with 8 nodes and 11 links.`                        |
+
+`Badge` is a compact inline label, not a `role="img"` figure, so it carries no
+`<title>`/`<desc>`. Keyboard navigation _between_ data points is out of scope here
+(tracked separately).

@@ -74,3 +74,39 @@ export function describeScatter(data: { x: number; y: number }[]): string {
   if (data.length === 0) return 'Scatter plot with no data.';
   return `Scatter plot with ${data.length} point${data.length === 1 ? '' : 's'}.`;
 }
+
+/** Pluralise a noun by count: `count(2, 'node')` → `'2 nodes'`. */
+function count(n: number, noun: string, plural = `${noun}s`): string {
+  return `${n} ${n === 1 ? noun : plural}`;
+}
+
+// Diagram-family fallbacks describe topology by count only — the field names
+// vary by chart (FlowEdge from/to, Sankey source/target), so these accept any
+// array and read just its length.
+
+/**
+ * Node/edge diagrams (Flowchart, OrgChart, MindMap, ArchitectureDiagram all go
+ * through `<Diagram>`). Counts only — the topology is the message.
+ */
+export function describeDiagram(nodes: readonly unknown[], edges: readonly unknown[] = []): string {
+  if (nodes.length === 0) return 'Diagram with no nodes.';
+  return `Diagram with ${count(nodes.length, 'node')} and ${count(edges.length, 'edge')}.`;
+}
+
+/** Entity-relationship diagrams: entity + relationship counts. */
+export function describeER(
+  entities: readonly unknown[],
+  relationships: readonly unknown[] = [],
+): string {
+  if (entities.length === 0) return 'Entity-relationship diagram with no entities.';
+  return (
+    `Entity-relationship diagram with ${count(entities.length, 'entity', 'entities')} ` +
+    `and ${count(relationships.length, 'relationship')}.`
+  );
+}
+
+/** Weighted flow (Sankey): node + link counts. */
+export function describeSankey(nodes: readonly unknown[], links: readonly unknown[] = []): string {
+  if (nodes.length === 0) return 'Sankey diagram with no nodes.';
+  return `Sankey diagram with ${count(nodes.length, 'node')} and ${count(links.length, 'link')}.`;
+}

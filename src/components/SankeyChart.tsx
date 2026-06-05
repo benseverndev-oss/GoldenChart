@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import type { BaseChartProps } from '../types/charts';
 import type { SankeyLinkInput, SankeyNodeInput, SankeyOrientation } from '../core/sankey';
 import { computeSankey } from '../core/sankey';
+import { describeSankey } from '../core/a11yDescribe';
 import { getPlotArea } from '../core/geometry';
 import { colorAt } from '../core/palette';
 import { resolveBrand } from '../brand/resolveBrand';
@@ -83,7 +84,7 @@ export function SankeyChart({
       vibe={vibe}
       brand={brand}
       title={title}
-      description={description}
+      description={description ?? describeSankey(nodes, links)}
       ariaLabel={ariaLabel}
       className={className}
       style={style}

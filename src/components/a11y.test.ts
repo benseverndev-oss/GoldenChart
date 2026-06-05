@@ -6,6 +6,10 @@ import { LineChart } from './LineChart';
 import { AreaChart } from './AreaChart';
 import { PieChart } from './PieChart';
 import { ScatterPlot } from './ScatterPlot';
+import { Flowchart } from './Flowchart';
+import { OrgChart } from './OrgChart';
+import { ERDiagram } from './ERDiagram';
+import { SankeyChart } from './SankeyChart';
 
 const BAR_DATA = [
   { label: 'Q1', value: 12 },
@@ -103,6 +107,72 @@ describe('a11y: chart SVGs expose role/title/desc', () => {
       } as any),
     );
     expect(svg).toContain('<desc>Scatter plot with 2 points.</desc>');
+  });
+
+  it('Flowchart (via Diagram) emits role=img and a node/edge fallback desc', () => {
+    const svg = render(
+      createElement(Flowchart, {
+        width: 300,
+        height: 200,
+        nodes: [
+          { id: 'a', label: 'Start' },
+          { id: 'b', label: 'End' },
+        ],
+        edges: [{ from: 'a', to: 'b' }],
+        bare: true,
+      } as any),
+    );
+    expect(svg).toContain('role="img"');
+    expect(svg).toContain('<desc>Diagram with 2 nodes and 1 edge.</desc>');
+  });
+
+  it('OrgChart forwards an explicit description through the Diagram wrapper', () => {
+    const svg = render(
+      createElement(OrgChart, {
+        width: 300,
+        height: 200,
+        nodes: [
+          { id: 'ceo', label: 'CEO' },
+          { id: 'vp', label: 'VP' },
+        ],
+        edges: [{ from: 'ceo', to: 'vp' }],
+        description: 'Org structure.',
+        bare: true,
+      } as any),
+    );
+    expect(svg).toContain('<desc>Org structure.</desc>');
+  });
+
+  it('ERDiagram emits an entity/relationship fallback desc', () => {
+    const svg = render(
+      createElement(ERDiagram, {
+        width: 320,
+        height: 220,
+        entities: [
+          { id: 'user', label: 'User' },
+          { id: 'order', label: 'Order' },
+        ],
+        relationships: [{ from: 'user', to: 'order' }],
+        bare: true,
+      } as any),
+    );
+    expect(svg).toContain('role="img"');
+    expect(svg).toContain(
+      '<desc>Entity-relationship diagram with 2 entities and 1 relationship.</desc>',
+    );
+  });
+
+  it('SankeyChart emits a node/link fallback desc', () => {
+    const svg = render(
+      createElement(SankeyChart, {
+        width: 320,
+        height: 220,
+        nodes: [{ id: 'a' }, { id: 'b' }],
+        links: [{ source: 'a', target: 'b', value: 10 }],
+        bare: true,
+      } as any),
+    );
+    expect(svg).toContain('<desc>Sankey diagram with 2 nodes and 1 link.</desc>');
   });
 
   it('aria-label falls back to title when ariaLabel is omitted', () => {
