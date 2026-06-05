@@ -1,0 +1,45 @@
+name: Refresh README badges
+
+# The README badge row is committed SVGs (the library renders its own badges —
+# see scripts/render-readme-badges.mjs). The npm downloads + version values are
+# baked at generation time, so they go stale until regenerated. This re-runs the
+# generator on a schedule (and on demand) and commits the result if it changed.
+
+on:
+  schedule:
+    # Mondays at 06:00 UTC.
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-badges
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+      - run: npm ci
+      # The badge script imports the built Badge component from dist/.
+      - run: npm run build
+      - name: Regenerate badges (fetches live npm downloads + reads version)
+        run: node scripts/render-readme-badges.mjs
+      - name: Commit if the badges changed
+        run: |
+          if git diff --quiet -- assets/badges; then
+            echo "Badges unchanged — nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/badges/*.svg
+          # [skip ci] so the badge-only commit doesn't trigger CI / Pages redeploy.
+          git commit -m "chore: refresh README badges [skip ci]"
+          git push
