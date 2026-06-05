@@ -17,7 +17,7 @@ hero:
       icon: external
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
 <CardGrid stagger>
   <Card title="Calc / render / vibe split" icon="puzzle">
@@ -41,4 +41,32 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
     `<title>` / `<desc>` / SR-only data tables, PNG/SVG client-side export — all
     opt-in, all under a 75 KB gzipped budget.
   </Card>
+</CardGrid>
+
+## Charts
+
+<CardGrid>
+  <LinkCard title="BarChart" href="/charts/bar-chart/" description="Single, grouped, or stacked bars." />
+  <LinkCard title="LineChart" href="/charts/line-chart/" description="Multi-series lines with emphasis callouts." />
+  <LinkCard title="AreaChart" href="/charts/area-chart/" description="Filled areas, optional stacking." />
+  <LinkCard title="ScatterPlot" href="/charts/scatter-plot/" description="Point clouds and bubbles." />
+  <LinkCard title="PieChart" href="/charts/pie-chart/" description="Pie or donut with labels." />
+  <LinkCard title="SankeyChart" href="/charts/sankey-chart/" description="Weighted flow ribbons." />
+  <LinkCard title="TreemapChart" href="/charts/treemap-chart/" description="Nested rectangles by value." />
+  <LinkCard title="HeatmapChart" href="/charts/heatmap-chart/" description="Colour-scaled grid cells." />
+  <LinkCard title="RadarChart" href="/charts/radar-chart/" description="Spider chart across shared axes." />
+</CardGrid>
+
+## Diagrams
+
+<CardGrid>
+  <LinkCard title="Flowchart" href="/diagrams/flowchart/" description="Auto-laid-out tree / DAG." />
+  <LinkCard title="OrgChart" href="/diagrams/org-chart/" description="Top-down hierarchy." />
+  <LinkCard title="MindMap" href="/diagrams/mind-map/" description="Radial spokes from a centre." />
+  <LinkCard title="ArchitectureDiagram" href="/diagrams/architecture-diagram/" description="Boxes with orthogonal routing." />
+  <LinkCard title="SequenceDiagram" href="/diagrams/sequence-diagram/" description="Actors, lifelines, messages." />
+  <LinkCard title="ERDiagram" href="/diagrams/er-diagram/" description="Entities, fields, cardinality." />
+  <LinkCard title="Timeline" href="/diagrams/timeline/" description="Ordered events on an axis." />
+  <LinkCard title="Diagram" href="/diagrams/diagram/" description="The low-level node/edge engine." />
+  <LinkCard title="AutoChart" href="/auto/auto-chart/" description="Pick a chart from data or a query." />
 </CardGrid>

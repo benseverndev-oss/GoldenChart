@@ -1,0 +1,49 @@
+---
+title: AutoChart
+description: Profile data, pick a chart type, and render — optionally driven by a plain-English query.
+---
+
+import PropTable from '../../../components/PropTable.astro';
+
+`AutoChart` profiles your rows, picks a chart type, maps fields to roles, and renders. Steer it with an `intent` or a natural-language `query`; any explicit prop you also pass still wins.
+
+## From an intent
+
+```tsx
+import { AutoChart } from 'goldenchart';
+
+<AutoChart
+  width={460}
+  height={300}
+  intent="trend"
+  data={[
+    { month: 'Jan', revenue: 12 },
+    { month: 'Feb', revenue: 18 },
+    { month: 'Mar', revenue: 15 },
+  ]}
+/>;
+```
+
+## From a natural-language query
+
+```tsx
+<AutoChart
+  width={460}
+  height={300}
+  query="revenue by month as a line in pencil"
+  data={data}
+/>
+```
+
+The query only _nudges_ the same recommender `intent` uses, so the two can't disagree. `Intent` is one of `'trend' | 'compare' | 'composition' | 'distribution' | 'correlation' | 'flow' | 'hierarchy'`.
+
+There's also an imperative form: `visualize(data, { query, width, height })` returns the same element.
+
+## Props
+
+<PropTable component="AutoChart" />
+
+## See also
+
+- [BarChart](/charts/bar-chart/)
+- [Brand vs. vibe](/start/brand-vs-vibe/)

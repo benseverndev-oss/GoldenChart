@@ -4,13 +4,18 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
+    "gen:props": "node scripts/gen-props.mjs",
+    "dev": "npm run gen:props && astro dev",
+    "build": "npm run gen:props && astro build",
     "preview": "astro preview",
     "astro": "astro"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.36.0",
     "astro": "^5.16.0"
+  },
+  "devDependencies": {
+    "react-docgen-typescript": "^2.4.0",
+    "typescript": "^5.9.3"
   }
 }

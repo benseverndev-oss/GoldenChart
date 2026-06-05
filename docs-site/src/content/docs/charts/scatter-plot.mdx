@@ -1,0 +1,52 @@
+---
+title: ScatterPlot
+description: Point cloud with optional bubble sizing from a per-point radius.
+---
+
+import PropTable from '../../../components/PropTable.astro';
+
+Plots a flat array of `{ x, y }` points (no series wrapper). Supply a per-point `r` plus `maxRadius` to turn it into a bubble chart.
+
+## Basic
+
+```tsx
+import { ScatterPlot } from 'goldenchart';
+
+<ScatterPlot
+  width={420}
+  height={320}
+  data={[
+    { x: 1, y: 2 },
+    { x: 3, y: 5 },
+    { x: 4, y: 1 },
+    { x: 6, y: 8 },
+  ]}
+/>;
+```
+
+## Bubbles
+
+```tsx
+<ScatterPlot
+  width={420}
+  height={320}
+  maxRadius={28}
+  data={[
+    { x: 1, y: 2, r: 3 },
+    { x: 3, y: 5, r: 9 },
+    { x: 6, y: 8, r: 14 },
+  ]}
+/>
+```
+
+## Props
+
+<PropTable component="ScatterPlot" />
+
+## Accessibility
+
+Auto-describes as "Scatter plot with N points." when no `description` is given.
+
+## See also
+
+- [LineChart](/charts/line-chart/)

@@ -16,3 +16,6 @@ yarn-error.log*
 
 # macOS
 .DS_Store
+
+# Auto-generated prop tables (built by scripts/gen-props.mjs)
+src/generated/

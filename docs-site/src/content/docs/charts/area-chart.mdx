@@ -1,0 +1,56 @@
+---
+title: AreaChart
+description: Filled area chart with optional stacking and a configurable baseline.
+---
+
+import PropTable from '../../../components/PropTable.astro';
+
+Same `series` shape as [LineChart](/charts/line-chart/), but fills the region between the line and a `baseline`. Set `stacked` to stack index-aligned series.
+
+## Basic
+
+```tsx
+import { AreaChart } from 'goldenchart';
+
+<AreaChart
+  width={480}
+  height={300}
+  series={[
+    {
+      id: 'sessions',
+      points: [
+        { x: 0, y: 12 },
+        { x: 1, y: 18 },
+        { x: 2, y: 15 },
+        { x: 3, y: 26 },
+      ],
+    },
+  ]}
+/>;
+```
+
+## Stacked
+
+```tsx
+<AreaChart
+  width={480}
+  height={300}
+  stacked
+  series={[
+    { id: 'organic', points: [{ x: 0, y: 5 }, { x: 1, y: 8 }, { x: 2, y: 6 }] },
+    { id: 'paid', points: [{ x: 0, y: 3 }, { x: 1, y: 4 }, { x: 2, y: 7 }] },
+  ]}
+/>
+```
+
+## Props
+
+<PropTable component="AreaChart" />
+
+## Accessibility
+
+Auto-describes as "Area chart with N series and M points…" when no `description` is supplied; supports `dataTable`.
+
+## See also
+
+- [LineChart](/charts/line-chart/)

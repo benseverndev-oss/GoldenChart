@@ -1,0 +1,63 @@
+---
+// Renders the auto-extracted prop table for a component. Data comes from
+// src/generated/props.json (built by scripts/gen-props.mjs off the library's
+// TypeScript types), so these tables can't drift from the real props.
+import props from '../generated/props.json';
+
+interface Props {
+  component: string;
+}
+const { component } = Astro.props;
+const entry = (props as Record<string, { props: PropRow[] }>)[component];
+if (!entry) {
+  throw new Error(
+    `PropTable: no generated props for "${component}". Did scripts/gen-props.mjs run, and is the name in its COMPONENTS list?`,
+  );
+}
+
+interface PropRow {
+  name: string;
+  type: string;
+  required: boolean;
+  defaultValue: string | null;
+  description: string;
+}
+
+// Minimal inline-markdown: escape HTML, then turn `code` spans into <code>.
+function inline(text: string): string {
+  const escaped = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  return escaped.replace(/`([^`]+)`/g, '<code>$1</code>');
+}
+---
+
+<table>
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Default</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      entry.props.map((p) => (
+        <tr>
+          <td>
+            <code>{p.name}</code>
+          </td>
+          <td>
+            <code>{p.type}</code>
+          </td>
+          <td>{p.required ? 'yes' : '—'}</td>
+          <td>{p.defaultValue ? <code>{p.defaultValue}</code> : '—'}</td>
+          <td set:html={inline(p.description)} />
+        </tr>
+      ))
+    }
+  </tbody>
+</table>

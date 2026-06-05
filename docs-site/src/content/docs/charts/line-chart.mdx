@@ -1,0 +1,58 @@
+---
+title: LineChart
+description: Multi-series line chart with curve interpolation, point markers, and emphasis callouts.
+---
+
+import PropTable from '../../../components/PropTable.astro';
+
+Plots one or more `series` of `{ x, y }` points. `linearScale` maps the data to the plot; a `<RoughPath>` sketches each line. Add `emphasis` for trend lines, auto-callouts, or series highlighting.
+
+## Basic
+
+```tsx
+import { LineChart } from 'goldenchart';
+
+<LineChart
+  width={480}
+  height={300}
+  series={[
+    {
+      id: 'revenue',
+      points: [
+        { x: 0, y: 10 },
+        { x: 1, y: 14 },
+        { x: 2, y: 9 },
+        { x: 3, y: 22 },
+      ],
+    },
+  ]}
+/>;
+```
+
+## Multiple series with a smooth curve
+
+```tsx
+<LineChart
+  width={480}
+  height={300}
+  curve="catmullRom"
+  showPoints
+  series={[
+    { id: 'team_a', points: [{ x: 0, y: 4 }, { x: 1, y: 8 }, { x: 2, y: 6 }] },
+    { id: 'team_b', points: [{ x: 0, y: 2 }, { x: 1, y: 5 }, { x: 2, y: 9 }] },
+  ]}
+/>
+```
+
+## Props
+
+<PropTable component="LineChart" />
+
+## Accessibility
+
+Renders `role="img"` with a `<title>`/`<desc>`; when `description` is omitted it auto-emits a summary like "Line chart with 2 series and 6 points, y values from 2 to 9." Set `dataTable` for a screen-reader table.
+
+## See also
+
+- [AreaChart](/charts/area-chart/)
+- [Brand vs. vibe](/start/brand-vs-vibe/)

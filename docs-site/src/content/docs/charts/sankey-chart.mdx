@@ -1,0 +1,42 @@
+---
+title: SankeyChart
+description: Weighted flow diagram sizing nodes by throughput and ribbons by value.
+---
+
+import PropTable from '../../../components/PropTable.astro';
+
+Nodes are `{ id, label?, color? }`; links are `{ source, target, value }`. `computeSankey` (built on the DAG layering) sizes nodes by throughput and ribbons by value.
+
+## Basic
+
+```tsx
+import { SankeyChart } from 'goldenchart';
+
+<SankeyChart
+  width={520}
+  height={320}
+  nodes={[
+    { id: 'visits', label: 'Visits' },
+    { id: 'signups', label: 'Signups' },
+    { id: 'paid', label: 'Paid' },
+    { id: 'churned', label: 'Churned' },
+  ]}
+  links={[
+    { source: 'visits', target: 'signups', value: 40 },
+    { source: 'signups', target: 'paid', value: 24 },
+    { source: 'signups', target: 'churned', value: 16 },
+  ]}
+/>;
+```
+
+## Props
+
+<PropTable component="SankeyChart" />
+
+## Accessibility
+
+Auto-describes as "Sankey diagram with N nodes and M links." when no `description` is given.
+
+## See also
+
+- [Flowchart](/diagrams/flowchart/)

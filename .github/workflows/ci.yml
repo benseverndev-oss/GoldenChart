@@ -21,6 +21,19 @@ jobs:
       - run: npm run build
       - run: npm run check:bundle
 
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+      # root deps so gen-props.mjs can resolve the library's TS imports
+      - run: npm ci
+      - run: npm --prefix docs-site ci
+      # runs gen:props (react-docgen-typescript) then astro build
+      - run: npm run docs:build
+
   mcp:
     runs-on: ubuntu-latest
     steps:

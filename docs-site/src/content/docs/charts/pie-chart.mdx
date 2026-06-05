@@ -1,0 +1,52 @@
+---
+title: PieChart
+description: Pie or donut chart with optional slice labels.
+---
+
+import PropTable from '../../../components/PropTable.astro';
+
+Renders `data` as proportional slices. Set `innerRadius > 0` for a donut, `padAngle` to separate slices.
+
+## Pie
+
+```tsx
+import { PieChart } from 'goldenchart';
+
+<PieChart
+  width={360}
+  height={360}
+  data={[
+    { label: 'Chrome', value: 64 },
+    { label: 'Safari', value: 19 },
+    { label: 'Firefox', value: 9 },
+    { label: 'Other', value: 8 },
+  ]}
+/>;
+```
+
+## Donut
+
+```tsx
+<PieChart
+  width={360}
+  height={360}
+  innerRadius={70}
+  padAngle={0.02}
+  data={[
+    { label: 'Used', value: 72 },
+    { label: 'Free', value: 28 },
+  ]}
+/>
+```
+
+## Props
+
+<PropTable component="PieChart" />
+
+## Accessibility
+
+Auto-describes as "Pie chart with N slices totaling T." when no `description` is given.
+
+## See also
+
+- [TreemapChart](/charts/treemap-chart/)
