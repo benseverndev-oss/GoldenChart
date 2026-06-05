@@ -18,6 +18,7 @@ import {
   orthogonalPoints,
 } from '../core/shapes';
 import { measureText } from '../core/text';
+import { describeDiagram } from '../core/a11yDescribe';
 import { nodeSize } from '../core/nodeSize';
 import { Surface } from './Surface';
 import { resolveVibe } from '../vibe/resolveVibe';
@@ -142,7 +143,7 @@ export function Diagram({
       vibe={vibe}
       brand={brand}
       title={title}
-      description={description}
+      description={description ?? describeDiagram(nodes, edges)}
       ariaLabel={ariaLabel}
       className={className}
       style={style}
