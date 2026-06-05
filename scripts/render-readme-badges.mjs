@@ -7,7 +7,7 @@
 //   node scripts/render-readme-badges.mjs
 //
 // Writes SVGs into assets/badges/*.svg.
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createElement as h } from 'react';
 import { Badge } from '../dist/index.js';
@@ -15,6 +15,12 @@ import { renderToSVGString } from '../dist/server.js';
 
 const outDir = join(process.cwd(), 'assets', 'badges');
 mkdirSync(outDir, { recursive: true });
+
+// Read the version from package.json so the npm badge can never drift behind a
+// release. (The package `exports` map omits `./package.json`, so a bare import
+// would throw ERR_PACKAGE_PATH_NOT_EXPORTED — read the file directly instead.)
+const pkg = JSON.parse(readFileSync(join(process.cwd(), 'package.json'), 'utf8'));
+const version = `v${pkg.version}`;
 
 // Use a system font (sans-serif) to keep the README badges tiny — embedding
 // the bundled Caveat font would bloat each SVG to ~70 KB. GitHub renders SVGs
@@ -43,7 +49,7 @@ const monthlyDownloads = await fetchNpmDownloads('goldenchart', 'last-month');
 console.log(`  fetched npm last-month downloads: ${monthlyDownloads}`);
 
 const badges = [
-  { file: 'npm.svg', label: 'npm', value: 'v0.2.0', tone: 'info', icon: 'tag' },
+  { file: 'npm.svg', label: 'npm', value: version, tone: 'info', icon: 'tag' },
   // No icon: the v1 BADGE_ICONS set has no download glyph and "downloads/mo"
   // as a label is clear enough on its own.
   { file: 'downloads.svg', label: 'downloads/mo', value: formatCount(monthlyDownloads), tone: 'info' },
