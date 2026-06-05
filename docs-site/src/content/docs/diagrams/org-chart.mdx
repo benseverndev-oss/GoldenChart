@@ -1,0 +1,37 @@
+---
+title: OrgChart
+description: Hierarchy chart — a thin wrapper over Diagram with a top-down tree layout and elbow connectors.
+---
+
+import PropTable from '../../../components/PropTable.astro';
+
+A thin wrapper over [Diagram](/diagrams/diagram/) preset to a tree layout with orthogonal elbow connectors and no arrowheads. Same `nodes` / `edges` shape as [Flowchart](/diagrams/flowchart/).
+
+```tsx
+import { OrgChart } from 'goldenchart';
+
+<OrgChart
+  width={520}
+  height={300}
+  nodes={[
+    { id: 'ceo', label: 'CEO' },
+    { id: 'cto', label: 'CTO' },
+    { id: 'cfo', label: 'CFO' },
+    { id: 'eng', label: 'Eng' },
+  ]}
+  edges={[
+    { from: 'ceo', to: 'cto' },
+    { from: 'ceo', to: 'cfo' },
+    { from: 'cto', to: 'eng' },
+  ]}
+/>;
+```
+
+## Props
+
+<PropTable component="OrgChart" />
+
+## See also
+
+- [Flowchart](/diagrams/flowchart/)
+- [MindMap](/diagrams/mind-map/)

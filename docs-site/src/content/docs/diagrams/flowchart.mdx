@@ -1,0 +1,49 @@
+---
+title: Flowchart
+description: Auto-laid-out flowchart — tidy tree for single-root, layered DAG for merges and cycles.
+---
+
+import PropTable from '../../../components/PropTable.astro';
+
+Nodes are `FlowNode` (`{ id, label, shape?: 'rect' | 'ellipse' | 'diamond', group?, vibe? }`); edges are `FlowEdge` (`{ from, to, label?, routing? }`). A d3-hierarchy tree handles single-root trees; a layered DAG layout handles merges, multiple roots, and cycles — in any of four `direction`s.
+
+## Basic
+
+```tsx
+import { Flowchart } from 'goldenchart';
+
+<Flowchart
+  width={480}
+  height={320}
+  nodes={[
+    { id: 'start', label: 'Start', shape: 'ellipse' },
+    { id: 'check', label: 'Valid?', shape: 'diamond' },
+    { id: 'ok', label: 'Process' },
+    { id: 'err', label: 'Reject' },
+  ]}
+  edges={[
+    { from: 'start', to: 'check' },
+    { from: 'check', to: 'ok', label: 'yes' },
+    { from: 'check', to: 'err', label: 'no' },
+  ]}
+/>;
+```
+
+## Orthogonal edges, left-to-right
+
+```tsx
+<Flowchart width={520} height={260} direction="LR" routing="orthogonal" nodes={nodes} edges={edges} />
+```
+
+## Props
+
+<PropTable component="Flowchart" />
+
+## Accessibility
+
+Renders `role="img"`; when `description` is omitted it auto-emits "Diagram with N nodes and M edges."
+
+## See also
+
+- [OrgChart](/diagrams/org-chart/), [MindMap](/diagrams/mind-map/), [ArchitectureDiagram](/diagrams/architecture-diagram/)
+- [Diagram (low-level)](/diagrams/diagram/)

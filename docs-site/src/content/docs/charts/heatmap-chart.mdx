@@ -1,0 +1,45 @@
+---
+title: HeatmapChart
+description: Grid of cells coloured by value, with a configurable colour scale.
+---
+
+import PropTable from '../../../components/PropTable.astro';
+
+Each datum is `{ x, y, value }` where `x`/`y` are category keys (string or number). The grid axes derive from the data, or pass explicit `xLabels` / `yLabels` to fix the order.
+
+## Basic
+
+```tsx
+import { HeatmapChart } from 'goldenchart';
+
+<HeatmapChart
+  width={420}
+  height={320}
+  showValues
+  data={[
+    { x: 'Mon', y: 'AM', value: 3 },
+    { x: 'Mon', y: 'PM', value: 7 },
+    { x: 'Tue', y: 'AM', value: 5 },
+    { x: 'Tue', y: 'PM', value: 9 },
+  ]}
+/>;
+```
+
+## Custom colour scale
+
+```tsx
+<HeatmapChart
+  width={420}
+  height={320}
+  colorScale="viridis"
+  data={data}
+/>
+```
+
+## Props
+
+<PropTable component="HeatmapChart" />
+
+## See also
+
+- [RadarChart](/charts/radar-chart/)

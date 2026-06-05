@@ -29,7 +29,34 @@ export default defineConfig({
         },
         {
           label: 'Charts',
-          items: [{ label: 'BarChart', link: '/charts/bar-chart/' }],
+          items: [
+            { label: 'BarChart', link: '/charts/bar-chart/' },
+            { label: 'LineChart', link: '/charts/line-chart/' },
+            { label: 'AreaChart', link: '/charts/area-chart/' },
+            { label: 'ScatterPlot', link: '/charts/scatter-plot/' },
+            { label: 'PieChart', link: '/charts/pie-chart/' },
+            { label: 'SankeyChart', link: '/charts/sankey-chart/' },
+            { label: 'TreemapChart', link: '/charts/treemap-chart/' },
+            { label: 'HeatmapChart', link: '/charts/heatmap-chart/' },
+            { label: 'RadarChart', link: '/charts/radar-chart/' },
+          ],
+        },
+        {
+          label: 'Diagrams',
+          items: [
+            { label: 'Flowchart', link: '/diagrams/flowchart/' },
+            { label: 'OrgChart', link: '/diagrams/org-chart/' },
+            { label: 'MindMap', link: '/diagrams/mind-map/' },
+            { label: 'ArchitectureDiagram', link: '/diagrams/architecture-diagram/' },
+            { label: 'SequenceDiagram', link: '/diagrams/sequence-diagram/' },
+            { label: 'ERDiagram', link: '/diagrams/er-diagram/' },
+            { label: 'Timeline', link: '/diagrams/timeline/' },
+            { label: 'Diagram (low-level)', link: '/diagrams/diagram/' },
+          ],
+        },
+        {
+          label: 'Auto-charting',
+          items: [{ label: 'AutoChart', link: '/auto/auto-chart/' }],
         },
         {
           label: 'Recipes',
@@ -45,7 +72,10 @@ export default defineConfig({
         },
         {
           label: 'Gallery',
-          items: [{ label: 'Vibes', link: '/gallery/vibes/' }],
+          items: [
+            { label: 'Vibes', link: '/gallery/vibes/' },
+            { label: 'Brands', link: '/gallery/brands/' },
+          ],
         },
       ],
     }),

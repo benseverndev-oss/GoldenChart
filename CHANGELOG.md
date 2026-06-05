@@ -8,6 +8,15 @@ The MCP server (`goldenchart-mcp`) versions independently; see `mcp/`.
 
 ## [Unreleased]
 
+### Added
+- **Docs site (phase 2).** The Astro Starlight site now has a reference page for
+  every chart and diagram (15 components), each with **auto-generated prop
+  tables** — `docs-site/scripts/gen-props.mjs` extracts props from the library's
+  TypeScript types via `react-docgen-typescript` at build time, so the tables
+  can't drift from the real props. Adds a brand gallery, links every component
+  from the index, a CI `docs` job that builds on PRs, and a combined GitHub
+  Pages deploy (playground at the root, docs under `/docs`) (#128).
+
 ### Changed
 - **Dev tooling:** migrated the playground to Tailwind 4 (CSS-first config via
   `@import "tailwindcss"` + `@source`, the `@tailwindcss/postcss` plugin;

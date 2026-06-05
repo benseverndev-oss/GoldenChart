@@ -1,0 +1,43 @@
+---
+title: RadarChart
+description: Spider/radar chart plotting one or more series across shared axes.
+---
+
+import PropTable from '../../../components/PropTable.astro';
+
+Give it the `axes` (one label per spoke) and `series` whose `values` array is index-aligned to `axes`. A closed `<RoughPath>` draws each series over faint grid rings.
+
+## Single series
+
+```tsx
+import { RadarChart } from 'goldenchart';
+
+<RadarChart
+  width={400}
+  height={400}
+  axes={['Speed', 'Power', 'Range', 'Cost', 'Weight']}
+  series={[{ id: 'model_a', values: [8, 6, 7, 4, 5] }]}
+/>;
+```
+
+## Compare two series
+
+```tsx
+<RadarChart
+  width={400}
+  height={400}
+  axes={['Speed', 'Power', 'Range', 'Cost', 'Weight']}
+  series={[
+    { id: 'model_a', values: [8, 6, 7, 4, 5] },
+    { id: 'model_b', values: [5, 9, 4, 7, 6] },
+  ]}
+/>
+```
+
+## Props
+
+<PropTable component="RadarChart" />
+
+## See also
+
+- [HeatmapChart](/charts/heatmap-chart/)

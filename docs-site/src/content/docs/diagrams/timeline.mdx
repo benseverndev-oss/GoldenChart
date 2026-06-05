@@ -1,0 +1,37 @@
+---
+title: Timeline
+description: Ordered events along a horizontal or vertical axis.
+---
+
+import PropTable from '../../../components/PropTable.astro';
+
+`events` are `{ label, date?, detail? }`, drawn in order along the axis. Switch `orientation` between `'horizontal'` and `'vertical'`.
+
+```tsx
+import { Timeline } from 'goldenchart';
+
+<Timeline
+  width={560}
+  height={200}
+  events={[
+    { label: 'Kickoff', date: 'Jan', detail: 'Spec approved' },
+    { label: 'Alpha', date: 'Mar' },
+    { label: 'Beta', date: 'May' },
+    { label: 'GA', date: 'Jul', detail: 'Public launch' },
+  ]}
+/>;
+```
+
+## Vertical
+
+```tsx
+<Timeline width={320} height={420} orientation="vertical" events={events} />
+```
+
+## Props
+
+<PropTable component="Timeline" />
+
+## See also
+
+- [SequenceDiagram](/diagrams/sequence-diagram/)

@@ -9,6 +9,7 @@ coverage
 .worktrees
 .firecrawl
 
-# Generated gallery / example renders (regenerate via scripts/, see scripts/README.md)
-gallery
-nl-examples
+# Generated gallery / example renders (regenerate via scripts/, see scripts/README.md).
+# Anchored to the repo root so they don't also swallow docs-site/.../gallery/ content.
+/gallery
+/nl-examples

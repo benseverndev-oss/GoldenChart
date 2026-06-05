@@ -1,0 +1,38 @@
+---
+title: ArchitectureDiagram
+description: System/architecture diagram — a Diagram wrapper that routes orthogonal connectors around boxes.
+---
+
+import PropTable from '../../../components/PropTable.astro';
+
+A thin wrapper over [Diagram](/diagrams/diagram/) tuned for architecture sketches: boxes laid out in a `direction`, with connectors routed orthogonally around the other nodes. Use `group` on nodes to draw labelled containers.
+
+```tsx
+import { ArchitectureDiagram } from 'goldenchart';
+
+<ArchitectureDiagram
+  width={560}
+  height={320}
+  direction="LR"
+  nodes={[
+    { id: 'web', label: 'Web', group: 'edge' },
+    { id: 'api', label: 'API' },
+    { id: 'db', label: 'Postgres', group: 'data' },
+    { id: 'cache', label: 'Redis', group: 'data' },
+  ]}
+  edges={[
+    { from: 'web', to: 'api' },
+    { from: 'api', to: 'db' },
+    { from: 'api', to: 'cache' },
+  ]}
+/>;
+```
+
+## Props
+
+<PropTable component="ArchitectureDiagram" />
+
+## See also
+
+- [Flowchart](/diagrams/flowchart/)
+- [Diagram (low-level)](/diagrams/diagram/)

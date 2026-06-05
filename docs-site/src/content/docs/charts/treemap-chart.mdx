@@ -1,0 +1,49 @@
+---
+title: TreemapChart
+description: Nested rectangles sized by value; supports a parent/child hierarchy.
+---
+
+import PropTable from '../../../components/PropTable.astro';
+
+Data is a flat list of `{ id, parent?, value?, label?, color? }`. Rows with a `parent` nest inside it; leaf `value`s drive the tiling.
+
+## Flat
+
+```tsx
+import { TreemapChart } from 'goldenchart';
+
+<TreemapChart
+  width={480}
+  height={320}
+  data={[
+    { id: 'a', label: 'Compute', value: 42 },
+    { id: 'b', label: 'Storage', value: 28 },
+    { id: 'c', label: 'Network', value: 18 },
+    { id: 'd', label: 'Other', value: 12 },
+  ]}
+/>;
+```
+
+## Hierarchy
+
+```tsx
+<TreemapChart
+  width={480}
+  height={320}
+  data={[
+    { id: 'root', label: 'Spend' },
+    { id: 'infra', parent: 'root', label: 'Infra' },
+    { id: 'ec2', parent: 'infra', label: 'EC2', value: 30 },
+    { id: 's3', parent: 'infra', label: 'S3', value: 14 },
+    { id: 'people', parent: 'root', label: 'People', value: 40 },
+  ]}
+/>
+```
+
+## Props
+
+<PropTable component="TreemapChart" />
+
+## See also
+
+- [PieChart](/charts/pie-chart/)

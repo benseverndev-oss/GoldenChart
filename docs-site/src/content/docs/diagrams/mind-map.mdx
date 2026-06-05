@@ -1,0 +1,37 @@
+---
+title: MindMap
+description: Radial mind map — a Diagram wrapper with a radial layout, straight spokes, and no arrowheads.
+---
+
+import PropTable from '../../../components/PropTable.astro';
+
+A thin wrapper over [Diagram](/diagrams/diagram/) preset to a radial layout: the first node sits at the centre and children fan out on straight spokes.
+
+```tsx
+import { MindMap } from 'goldenchart';
+
+<MindMap
+  width={480}
+  height={400}
+  nodes={[
+    { id: 'root', label: 'Release' },
+    { id: 'docs', label: 'Docs' },
+    { id: 'tests', label: 'Tests' },
+    { id: 'ci', label: 'CI' },
+  ]}
+  edges={[
+    { from: 'root', to: 'docs' },
+    { from: 'root', to: 'tests' },
+    { from: 'root', to: 'ci' },
+  ]}
+/>;
+```
+
+## Props
+
+<PropTable component="MindMap" />
+
+## See also
+
+- [OrgChart](/diagrams/org-chart/)
+- [Flowchart](/diagrams/flowchart/)
