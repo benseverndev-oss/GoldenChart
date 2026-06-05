@@ -107,7 +107,7 @@ export function SequenceDiagram({
                 {m.label && (
                   // Label sits above the loop (centred over it), so it stays in
                   // the column and never crosses the neighbouring lifeline.
-                  <RoughText x={x + loopW / 2} y={m.y - 6} anchor="middle" baseline="auto">
+                  <RoughText x={x + loopW / 2} y={m.y - 6} anchor="middle" baseline="auto" knockout>
                     {m.label}
                   </RoughText>
                 )}
@@ -126,7 +126,13 @@ export function SequenceDiagram({
               />
               <RoughPath d={arrowHeadPath({ x: m.x1, y: m.y }, { x: m.x2, y: m.y })} fill={null} />
               {m.label && (
-                <RoughText x={(m.x1 + m.x2) / 2} y={m.y - 7} anchor="middle" baseline="auto">
+                <RoughText
+                  x={(m.x1 + m.x2) / 2}
+                  y={m.y - 7}
+                  anchor="middle"
+                  baseline="auto"
+                  knockout
+                >
                   {m.label}
                 </RoughText>
               )}

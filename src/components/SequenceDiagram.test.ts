@@ -78,4 +78,22 @@ describe('SequenceDiagram', () => {
     // Reply / self messages request a dashed stroke.
     expect(svg).toContain('stroke-dasharray');
   });
+
+  it('knocks out a solid rect behind message labels so lifelines never run through them (#140)', () => {
+    // `pencil` resolves to no background, the exact case the per-glyph halo
+    // missed — the knockout box must still paint, falling back to white.
+    const svg = renderToSVGString(
+      createElement(SequenceDiagram, {
+        actors: ACTORS,
+        messages: MESSAGES,
+        width: 480,
+        height: 320,
+        vibe: 'pencil',
+        bare: true,
+      }),
+    );
+    // One knockout rect per message label (5 messages here).
+    const rects = svg.match(/<rect[^>]*fill="#ffffff"/g) ?? [];
+    expect(rects.length).toBeGreaterThanOrEqual(5);
+  });
 });
