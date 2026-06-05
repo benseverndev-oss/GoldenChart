@@ -8,6 +8,14 @@ The MCP server (`goldenchart-mcp`) versions independently; see `mcp/`.
 
 ## [Unreleased]
 
+### Changed
+- **Dev tooling:** migrated the playground to Tailwind 4 (CSS-first config via
+  `@import "tailwindcss"` + `@source`, the `@tailwindcss/postcss` plugin;
+  `autoprefixer` is now bundled and was dropped). Removed the unshipped root
+  `tailwind.config.ts` and `playground/tailwind.config.js`. **No consumer
+  impact** — the published library ships no Tailwind/CSS; these files were never
+  in the npm `files` list (#115).
+
 ## [0.3.0]
 
 ### Added
