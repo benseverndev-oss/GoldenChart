@@ -41,6 +41,26 @@ export const VIBE_PRESETS: Record<VibePreset, ResolvedVibe> = {
     fontFamily: '"Cousine", "Courier New", ui-monospace, monospace',
     fontSize: 13,
   },
+  // PRISM "Quiet Indigo": calm indigo ink and a soft hachure on a clean digital
+  // surface. oklch(0.52 0.18 270) → sRGB #435BCF.
+  quiet_indigo: {
+    preset: 'quiet_indigo',
+    roughness: 0.6,
+    bowing: 0.4,
+    strokeWidth: 1.25,
+    stroke: '#435BCF',
+    fill: '#435BCF',
+    fillStyle: 'hachure',
+    fillWeight: 0.5,
+    hachureAngle: -30,
+    hachureGap: 6,
+    curveStepCount: 14,
+    curveTightness: 0,
+    disableMultiStroke: true,
+    seed: 11,
+    fontFamily: '"IBM Plex Sans", system-ui, sans-serif',
+    fontSize: 13,
+  },
   chaotic_notebook: {
     preset: 'chaotic_notebook',
     roughness: 2.8,
