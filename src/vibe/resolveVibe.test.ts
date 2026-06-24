@@ -55,6 +55,27 @@ describe('resolveVibe', () => {
     });
   });
 
+  describe('quiet_indigo preset', () => {
+    it('resolves with the PRISM indigo stroke, soft hachure, and IBM Plex Sans', () => {
+      const v = resolveVibe('quiet_indigo');
+      expect(v.preset).toBe('quiet_indigo');
+      expect(v.stroke).toBe('#435BCF');
+      expect(v.fill).toBe('#435BCF');
+      expect(v.fillStyle).toBe('hachure');
+      expect(v.fontFamily).toContain('IBM Plex Sans');
+    });
+
+    it('is digital (not paper-textured)', () => {
+      expect(VIBE_PRESETS.quiet_indigo.texture).toBeUndefined();
+    });
+
+    it('participates in the flat override merge', () => {
+      const v = resolveVibe({ preset: 'quiet_indigo', roughness: 2 });
+      expect(v.roughness).toBe(2);
+      expect(v.stroke).toBe('#435BCF');
+    });
+  });
+
   describe('unknown preset', () => {
     afterEach(() => {
       vi.restoreAllMocks();

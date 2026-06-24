@@ -31,7 +31,8 @@ export type VibePreset =
   | 'botanical'
   | 'risograph'
   | 'sticky_note'
-  | 'amber_crt';
+  | 'amber_crt'
+  | 'quiet_indigo';
 
 /** Optional "draw-on" reveal: strokes animate as if being sketched. */
 export interface VibeAnimate {
