@@ -76,8 +76,7 @@ sans-serif rather than blueprint-blue and monospace.
 | `src/types/vibe.ts` | add `'quiet_indigo'` to the `VibePreset` string-literal union |
 | `src/vibe/presets.ts` | add the `quiet_indigo` entry to `VIBE_PRESETS` (NOT to `PAPER_TEXTURED`) |
 | `src/vibe/resolveVibe.test.ts` | add a test (see §5) |
-| `comparisons/` | before/after render PNGs from `cd mcp && npm run compare` (the agent-surface compare writes PNGs here) |
-| `mcp/src/__snapshots__/*.snap` | any vitest golden snapshots the mcp tests refresh — LF-pinned via `.gitattributes` (`*.snap text eol=lf`). Distinct mechanism from the `comparisons/` PNGs. |
+| `comparisons/` | **expected unchanged.** `cd mcp && npm run compare` renders a fixed scene set (no `quiet_indigo` scene), so a new registry entry produces no diff here. Run it only to confirm no accidental perturbation. |
 
 `VibePreset` lookup is by string key with a dev-warning fallback, so adding the
 union member + the registry entry is sufficient for `resolveVibe('quiet_indigo')`
@@ -97,10 +96,11 @@ Unit (`resolveVibe.test.ts`, mirroring existing preset assertions):
   (confirms the new preset participates in the normal merge precedence).
 
 Output snapshot:
-- `cd mcp && npm run compare` to regenerate the before/after render PNGs in
-  `comparisons/`; commit them. Separately, if the mcp vitest run refreshes any
-  golden `.snap` files under `mcp/src/__snapshots__/`, commit those too (LF-pinned
-  via `.gitattributes`).
+- `cd mcp && npm run compare` is a **verification-only** step here. Its scene set
+  is fixed and references no `quiet_indigo`, so adding the preset produces no
+  `comparisons/` diff and no `mcp/src/__snapshots__/*.snap` churn. Run it to
+  confirm existing output is unperturbed; expect nothing to commit. (A `.snap`
+  diff would be LF/CRLF churn — investigate, don't commit.)
 
 Repo CI:
 - `.github/workflows/ci.yml` runs library + mcp full checks (`build`,
