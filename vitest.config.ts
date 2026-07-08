@@ -10,7 +10,7 @@ export default defineConfig({
       reporter: ['text', 'html'],
       include: ['src/**/*.{ts,tsx}'],
       // Barrel files and the generated font blob carry no testable branches.
-      exclude: ['src/**/*.test.ts', 'src/**/index.ts', 'src/assets/fonts.ts'],
+      exclude: ['src/**/*.test.ts', 'src/**/index.ts', 'src/assets/fonts.ts', 'src/assets/usStates.ts'],
       // A starting floor, not a target — ratchet up as coverage grows. Enforced
       // by `test:coverage` (CI) so coverage can't silently regress.
       thresholds: {
