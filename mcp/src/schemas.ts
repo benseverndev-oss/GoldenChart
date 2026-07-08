@@ -294,6 +294,11 @@ export const TreemapDatumSchema = z.object({
   color: z.string().optional(),
 });
 
+export const ChoroplethDatumSchema = z.object({
+  region: z.string(),
+  value: z.number(),
+});
+
 export const HeatmapDatumSchema = z.object({
   x: z.union([z.string(), z.number()]),
   y: z.union([z.string(), z.number()]),
