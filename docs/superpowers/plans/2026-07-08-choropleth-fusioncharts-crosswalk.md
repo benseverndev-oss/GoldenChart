@@ -32,7 +32,7 @@ Add to `package.json` devDependencies: `d3-geo`, `topojson-client`, `us-atlas` (
 import { writeFileSync } from 'node:fs';
 import { geoAlbersUsa, geoPath } from 'd3-geo';
 import { feature } from 'topojson-client';
-import states10m from 'us-atlas/states-10m.json' assert { type: 'json' };
+import states10m from 'us-atlas/states-10m.json' with { type: 'json' };  // Node 22: `with`, not `assert`
 
 // Census state FIPS id -> USPS 2-letter code (50 states + DC).
 const FIPS_TO_USPS = {
@@ -198,7 +198,7 @@ export function ChoroplethMap({
 
     const regions = Object.entries(US_STATES_GEOMETRY).map(([code, d]) => {
       const v = byRegion.get(code);
-      return { code, d, fill: v === undefined ? 'var(--gc-nodata, #e5e7eb)' : color(v) };
+      return { code, d, fill: v === undefined ? '#e5e7eb' : color(v) }; // concrete hex → deterministic snapshots
     });
     return { regions, transform: `translate(${tx},${ty}) scale(${s})` };
   }, [data, colorScale, themeColor, plot.x, plot.y, plot.width, plot.height]);
@@ -216,7 +216,7 @@ export function ChoroplethMap({
   );
 }
 ```
-Add `export { ChoroplethMap } from './components/ChoroplethMap';` (+ types) to `src/index.ts` (match how other charts are exported).
+Add `export { ChoroplethMap } from './components/ChoroplethMap';` (+ its types) to **`src/server.ts`** — NOT `src/index.ts`. `ChoroplethMap` hard-imports the geometry blob, so exporting it from the `.` browser entry would drag `US_STATES_GEOMETRY` into `dist/index.js` and blow the 75 KB bundle budget (and violate the spec's guardrail). The `./server` entry is not bundle-budgeted, and the MCP renders server-side, so `./server` is the correct home. Do NOT add `ChoroplethMap` to `AutoChart.tsx`'s REGISTRY or the shared `ComponentName` union (that union is `.`-reachable via `AutoChart`).
 
 - [ ] **Step 3: Run → PASS.** `npm test -- ChoroplethMap`. Then `npm run typecheck && npm run lint`.
 
@@ -250,7 +250,7 @@ export const ChoroplethDatumSchema = z.object({
 });
 ```
 
-- [ ] **Step 3: Register the tool** — in `mcp/src/tools.ts`: import `ChoroplethMap` (with the other chart imports) + `ChoroplethDatumSchema`, and add to `extraChartTools`:
+- [ ] **Step 3: Register the tool** — in `mcp/src/tools.ts`: import `ChoroplethMap` **from `goldenchart/server`** (it's server-only, per Task 2) — a separate import line from the other chart components — plus `ChoroplethDatumSchema` from `./schemas`, and add to `extraChartTools`:
 ```ts
   makeRenderTool({
     name: 'render_choropleth',
@@ -266,7 +266,7 @@ export const ChoroplethDatumSchema = z.object({
   }),
 ```
 
-- [ ] **Step 4: Run → PASS + snapshot.** `cd mcp && npm test -- extraCharts` (generates a `render_choropleth` golden snapshot; review the `.snap`). Then `cd mcp && npm run typecheck`.
+- [ ] **Step 4: Build the library, then run → PASS + snapshot.** The MCP imports `ChoroplethMap` from the built `goldenchart/server` dist, so build the library first: `npm run build` (root). Then `cd mcp && npm test -- extraCharts` (generates a `render_choropleth` golden snapshot; review the `.snap`) and `cd mcp && npm run typecheck`.
 
 - [ ] **Step 5: Commit**
 ```bash
@@ -325,14 +325,16 @@ describe('fusionToGoldenChart', () => {
 ```
 Run → FAIL.
 
-- [ ] **Step 2: Extend `ComponentName`** in `src/core/compile.ts` — add `'ChoroplethMap'` to the union (lines 9-18).
+- [ ] **Step 2: Do NOT touch `ComponentName`.** Leave `src/core/compile.ts` unchanged — adding `'ChoroplethMap'` to the shared union breaks `AutoChart.tsx`'s exhaustive `Record<ComponentName, …>` REGISTRY (a `.`-reachable typecheck failure). The crosswalk widens its OWN result type instead (Step 3: `ComponentName | 'ChoroplethMap'`).
 
-- [ ] **Step 3: Implement `src/core/fusioncharts.ts`** — a pure switch mirroring `compileChart` (reuse the `num`/`str` idioms; add a color normalizer):
+- [ ] **Step 3: Implement `src/core/fusioncharts.ts`** — a pure switch mirroring `compileChart` (reuse the `num`/`str` idioms; add a color normalizer). Import `ComponentName` as a type and widen locally with `| 'ChoroplethMap'`:
 ```ts
 import type { ComponentName } from './compile';
 
+export type CrosswalkComponent = ComponentName | 'ChoroplethMap';
+
 export type CrosswalkResult =
-  | { component: ComponentName; props: Record<string, unknown> }
+  | { component: CrosswalkComponent; props: Record<string, unknown> }
   | { unsupported: { type: string; reason: string } };
 
 const num = (v: unknown): number =>
@@ -451,12 +453,12 @@ git commit -m "feat(crosswalk): fusionToGoldenChart — FusionCharts config -> G
 
 ## Task 5: `build_chart_from_fusioncharts` MCP tool
 
-**Files:** `mcp/src/fusionTools.ts` (new), `mcp/src/tools.ts` (import + `...fusionTools` in the `tools` array), `mcp/src/visualizeTool.ts` (add `ChoroplethMap` to `REGISTRY`), `mcp/src/fusionTools.test.ts` (new)
+**Files:** `mcp/src/fusionTools.ts` (new, with its OWN component map), `mcp/src/tools.ts` (import + `...fusionTools` in the `tools` array), `mcp/src/fusionTools.test.ts` (new). (No `visualizeTool.ts` change — the crosswalk tool carries its own component lookup so it doesn't have to widen `visualizeTool`'s `Record<ComponentName,…>` REGISTRY.)
 
 - [ ] **Step 1: Write failing test** (`mcp/src/fusionTools.test.ts`) — mirror `dslTools`/`extraCharts` style:
 ```ts
 import { describe, expect, it } from 'vitest';
-import { fusionTools } from './tools';
+import { fusionTools } from './fusionTools';
 
 const tool = fusionTools.find((t) => t.name === 'build_chart_from_fusioncharts')!;
 
@@ -480,16 +482,29 @@ describe('build_chart_from_fusioncharts', () => {
 ```
 Run `cd mcp && npm test -- fusionTools` → FAIL.
 
-- [ ] **Step 2: Add `ChoroplethMap` to the render registry** — in `mcp/src/visualizeTool.ts`, import `ChoroplethMap` (from `goldenchart`) and add `ChoroplethMap` to `REGISTRY` (lines ~26-36). Export `REGISTRY` if not already, so the crosswalk tool reuses it.
-
-- [ ] **Step 3: Implement `mcp/src/fusionTools.ts`** (mirror `build_diagram_from_mermaid`):
+- [ ] **Step 2: Implement `mcp/src/fusionTools.ts`** (mirror `build_diagram_from_mermaid`) with its own `COMPONENTS` map. Note the import split: `fusionToGoldenChart` is on the `goldenchart` main entry (Task 4 export); `renderToSVGString` and `ChoroplethMap` are on `goldenchart/server`; the other chart components import the same way `mcp/src/tools.ts` already imports them (verify — main `goldenchart` entry):
 ```ts
-import { createElement } from 'react';
+import { createElement, type ComponentType } from 'react';
 import { z } from 'zod';
-import { fusionToGoldenChart, renderToSVGString } from 'goldenchart';
+// The 8 standard components + fusionToGoldenChart from the main `goldenchart`
+// entry — import them EXACTLY the way `mcp/src/tools.ts` already imports its
+// components (verify the source; do not assume). ChoroplethMap + renderToSVGString
+// are server-only (`goldenchart/server`).
+import {
+  fusionToGoldenChart,
+  BarChart, LineChart, AreaChart, PieChart, ScatterPlot,
+  HeatmapChart, TreemapChart, RadarChart,
+} from 'goldenchart';
+import { renderToSVGString, ChoroplethMap } from 'goldenchart/server';
 import type { ToolDef } from './registry';
 import { baseChartShape, renderOutputShape } from './schemas';
-import { REGISTRY } from './visualizeTool';
+
+// Crosswalk-local component lookup (keeps ChoroplethMap out of visualizeTool's
+// ComponentName-typed REGISTRY). Keys match fusionToGoldenChart's result.component.
+const COMPONENTS: Record<string, ComponentType<any>> = {
+  BarChart, LineChart, AreaChart, PieChart, ScatterPlot,
+  HeatmapChart, TreemapChart, RadarChart, ChoroplethMap,
+};
 
 export const fusionTools: ToolDef[] = [
   {
@@ -512,7 +527,7 @@ export const fusionTools: ToolDef[] = [
       if ('unsupported' in result) {
         return { content: [{ type: 'text', text: `Unsupported FusionCharts type "${result.unsupported.type}": ${result.unsupported.reason}` }], isError: true };
       }
-      const Comp = REGISTRY[result.component];
+      const Comp = COMPONENTS[result.component];
       const svg = renderToSVGString(
         createElement(Comp as any, {
           ...result.props,
@@ -527,9 +542,9 @@ export const fusionTools: ToolDef[] = [
   },
 ];
 ```
-Wire it: import `fusionTools` in `mcp/src/tools.ts` and add `...fusionTools` to the `tools` array. (Confirm `renderToSVGString` + `fusionToGoldenChart` are exported from the `goldenchart` package index — Task 4 Step 4 adds the crosswalk export; `renderToSVGString` is already exported per the render tools.)
+- [ ] **Step 3: Wire the tool group** — import `fusionTools` in `mcp/src/tools.ts` and add `...fusionTools` to the `tools` array (mirror `...dslTools`). (`fusionToGoldenChart` comes from `goldenchart` main — added to `src/index.ts` in Task 4 Step 4; `renderToSVGString`/`ChoroplethMap` from `goldenchart/server`.)
 
-- [ ] **Step 4: Run → PASS.** `cd mcp && npm test -- fusionTools && npm run typecheck`.
+- [ ] **Step 4: Build the library, then run → PASS.** `npm run build` (root) so the MCP sees the new `goldenchart`/`goldenchart/server` exports, then `cd mcp && npm test -- fusionTools && npm run typecheck`.
 
 - [ ] **Step 5: Commit**
 ```bash
@@ -542,7 +557,7 @@ git commit -m "feat(mcp): build_chart_from_fusioncharts crosswalk tool"
 ## Task 6: Full verification + docs
 
 - [ ] **Step 1: Library gate** — `npm test && npm run typecheck && npm run lint && npm run build && npm run check:bundle` (root). All green; bundle budget holds.
-- [ ] **Step 2: MCP gate** — `cd mcp && npm test && npm run typecheck && npm run build`. Review any new `.snap` files.
+- [ ] **Step 2: MCP gate** — the library must be built first (Step 1 runs root `npm run build`, so `dist/` is fresh) since `mcp/` imports the built `goldenchart`/`goldenchart/server`. Then `cd mcp && npm test && npm run typecheck && npm run build`. Review any new `.snap` files. (No `lint` script in `mcp/`.)
 - [ ] **Step 3: Docs** — update `CLAUDE.md` (note `render_choropleth`, `build_chart_from_fusioncharts`, and the `./usStates` opt-in subpath), `ROADMAP.md` (maps: done for US states), and `docs/API.md` if it enumerates tools.
 - [ ] **Step 4: Commit** — `git commit -am "docs: choropleth + FusionCharts crosswalk"`.
 
