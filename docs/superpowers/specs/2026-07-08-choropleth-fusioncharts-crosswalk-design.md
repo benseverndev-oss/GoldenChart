@@ -90,10 +90,10 @@ Accepts a FusionCharts payload (either the full `{type, dataSource}` or a bare
   | FusionCharts `type` | GoldenChart target |
   |---|---|
   | `line, spline, msline, msspline, zoomline` | `LineChart` |
-  | `column2d, bar2d, mscolumn2d, msbar2d, stackedcolumn2d, stackedbar2d` | `BarChart` (orientation from column-vs-bar; `mode: 'grouped'\|'stacked'`) |
+  | `column2d, bar2d, mscolumn2d, msbar2d, stackedcolumn2d, stackedbar2d` | `BarChart` (`mode: 'single'\|'grouped'\|'stacked'`). **Known-lossy in v1:** `BarChart` renders vertical columns only — no orientation prop exists, so the horizontal `bar2d`/`msbar2d`/`stackedbar2d` families render as vertical columns. Adding a `BarChart` orientation prop is out of scope for v1 (future). |
   | `area2d, msarea2d, stackedarea2d` | `AreaChart` |
   | `pie2d, pie3d, doughnut2d, doughnut3d` | `PieChart` (doughnut → `innerRadius`) |
-  | `scatter, bubble` | `ScatterChart` (bubble → `r` from z) |
+  | `scatter, bubble` | `ScatterPlot` (`render_scatter_plot`; bubble → `r` from z) |
   | `radar` | `RadarChart` |
   | `heatmap` | `HeatmapChart` |
   | `treemap` | `TreemapChart` |
