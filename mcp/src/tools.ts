@@ -17,8 +17,11 @@ import {
   Timeline,
   TreemapChart,
 } from 'goldenchart';
+// ChoroplethMap is server-only (its geometry stays off the browser entry).
+import { ChoroplethMap } from 'goldenchart/server';
 import { makeRenderTool } from './registry';
 import type { ToolDef } from './registry';
+import { fusionTools } from './fusionTools';
 import { vibeTools } from './vibeTools';
 import { calcTools } from './calcTools';
 import { primitiveTools } from './primitiveTools';
@@ -43,6 +46,7 @@ import {
   FlowDirectionSchema,
   FlowEdgeSchema,
   FlowNodeSchema,
+  ChoroplethDatumSchema,
   HeatmapDatumSchema,
   MultiSeriesDatumSchema,
   RadarSeriesSchema,
@@ -246,6 +250,19 @@ export const extraChartTools: ToolDef[] = [
       showLabels: z.boolean().optional(),
     },
   }),
+  makeRenderTool({
+    name: 'render_choropleth',
+    title: 'Render US Choropleth Map',
+    description:
+      'Render a hand-drawn US-states choropleth (states shaded by a numeric value) as a standalone SVG. Regions are 2-letter USPS codes.',
+    kind: 'choropleth',
+    component: ChoroplethMap,
+    inputShape: {
+      ...baseChartShape,
+      data: z.array(ChoroplethDatumSchema).min(1),
+      colorScale: ColorScaleNameSchema.optional(),
+    },
+  }),
 ];
 
 /**
@@ -352,4 +369,5 @@ export const tools: ToolDef[] = [
   ...exportTools,
   ...visualizeTools,
   ...badgeTools,
+  ...fusionTools,
 ];

@@ -37,6 +37,11 @@
       "types": "./dist/interactive.d.ts",
       "import": "./dist/interactive.js",
       "require": "./dist/interactive.cjs"
+    },
+    "./usStates": {
+      "types": "./dist/usStates.d.ts",
+      "import": "./dist/usStates.js",
+      "require": "./dist/usStates.cjs"
     }
   },
   "files": [
@@ -57,6 +62,7 @@
     "playground": "vite --config playground/vite.config.ts",
     "playground:build": "vite build --config playground/vite.config.ts",
     "check:bundle": "node scripts/check-bundle.mjs",
+    "gen:us-states": "node scripts/gen-us-states.mjs",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
@@ -88,13 +94,18 @@
   "devDependencies": {
     "@eslint/js": "^9.39.4",
     "@tailwindcss/postcss": "^4.3.0",
+    "@types/d3-geo": "^3.1.0",
     "@types/d3-hierarchy": "^3.1.7",
+    "@types/topojson-client": "^3.1.5",
     "@types/d3-scale": "^4.0.8",
     "@types/d3-shape": "^3.1.6",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^6.0.2",
     "@vitest/coverage-v8": "^4.1.7",
+    "d3-geo": "^3.1.1",
+    "topojson-client": "^3.1.0",
+    "us-atlas": "^3.0.1",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.1.1",

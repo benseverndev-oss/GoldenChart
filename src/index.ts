@@ -118,3 +118,8 @@ export type {
   BadgeTone,
   BadgeIcon,
 } from './components';
+
+// FusionCharts → GoldenChart crosswalk (pure). ChoroplethMap itself is exported
+// from `goldenchart/server` (geometry must stay off the browser entry).
+export { fusionToGoldenChart } from './core/fusioncharts';
+export type { CrosswalkResult, CrosswalkComponent } from './core/fusioncharts';

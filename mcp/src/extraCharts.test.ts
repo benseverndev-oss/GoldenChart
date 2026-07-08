@@ -41,12 +41,23 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
     axes: ['speed', 'power', 'range'],
     series: [{ id: 's1', values: [3, 5, 2] }],
   },
+  render_choropleth: {
+    width: 480,
+    height: 300,
+    vibe: 'clean_blueprint',
+    data: [
+      { region: 'CA', value: 39 },
+      { region: 'TX', value: 30 },
+      { region: 'NY', value: 20 },
+    ],
+    colorScale: 'blues',
+  },
 };
 
 describe('extra chart render tools', () => {
-  it('registers sankey, treemap, heatmap and radar', () => {
+  it('registers sankey, treemap, heatmap, radar and choropleth', () => {
     expect(tools.map((t) => t.name).sort()).toEqual(
-      ['render_heatmap', 'render_radar', 'render_sankey', 'render_treemap'].sort(),
+      ['render_choropleth', 'render_heatmap', 'render_radar', 'render_sankey', 'render_treemap'].sort(),
     );
   });
 
