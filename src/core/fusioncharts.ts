@@ -80,11 +80,16 @@ export function fusionToGoldenChart(input: FusionInput): CrosswalkResult {
   }
 
   const component = TYPE_MAP[type];
-  if (!component) return { unsupported: { type: type || '(none)', reason: 'no GoldenChart equivalent' } };
+  if (!component)
+    return { unsupported: { type: type || '(none)', reason: 'no GoldenChart equivalent' } };
 
   switch (component) {
     case 'BarChart': {
-      const mode = type.startsWith('stacked') ? 'stacked' : type.startsWith('ms') ? 'grouped' : 'single';
+      const mode = type.startsWith('stacked')
+        ? 'stacked'
+        : type.startsWith('ms')
+          ? 'grouped'
+          : 'single';
       if (mode === 'single') {
         return {
           component,
